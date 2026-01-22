@@ -33,3 +33,10 @@ desktop.ini
 # Build
 dist/
 build/
+
+# Database files (do not commit DB files)
+*.db
+*.db-shm
+*.db-wal
+server/*.db
+server/tenants/*.db
