@@ -1,0 +1,6 @@
+# Set default behavior to automatically normalize line endings.
+* text=auto
+
+# Treat license as text
+LICENSE text
+README.md text

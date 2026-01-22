@@ -303,7 +303,9 @@ O sistema utiliza um design premium com:
 
 ## 📄 Licença
 
-MIT License - Livre para uso comercial e pessoal.
+Este projeto está licenciado sob a [MIT License](LICENSE).
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 👨‍💻 Suporte
 
