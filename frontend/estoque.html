@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Regras de Estoque - Admin</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Auth Guard - Proteção de acesso -->
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <style>
+    /* Estatísticas: cards lado a lado e altura compacta */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; align-items: center; margin-bottom: 24px; }
+    .stat-card { display:flex; align-items:center; gap:16px; min-height:86px; padding:16px; border-radius:12px; }
+    .stat-icon { width:56px; height:56px; display:flex; align-items:center; justify-content:center; font-size:20px; border-radius:12px; flex:0 0 56px; }
+    .stat-value { font-size:28px; font-weight:800; color:var(--gray-800); margin-bottom:0; }
+    .stat-label { font-size:13px; color:var(--gray-500); margin-top:4px; }
+    @media (max-width:767px) { .stats-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar">
+      <h4>SISTEMA</h4>
+      <ul class="sidebar-menu">
+        <li><a href="index.html"><span class="menu-icon"><i class="fa fa-home"></i></span><span class="menu-label">Início</span></a></li>
+        <li><a href="pdv.html"><span class="menu-icon"><i class="fa fa-cash-register"></i></span><span class="menu-label">PDV</span></a></li>
+        <li><a href="dashboard.html"><span class="menu-icon"><i class="fa fa-chart-pie"></i></span><span class="menu-label">Painel</span></a></li>
+        <li><a href="nfe-emissao.html"><span class="menu-icon"><i class="fa fa-file-invoice"></i></span><span class="menu-label">Notas Fiscais</span></a></li>
+        <li><a href="movimentos.html"><span class="menu-icon"><i class="fa fa-exchange-alt"></i></span><span class="menu-label">Movimentos</span></a></li>
+        <li><a href="relatorios.html"><span class="menu-icon"><i class="fa fa-chart-bar"></i></span><span class="menu-label">Relatórios</span></a></li>
+        <li><a href="pessoas.html"><span class="menu-icon"><i class="fa fa-users"></i></span><span class="menu-label">Clientes</span></a></li>
+        <li><a href="produtos.html"><span class="menu-icon"><i class="fa fa-boxes"></i></span><span class="menu-label">Produtos</span></a></li>
+        <li><a href="agenda.html"><span class="menu-icon"><i class="fa fa-calendar"></i></span><span class="menu-label">Agenda</span></a></li>
+        <li><a href="admin.html" class="active"><span class="menu-icon"><i class="fa fa-cogs"></i></span><span class="menu-label">Admin</span></a></li>
+      </ul>
+    </div>
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-warehouse"></i> Regras de Estoque</h3>
+        <div class="header-info">
+          <button class="btn btn-light mr-2" onclick="location.href='admin.html'"><i class="fa fa-arrow-left"></i> Voltar</button>
+          <button class="btn btn-primary" onclick="openEstoqueModal()"><i class="fa fa-plus"></i> Nova Regra</button>
+        </div>
+      </div>
+
+      <div class="container-fluid py-4">
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i class="fa fa-list"></i></div>
+            <div>
+              <div class="stat-value" id="totalRules">0</div>
+              <div class="stat-label">Regras</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #f97316);"><i class="fa fa-bell"></i></div>
+            <div>
+              <div class="stat-value" id="alertsActive">0</div>
+              <div class="stat-label">Alertas Ativos</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="fa fa-sync-alt"></i></div>
+            <div>
+              <div class="stat-value" id="turnoverPeriod">0</div>
+              <div class="stat-label">Giro (dias)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-search"></i></span></div>
+                  <input type="text" id="searchEstoque" class="form-control" placeholder="Buscar por nome ou descrição...">
+                </div>
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-secondary btn-block" onclick="loadEstoque()"><i class="fa fa-sync-alt"></i> Atualizar</button>
+              </div>
+              <div class="col-md-3">
+                <select id="inventoryFilter" class="form-control">
+                  <option value="">Todos os inventários</option>
+                  <option value="monthly">Mensal</option>
+                  <option value="quarterly">Trimestral</option>
+                  <option value="yearly">Anual</option>
+                  <option value="manual">Manual</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rules List (tree-like) -->
+        <div id="estoqueTree" class="dept-tree">
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-3 text-muted">Carregando regras de estoque...</p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-shortcuts">
+        <div class="shortcut-item"><span><kbd>F2</kbd> Novo</span></div>
+        <div class="shortcut-item"><span><kbd>F5</kbd> Atualizar</span></div>
+        <div class="shortcut-item"><span><kbd>ESC</kbd> Voltar</span></div>
+      </footer>
+    </div>
+  </div>
+
+  <div class="modal fade" id="estoqueModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa fa-warehouse mr-2"></i> <span id="estoqueModalTitle">Nova Regra de Estoque</span></h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="estoqueFormDoc">
+            <input type="hidden" id="estoqueId">
+
+            <div class="row">
+              <div class="form-group col-md-6">
+                <label>Nome</label>
+                <input id="estoqueName" class="form-control">
+              </div>
+              <div class="form-group col-md-3">
+                <label>Alerta mínimo (un)</label>
+                <input id="estoqueMin" class="form-control" type="number" min="0">
+              </div>
+              <div class="form-group col-md-3">
+                <label>Máximo (un)</label>
+                <input id="estoqueMax" class="form-control" type="number" min="0">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="form-group col-md-4">
+                <label>Ponto de Reposição (un)</label>
+                <input id="estoqueReorder" class="form-control" type="number" min="0">
+              </div>
+              <div class="form-group col-md-4">
+                <label>Giro (dias)</label>
+                <input id="estoqueTurnover" class="form-control" type="number" min="0" placeholder="Ex.: 30">
+              </div>
+              <div class="form-group col-md-4">
+                <label>Inventário</label>
+                <select id="estoqueInventory" class="form-control">
+                  <option value="monthly">Mensal</option>
+                  <option value="quarterly">Trimestral</option>
+                  <option value="yearly">Anual</option>
+                  <option value="manual">Manual</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group form-check">
+              <input id="estoqueAlertEnabled" class="form-check-input" type="checkbox">
+              <label class="form-check-label" for="estoqueAlertEnabled">Ativar alerta de reposição</label>
+            </div>
+
+            <div class="form-group"><label>Descrição</label><textarea id="estoqueDesc" class="form-control"></textarea></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveEstoque()"><i class="fa fa-save"></i> Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="js/estoque.js"></script>
+</body>
+</html> 

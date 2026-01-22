@@ -1,0 +1,3 @@
+const sql = `INSERT INTO produtos (id, code, name, sku, unit, short_description, price, cost, stock, min_stock, category, sub_category, brand, description, barcode, photo, active, ncm, icms_value, icms_rate, pis_value, pis_rate, cofins_value, cofins_rate, ipi_value, ipi_rate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+console.log('placeholders:', sql.split('?').length -1);
+console.log('columns:', sql.slice(sql.indexOf('(')+1, sql.indexOf(')')).split(',').length);

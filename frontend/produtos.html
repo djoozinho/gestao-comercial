@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produtos - Sistema</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Auth Guard - Proteção de acesso -->
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <script src="js/sidebar.js"></script>
+  <style>
+    /* Estilos específicos da página de produtos */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
+    .stat-card { cursor: pointer; }
+    .stat-card .stat-icon { background: var(--brand-gradient); }
+    .stat-card .stat-icon.success { background: linear-gradient(135deg, #10b981, #059669); }
+    .stat-card .stat-icon.danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .stat-card .stat-icon.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .stat-card .stat-icon.info { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+    .refresh-btn { background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--brand); }
+    .refresh-btn:hover { background: var(--brand); color: #fff; }
+    .product-row { transition: all 0.2s; }
+    .product-row:hover { background: rgba(99, 102, 241, 0.05); }
+    .product-image { width: 40px; height: 40px; border-radius: 8px; background: var(--gray-100); display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; overflow: hidden; border: 1px solid var(--gray-200); }
+    .product-image img { width: 100%; height: 100%; object-fit: cover; }
+    .product-image i { font-size: 18px; color: var(--brand); }
+    .stock-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .stock-badge.ok { background: rgba(16, 185, 129, 0.15); color: #065f46; }
+    .stock-badge.low { background: rgba(245, 158, 11, 0.15); color: #92400e; }
+    .stock-badge.out { background: rgba(239, 68, 68, 0.15); color: #991b1b; }
+    .category-badge { background: rgba(99, 102, 241, 0.1); color: var(--brand); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+
+    /* Action buttons (icons) — alinhamento e tamanho consistentes */
+    .action-btn {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-left: 6px;
+      border-width: 2px;
+      box-sizing: border-box;
+    }
+    .action-btn i {
+      width: 16px; /* keep icons visually centered */
+      text-align: center;
+      font-size: 14px;
+    }
+    th.actions, td.actions { text-align: center; vertical-align: middle; }
+
+    /* Import button styles */
+    .btn-import {
+      background: linear-gradient(90deg, var(--brand), var(--brand-dark));
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 18px rgba(99,102,241,0.18);
+      transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .btn-import .btn-icon { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; }
+    .btn-import .btn-icon i { font-size:14px; }
+    .btn-import:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(99,102,241,0.22); }
+    .btn-import:active { transform: translateY(0); opacity: .95; }
+    .btn-import:focus { outline: 3px solid rgba(99,102,241,0.18); outline-offset: 2px; }
+    @media (max-width: 480px) { .btn-import .btn-text { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar">
+      <h4>SISTEMA</h4>
+      <ul class="sidebar-menu">
+        <li><a href="index.html"><span class="menu-icon"><i class="fa fa-home"></i></span><span class="menu-label">Início</span></a></li>
+        <li><a href="pdv.html"><span class="menu-icon"><i class="fa fa-cash-register"></i></span><span class="menu-label">PDV</span></a></li>
+        <li><a href="dashboard.html"><span class="menu-icon"><i class="fa fa-chart-pie"></i></span><span class="menu-label">Painel</span></a></li>
+        <li><a href="nfe-emissao.html"><span class="menu-icon"><i class="fa fa-file-invoice"></i></span><span class="menu-label">Notas Fiscais</span></a></li>
+        <li><a href="movimentos.html"><span class="menu-icon"><i class="fa fa-exchange-alt"></i></span><span class="menu-label">Movimentos</span></a></li>
+        <li><a href="relatorios.html"><span class="menu-icon"><i class="fa fa-chart-bar"></i></span><span class="menu-label">Relatórios</span></a></li>
+        <li><a href="pessoas.html"><span class="menu-icon"><i class="fa fa-users"></i></span><span class="menu-label">Clientes</span></a></li>
+        <li><a href="produtos.html" class="active"><span class="menu-icon"><i class="fa fa-boxes"></i></span><span class="menu-label">Produtos</span></a></li>
+        <li><a href="agenda.html"><span class="menu-icon"><i class="fa fa-calendar"></i></span><span class="menu-label">Agenda</span></a></li>
+        <li><a href="admin.html"><span class="menu-icon"><i class="fa fa-cogs"></i></span><span class="menu-label">Admin</span></a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-box-open"></i> Produtos</h3>
+        <div class="header-info">
+          <span><i class="fa fa-user-circle mr-2"></i><span id="userName">Admin</span></span>
+          <span><i class="fa fa-clock mr-2"></i><span id="currentTime">--:--:--</span></span>
+          <button id="refreshBtn" class="refresh-btn"><i class="fa fa-sync-alt"></i> Atualizar</button>
+          <button class="btn-logout" style="background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:8px;">
+            <i class="fa fa-sign-out-alt"></i> Sair
+          </button>
+        </div>
+      </div>
+
+      <div class="dashboard-container">
+        <!-- Cards de Estatísticas -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon success"><i class="fa fa-boxes"></i></div>
+            <div class="stat-value" id="total-products">0</div>
+            <div class="stat-label">Total Produtos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon danger"><i class="fa fa-exclamation-triangle"></i></div>
+            <div class="stat-value" id="low-stock">0</div>
+            <div class="stat-label">Estoque Baixo</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon info"><i class="fa fa-tags"></i></div>
+            <div class="stat-value" id="total-categories">0</div>
+            <div class="stat-label">Categorias</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon warning"><i class="fa fa-chart-line"></i></div>
+            <div class="stat-value" id="total-value">R$ 0,00</div>
+            <div class="stat-label">Valor Total</div>
+          </div>
+        </div>
+
+        <!-- Tabela de Produtos -->
+        <div class="card">
+          <div class="card-header">
+            <div class="d-flex align-items-center gap-3">
+              <i class="fa fa-boxes"></i> Catálogo de Produtos
+              <button class="btn btn-sm btn-light ml-3" id="btnNew"><i class="fa fa-plus"></i> Novo Produto</button>
+              <button class="btn btn-import ml-2" id="btnImportXml" title="Importar produtos a partir do XML da NF-e" aria-label="Importar XML">
+                <span class="btn-icon"><i class="fa fa-file-import"></i></span>
+                <span class="btn-text">Importar XML</span>
+              </button>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <input id="search" class="form-control form-control-sm" placeholder="Pesquisar..." style="width: 200px; background: rgba(255,255,255,0.1); border: none; color: white;" />
+              <select id="filterCat" class="form-control form-control-sm" style="width: 150px; background: rgba(255,255,255,0.1); border: none; color: white;">
+                <option value="">Todas categorias</option>
+              </select>
+              <span class="small" id="count">0 produtos</span>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th style="width: 35%;">Produto</th>
+                    <th style="width: 12%;">Código</th>
+                    <th style="width: 12%;">GTIN</th>
+                    <th class="text-center" style="width: 8%;">Margem</th>
+                    <th class="text-right" style="width: 13%;">Preço</th>
+                    <th class="text-right" style="width: 12%;">Estoque</th>
+                    <th style="width: 13%;">Categoria</th>
+                    <th class="text-center actions" style="width: 10%;">Ações</th> 
+                  </tr>
+                </thead>
+                <tbody id="body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-shortcuts">
+        <div class="shortcut-item"><span><kbd>F1</kbd> Ajuda</span></div>
+        <div class="shortcut-item"><span><kbd>F2</kbd> Atualizar</span></div>
+        <div class="shortcut-item"><span><kbd>F3</kbd> Novo Produto</span></div>
+        <div class="shortcut-item"><span><kbd>F4</kbd> Pesquisar</span></div>
+        <div class="shortcut-item"><span><kbd>F5</kbd> Exportar</span></div>
+        <div class="shortcut-item"><span><kbd>F6</kbd> Dashboard</span></div>
+        <div class="shortcut-item"><span><kbd>F9</kbd> PDV</span></div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Modal de Produto - Layout Fullscreen Horizontal -->
+  <div class="modal fade" id="modalProd" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header py-2">
+          <h5 class="modal-title" id="modalProdTitle"><i class="fa fa-box-open"></i> Novo Produto</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="prodId" />
+          <input type="hidden" id="prodPhotoData" />
+
+          <!-- LINHA 1: Códigos e Identificação -->
+          <div class="form-row-full">
+            <div class="form-col"><label>Código</label><input id="prodCode" class="form-control form-control-sm" placeholder="Auto" /></div>
+            <div class="form-col"><label>EAN</label><input id="prodBarcode" class="form-control form-control-sm" placeholder="Cód. Barras" maxlength="13" /></div>
+            <div class="form-col flex-3"><label>Nome do Produto *</label><input id="prodName" class="form-control form-control-sm" required placeholder="Descrição completa" /></div>
+            <div class="form-col"><label>Unidade *</label><select id="prodUnit" class="form-control form-control-sm"><option value="UN">UN</option><option value="KG">KG</option><option value="CX">CX</option><option value="PCT">PCT</option><option value="LT">LT</option><option value="MT">MT</option></select></div>
+            <div class="form-col flex-2"><label>Desc. Reduzida</label><input id="prodShortDescription" class="form-control form-control-sm" placeholder="Cupom fiscal" maxlength="50" /></div>
+          </div>
+
+          <!-- LINHA 2: Categoria, Marca e Preços -->
+          <div class="form-row-full">
+            <div class="form-col" style="position:relative">
+              <label>Categoria</label>
+              <div class="input-group input-group-sm">
+                <select id="prodCategory" class="form-control form-control-sm">
+                  <option value="">--</option>
+                  <option value="Alimentos">Alimentos</option>
+                  <option value="Bebidas">Bebidas</option>
+                  <option value="Limpeza">Limpeza</option>
+                  <option value="Higiene">Higiene</option>
+                  <option value="Hortifruti">Hortifruti</option>
+                  <option value="Outros">Outros</option>
+                </select>
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="btnAddCategory" title="Nova categoria"><i class="fa fa-plus"></i></button>
+                </div>
+              </div>
+            </div>
+            <div class="form-col"><label>Subcategoria</label><input id="prodSubCategory" class="form-control form-control-sm" placeholder="Ex: Laticínios" /></div>
+            <div class="form-col"><label>Marca</label><input id="prodBrand" class="form-control form-control-sm" placeholder="Marca" /></div>
+            <div class="form-col"><label>Custo (R$)</label><input id="prodCost" type="number" step="0.01" class="form-control form-control-sm" placeholder="0,00" /></div>
+            <div class="form-col"><label>Margem %</label><input id="prodMargin" type="number" step="0.01" class="form-control form-control-sm" placeholder="Ex: 75" /></div>
+            <div class="form-col"><label>Venda (R$) *</label><input id="prodPrice" type="number" step="0.01" class="form-control form-control-sm" required placeholder="0,00" /></div>
+          </div>
+
+          <!-- LINHA 3: Impostos e NCM -->
+          <div class="form-row-full">
+            <div class="form-col"><label>NCM</label><input id="prodNcm" class="form-control form-control-sm" placeholder="00000000" /></div>
+            <div class="form-col"><label>ICMS %</label><input id="prodIcmsRate" type="number" step="0.01" class="form-control form-control-sm" placeholder="0" /></div>
+            <div class="form-col"><label>PIS %</label><input id="prodPisRate" type="number" step="0.01" class="form-control form-control-sm" placeholder="0" /></div>
+            <div class="form-col"><label>COFINS %</label><input id="prodCofinsRate" type="number" step="0.01" class="form-control form-control-sm" placeholder="0" /></div>
+            <div class="form-col"><label>IPI %</label><input id="prodIpiRate" type="number" step="0.01" class="form-control form-control-sm" placeholder="0" /></div>
+            <div class="form-col"><label>Estoque *</label><input id="prodStock" type="number" class="form-control form-control-sm" required value="0" /></div>
+            <div class="form-col"><label>Est. Mín.</label><input id="prodMinStock" type="number" class="form-control form-control-sm" value="5" /></div>
+          </div>
+
+          <!-- LINHA 4: Observações e Foto -->
+          <div class="form-row-full">
+            <div class="form-col flex-4"><label>Observações</label><input id="prodDescription" class="form-control form-control-sm" placeholder="Anotações sobre o produto..." /></div>
+            <div class="form-col" style="max-width:140px"><label>Foto</label><input type="file" class="form-control-file form-control-sm" id="prodPhoto" accept="image/*" style="font-size:11px"></div>
+          </div>
+
+        </div>
+        <div class="modal-footer py-2">
+          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
+          <button type="button" class="btn btn-primary btn-sm" id="saveProd" onclick="saveProduct(); return false;"><i class="fa fa-save"></i> Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Importar XML NF-e -->
+  <div class="modal fade" id="xmlModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa fa-file-import"></i> Importar Produtos via XML da NF-e</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Arquivo XML (.xml)</label>
+            <input type="file" id="xmlFile" class="form-control" accept=".xml" />
+          </div>
+          <div class="form-group">
+            <label>Ou cole o XML aqui</label>
+            <textarea id="xmlText" class="form-control" rows="6" placeholder="Cole o conteúdo do XML da NF-e aqui"></textarea>
+            <div class="mt-2 d-flex gap-2">
+              <button class="btn btn-sm btn-outline-primary" id="xmlPreviewBtn">Pré-visualizar</button>
+              <label class="ml-3"><input type="checkbox" id="useQtyAsStock" /> Adicionar quantidade da nota ao estoque</label>
+            </div>
+          </div>
+
+          <div id="xmlPreview" style="max-height: 360px; overflow:auto; border:1px solid #eee; border-radius:8px; padding:12px; background:#fff"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-primary" id="importXmlBtn">Importar selecionados</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Relatório de Importação -->
+  <div class="modal fade" id="importReportModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa fa-list-alt"></i> Relatório de Importação</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body" id="importReportContent" style="max-height:60vh; overflow:auto;">
+          <!-- Conteúdo será injetado dinamicamente -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-primary" id="downloadImportReportBtn"><i class="fa fa-download"></i> Baixar CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- Módulo centralizado de data/hora (Brasília) -->
+  <script src="/js/datetime-utils.js"></script>
+  <!-- Sistema de Toasts Elegantes -->
+  <script src="js/toast.js"></script>
+  <script>
+    const API_BASE = 'http://localhost:3000/api';
+    // Debug helpers: start marker and global error capture
+    console.log('🧭 produtos.js - start');
+    window.addEventListener('error', function(e){
+      try {
+        console.error('Global window error:', e.message || e, 'file:', e.filename, 'line:', e.lineno, 'col:', e.colno, 'errorObj:', e.error);
+      } catch(err) { console.error('Error handler failed', err); }
+    });
+    window.addEventListener('unhandledrejection', function(e){
+      try { console.error('Unhandled Promise rejection:', e.reason); } catch(err){ console.error('Rejection handler failed', err); }
+    });
+    // Log currently parsed script tags to detect blocked/truncated scripts
+    try {
+      const scripts = Array.from(document.scripts || []).map(s=>({ src: s.src || '(inline)', readyState: s.readyState || 'n/a', type: s.type || 'n/a' }));
+      console.log('Loaded script tags:', scripts);
+    } catch(e){ console.warn('Could not list scripts', e); }
+
+    // Axios interceptors to log requests/responses
+    try {
+      if (window.axios) {
+        axios.interceptors.request.use(req => {
+          try { console.log('axios request', req.method, req.url || req.baseURL + req.url, req.data ? (typeof req.data === 'string' ? req.data : JSON.parse(JSON.stringify(req.data))) : undefined); } catch(e){ console.log('axios request (raw)', req); }
+          return req;
+        }, err => { console.error('axios request error', err); return Promise.reject(err); });
+        axios.interceptors.response.use(res => { console.log('axios response', res && res.status, res && (res.data || 'no-data')); return res; }, err => { console.error('axios response error', err && (err.response ? { status: err.response.status, data: err.response.data } : err)); return Promise.reject(err); });
+        console.log('Axios interceptors installed');
+      } else {
+        console.warn('Axios not found - requests will not be logged');
+      }
+    } catch(e){ console.warn('Failed to install axios interceptors', e); }
+
+    let productsData = { products: [], categories: [], totalProducts: 0, lowStock: 0, totalCategories: 0, totalValue: 0 };
+    
+    async function loadProducts() {
+      try {
+        const q = document.getElementById('search').value || '';
+        const cat = document.getElementById('filterCat').value || '';
+        console.log('loadProducts start', { q, cat });
+        showLoading(true);
+        const response = await axios.get(`${API_BASE}/products`, {
+          params: { page: 1, pageSize: 1000, search: q, category: cat }
+        });
+        console.log('loadProducts response', response && (response.data && response.data.total !== undefined ? { total: response.data.total } : { dataLength: (response.data.data || response.data || []).length }));
+        const products = response.data.data || response.data || [];
+        productsData.products = products;
+        productsData.totalProducts = products.length;
+        calculateStatistics(products);
+        updateCategories(products);
+        renderProducts(products);
+        showLoading(false);
+      } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        showLoading(false);
+      }
+    }
+    
+    function calculateStatistics(products) {
+      productsData.lowStock = products.filter(p => (p.stock || 0) <= 5).length;
+      const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+      productsData.totalCategories = categories.length;
+      productsData.totalValue = products.reduce((sum, p) => sum + ((parseFloat(p.price) || 0) * (parseInt(p.stock) || 0)), 0);
+      
+      document.getElementById('total-products').textContent = productsData.totalProducts;
+      document.getElementById('low-stock').textContent = productsData.lowStock;
+      document.getElementById('total-categories').textContent = productsData.totalCategories;
+      document.getElementById('total-value').textContent = `R$ ${productsData.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    }
+    
+    function updateCategories(products) {
+      const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+      const select = document.getElementById('filterCat');
+      const currentCat = select.value;
+      select.innerHTML = '<option value="">Todas categorias</option>';
+      categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        select.appendChild(option);
+      });
+      if (currentCat && categories.includes(currentCat)) select.value = currentCat;
+    }
+    
+    function renderProducts(products) {
+      const body = document.getElementById('body');
+      
+      if (products.length === 0) {
+        body.innerHTML = `<tr><td colspan="6" class="text-center py-5">
+          <i class="fa fa-box-open fa-3x text-muted mb-3 d-block"></i>
+          <p class="text-muted">Nenhum produto encontrado</p>
+          <button class="btn btn-primary mt-2" onclick="document.getElementById('btnNew').click()"><i class="fa fa-plus"></i> Novo Produto</button>
+        </td></tr>`;
+        return;
+      }
+      
+      body.innerHTML = products.map(p => {
+        const stock = parseInt(p.stock) || 0;
+        const stockClass = stock <= 5 ? 'text-danger font-weight-bold' : '';
+        return `
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="product-image">${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : `<i class="fa fa-box"></i>`}</div>
+                <div>
+                  <div class="font-weight-bold">${p.name}</div>
+                  ${p.brand ? `<small class="text-muted"><i class="fa fa-tag"></i> ${p.brand}</small>` : ''}
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-light">${p.code || p.sku || 'N/A'}</span></td>
+            <td>${p.barcode || '-'}</td>
+            <td class="text-center">${(p.margin !== undefined && p.margin !== null) ? (parseFloat(p.margin).toFixed(2) + '%') : '-'}</td>
+            <td class="text-right font-weight-bold text-success">R$ ${(parseFloat(p.price) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+            <td class="text-right ${stockClass}">${stock} ${p.unit || 'UN'}${(stock <= 5 ? ' <i class="fa fa-exclamation-circle text-danger"></i>' : '')}</td>
+            <td><span class="badge badge-secondary">${p.category || '-'}</span></td>
+            <td class="actions">
+              <button class="action-btn btn-sm btn-outline-primary" onclick="editProduct('${p.id}')"><i class="fa fa-edit fa-fw"></i></button>
+              <button class="action-btn btn-sm btn-outline-danger" onclick="deleteProduct('${p.id}')"><i class="fa fa-trash fa-fw"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      
+      document.getElementById('count').textContent = `${products.length} produto${products.length !== 1 ? 's' : ''}`;
+    }
+    
+    async function editProduct(id) {
+      try {
+        const response = await axios.get(`${API_BASE}/products/${id}`);
+        const p = response.data;
+        document.getElementById('prodId').value = p.id;
+        document.getElementById('prodCode').value = p.code || '';
+        document.getElementById('prodBarcode').value = p.barcode || '';
+        document.getElementById('prodName').value = p.name || '';
+        document.getElementById('prodShortDescription').value = p.shortDescription || '';
+        document.getElementById('prodUnit').value = p.unit || 'UN';
+        document.getElementById('prodCategory').value = p.category || '';
+        document.getElementById('prodSubCategory').value = p.subCategory || '';
+        document.getElementById('prodBrand').value = p.brand || '';
+        document.getElementById('prodCost').value = parseFloat(p.cost) || 0;
+        document.getElementById('prodPrice').value = parseFloat(p.price) || 0;
+        document.getElementById('prodStock').value = parseInt(p.stock) || 0;
+        document.getElementById('prodMinStock').value = p.minStock || 5;
+        document.getElementById('prodDescription').value = p.description || '';
+        document.getElementById('prodNcm').value = p.ncm || '';
+        document.getElementById('prodIcmsRate').value = p.icms_rate !== undefined ? p.icms_rate : '';
+        document.getElementById('prodPisRate').value = p.pis_rate !== undefined ? p.pis_rate : '';
+        document.getElementById('prodCofinsRate').value = p.cofins_rate !== undefined ? p.cofins_rate : '';
+        document.getElementById('prodIpiRate').value = p.ipi_rate !== undefined ? p.ipi_rate : '';
+        // Photo data when editing
+        if (p.photo) {
+          document.getElementById('prodPhotoData').value = p.photo;
+        } else {
+          document.getElementById('prodPhotoData').value = '';
+        }
+        document.getElementById('modalProdTitle').innerHTML = '<i class="fa fa-edit"></i> Editar Produto';
+        $('#modalProd').modal('show');
+      } catch (error) {
+        Toast.error('Erro ao carregar produto.');
+      }
+    }
+    
+    async function deleteProduct(id) {
+      const confirmDelete = await Modal.delete('Tem certeza que deseja excluir este produto?', 'Excluir Produto');
+      if (!confirmDelete) return;
+      try {
+        await axios.delete(`${API_BASE}/products/${id}`);
+        Toast.success('Produto excluído com sucesso!');
+        loadProducts();
+      } catch (error) {
+        Toast.error('Erro ao excluir produto.');
+      }
+    }
+    
+    async function saveProduct() {
+      const btn = document.getElementById('saveProd');
+      const originalHtml = btn ? btn.innerHTML : null;
+      try {
+        console.log('saveProduct start');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Salvando...'; }
+
+        const id = document.getElementById('prodId').value;
+        const product = {
+          code: document.getElementById('prodCode').value.trim(),
+          barcode: document.getElementById('prodBarcode').value.trim(),
+          name: document.getElementById('prodName').value.trim(),
+          shortDescription: document.getElementById('prodShortDescription').value.trim(),
+          unit: document.getElementById('prodUnit').value,
+          category: document.getElementById('prodCategory').value.trim(),
+          subCategory: document.getElementById('prodSubCategory').value.trim(),
+          brand: document.getElementById('prodBrand').value.trim(),
+          cost: parseFloat(document.getElementById('prodCost').value) || 0,
+          margin: parseFloat(document.getElementById('prodMargin').value) || 0,
+          price: parseFloat(document.getElementById('prodPrice').value) || 0,
+          stock: parseInt(document.getElementById('prodStock').value) || 0,
+          minStock: parseInt(document.getElementById('prodMinStock').value) || 5,
+          description: document.getElementById('prodDescription').value.trim(),
+          photo: document.getElementById('prodPhotoData').value || null,
+          ncm: document.getElementById('prodNcm').value.trim() || null,
+          icms_rate: parseFloat(document.getElementById('prodIcmsRate').value) || 0,
+          pis_rate: parseFloat(document.getElementById('prodPisRate').value) || 0,
+          cofins_rate: parseFloat(document.getElementById('prodCofinsRate').value) || 0,
+          ipi_rate: parseFloat(document.getElementById('prodIpiRate').value) || 0
+        };
+
+        console.log('saveProduct payload', { id, product });
+
+        if (!product.name || product.price <= 0) {
+          Toast.warning('Preencha os campos obrigatórios!');
+          return;
+        }
+
+        // Calcula valores de imposto básicos a partir das alíquotas (por unidade)
+        product.icms_value = product.price * (product.icms_rate || 0) / 100;
+        product.pis_value = product.price * (product.pis_rate || 0) / 100;
+        product.cofins_value = product.price * (product.cofins_rate || 0) / 100;
+        product.ipi_value = product.price * (product.ipi_rate || 0) / 100;
+
+        let resp;
+        if (id) {
+          resp = await axios.put(`${API_BASE}/products/${id}`, product);
+        } else {
+          resp = await axios.post(`${API_BASE}/products`, product);
+        }
+        console.log('saveProduct response', resp && resp.data);
+        $('#modalProd').modal('hide');
+        Toast.success(id ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!');
+        // refresh list after save and log result
+        await loadProducts();
+        console.log('loadProducts called after save');
+      } catch (error) {
+        console.error('Erro ao salvar produto:', error);
+        let msg = 'Erro ao salvar produto.';
+        if (error.response && error.response.data) msg += ' ' + JSON.stringify(error.response.data);
+        else if (error.message) msg += ' ' + error.message;
+        Toast.error(msg);
+      } finally {
+        if (btn) { btn.disabled = false; if (originalHtml) btn.innerHTML = originalHtml; }
+      }
+    }
+    
+    // Funções de cálculo de preço baseado em margem
+    function formatBRL(value){
+      return (value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function updatePriceFromMargin(){
+      const cost = parseFloat(document.getElementById('prodCost').value) || 0;
+      const margin = parseFloat(document.getElementById('prodMargin').value);
+      if (!isNaN(margin) && cost > 0) {
+        const newPrice = +(cost * (1 + margin / 100)).toFixed(2);
+        document.getElementById('prodPrice').value = newPrice;
+      }
+    }
+
+    function updateMarginFromPrice(){
+      const cost = parseFloat(document.getElementById('prodCost').value) || 0;
+      const price = parseFloat(document.getElementById('prodPrice').value) || 0;
+      if (cost > 0 && price > 0) {
+        const margin = ((price / cost - 1) * 100);
+        document.getElementById('prodMargin').value = +margin.toFixed(2);
+      }
+    }
+
+    // Função vazia para compatibilidade (elementos removidos)
+    function updateSideSummary(){ }
+
+    // listeners
+    document.getElementById('prodMargin').addEventListener('input', updatePriceFromMargin);
+    document.getElementById('prodCost').addEventListener('input', updatePriceFromMargin);
+    document.getElementById('prodPrice').addEventListener('input', updateMarginFromPrice);
+
+    // Botão para adicionar nova categoria
+    document.getElementById('btnAddCategory').addEventListener('click', function() {
+      const newCat = prompt('Digite o nome da nova categoria:');
+      if (newCat && newCat.trim()) {
+        const select = document.getElementById('prodCategory');
+        // Verifica se já existe
+        const exists = Array.from(select.options).some(opt => opt.value.toLowerCase() === newCat.trim().toLowerCase());
+        if (!exists) {
+          const option = document.createElement('option');
+          option.value = newCat.trim();
+          option.textContent = newCat.trim();
+          // Insere antes da opção "Outros" se existir, senão no final
+          const outrosOpt = Array.from(select.options).find(opt => opt.value === 'Outros');
+          if (outrosOpt) {
+            select.insertBefore(option, outrosOpt);
+          } else {
+            select.appendChild(option);
+          }
+        }
+        select.value = newCat.trim();
+      }
+    });
+
+    // ========== Importar produtos via XML (NF-e) ==========
+    function openXmlModal(){
+      document.getElementById('xmlFile').value = '';
+      document.getElementById('xmlText').value = '';
+      document.getElementById('xmlPreview').innerHTML = '';
+      document.getElementById('useQtyAsStock').checked = false;
+      $('#xmlModal').modal('show');
+    }
+
+    function handleXmlFileChange(e){
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev){
+        const text = ev.target.result;
+        document.getElementById('xmlText').value = text;
+        parseXmlAndPreview(text);
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    async function parseXmlAndPreview(xmlText){
+      const preview = document.getElementById('xmlPreview');
+      preview.innerHTML = '<div class="text-muted">Processando XML...</div>';
+      try {
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(xmlText, 'application/xml');
+        if (xml.getElementsByTagName('parsererror').length) throw new Error('XML inválido');
+
+        // NF-e estrutura: <det> contém <prod> e <imposto>
+        const detNodes = Array.from(xml.getElementsByTagName('det'));
+        if (detNodes.length === 0) {
+          preview.innerHTML = '<div class="text-muted">Nenhum item encontrado no XML.</div>';
+          return;
+        }
+
+        function getText(node, tag){
+          const el = node.getElementsByTagName(tag)[0];
+          return el ? el.textContent.trim() : '';
+        }
+
+        const items = detNodes.map(det => {
+          const p = det.getElementsByTagName('prod')[0] || {};
+          const imp = det.getElementsByTagName('imposto')[0] || {};
+
+          // tenta extrair valores de impostos (vICMS, pICMS, vIPI, vPIS, vCOFINS)
+          const icms_value = parseFloat(getText(imp, 'vICMS') || 0);
+          const icms_rate = parseFloat(getText(imp, 'pICMS') || 0);
+          const ipi_value = parseFloat(getText(imp, 'vIPI') || 0);
+          const ipi_rate = parseFloat(getText(imp, 'pIPI') || 0);
+          const pis_value = parseFloat(getText(imp, 'vPIS') || 0);
+          const pis_rate = parseFloat(getText(imp, 'pPIS') || 0);
+          const cofins_value = parseFloat(getText(imp, 'vCOFINS') || 0);
+          const cofins_rate = parseFloat(getText(imp, 'pCOFINS') || 0);
+
+          const rawBarcode = getText(p, 'cEAN') || '';
+          const barcode = (rawBarcode && rawBarcode.trim().toUpperCase() === 'SEM GTIN') ? '' : rawBarcode;
+          return ({
+            code: getText(p, 'cProd') || '',
+            barcode: barcode,
+            name: getText(p, 'xProd') || '',
+            ncm: getText(p, 'NCM') || '',
+            unit: getText(p, 'uCom') || 'UN',
+            qty: parseFloat(getText(p, 'qCom') || '0'),
+            unitPrice: parseFloat(getText(p, 'vUnCom') || '0'),
+            total: parseFloat(getText(p, 'vProd') || '0'),
+            icms_value, icms_rate, ipi_value, ipi_rate, pis_value, pis_rate, cofins_value, cofins_rate
+          });
+        });
+
+        // Checar existência (busca por código ou nome)
+        const checks = await Promise.all(items.map(async it => {
+          try {
+            const q = encodeURIComponent(it.code || it.name || '');
+            const res = await axios.get(`${API_BASE}/products?search=${q}&pageSize=10`);
+            const found = (res.data && (res.data.data || res.data)) || [];
+            const exists = found.some(f => (f.code && it.code && f.code === it.code) || (f.name && it.name && f.name.toLowerCase() === it.name.toLowerCase()));
+            return Object.assign({}, it, { exists, found });
+          } catch (e){
+            return Object.assign({}, it, { exists: false, found: [] });
+          }
+        }));
+
+        // Render preview table with impostos
+        const rows = checks.map((it, idx) => `
+          <tr>
+            <td><input type="checkbox" class="xml-item-cb" data-idx="${idx}" ${it.exists ? '' : 'checked'} /></td>
+            <td><strong>${it.name || '<em>Sem descrição</em>'}</strong><br/><small class="text-muted">Código: ${it.code || '-'} ${it.ncm ? '| NCM: '+it.ncm : ''}</small></td>
+            <td>${it.unit}</td>
+            <td>${it.qty}</td>
+            <td>R$ ${Number(it.unitPrice||0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+            <td>
+              ${it.exists ? '<span class="badge badge-warning">Já existe</span>' : '<span class="badge badge-success">Novo</span>'}
+              <div class="small mt-1 text-muted">ICMS: R$ ${Number(it.icms_value||0).toLocaleString('pt-BR', {minimumFractionDigits:2})} (${Number(it.icms_rate||0)}%)</div>
+              <div class="small text-muted">PIS/COFINS: R$ ${Number(it.pis_value||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}/${Number(it.cofins_value||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+              <div class="small text-muted">IPI: R$ ${Number(it.ipi_value||0).toLocaleString('pt-BR',{minimumFractionDigits:2})} (${Number(it.ipi_rate||0)}%)</div>
+            </td>
+            <td>${it.found && it.found.length ? it.found.slice(0,2).map(f=>`<div style="font-size:12px">${f.name} <small class="text-muted">(${f.code||f.sku||'N/A'})</small></div>`).join('') : ''}</td>
+          </tr>
+        `).join('');
+
+        preview.innerHTML = `
+          <table class="table table-sm">
+            <thead><tr><th></th><th>Produto</th><th>Un</th><th>Qtd</th><th>Preço</th><th>Impostos</th><th>Possíveis correspondências</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div class="small text-muted">Marque os itens que deseja importar e clique em <strong>Importar selecionados</strong>.</div>
+        `;
+
+        // Store parsed items for import
+        window._xmlImportItems = checks;
+
+      } catch (err){
+        console.error('Erro ao parsear XML:', err);
+        preview.innerHTML = `<div class="text-danger">Erro ao processar XML: ${err.message}</div>`;
+      }
+    }
+
+    async function importSelectedItems(){
+      const items = window._xmlImportItems || [];
+      if (!items.length) { Toast.warning('Nenhum item para importar. Faça a pré-visualização primeiro.'); return; }
+      const checkboxes = Array.from(document.querySelectorAll('.xml-item-cb'));
+      const toImport = checkboxes.filter(cb => cb.checked).map(cb => items[parseInt(cb.getAttribute('data-idx'),10)]).filter(Boolean);
+      if (toImport.length === 0) { Toast.warning('Nenhum item selecionado.'); return; }
+
+      const useQty = document.getElementById('useQtyAsStock').checked;
+      const btn = document.getElementById('importXmlBtn');
+      const original = btn.innerHTML;
+      try {
+        btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Importando...';
+
+        // Build payload array for bulk import
+        const payloadItems = toImport.map(it => ({
+          code: it.code || null,
+          sku: it.code || null,
+          barcode: it.barcode || null,
+          name: it.name || 'Produto importado',
+          unit: it.unit || 'UN',
+          price: it.unitPrice || (it.total && it.qty ? (it.total / it.qty) : 0),
+          cost: it.unitPrice || 0,
+          stock: useQty ? (it.qty || 0) : 0,
+          minStock: 1,
+          category: 'Importado NF-e',
+          ncm: it.ncm || null,
+          icms_value: it.icms_value || 0,
+          icms_rate: it.icms_rate || 0,
+          pis_value: it.pis_value || 0,
+          pis_rate: it.pis_rate || 0,
+          cofins_value: it.cofins_value || 0,
+          cofins_rate: it.cofins_rate || 0,
+          ipi_value: it.ipi_value || 0,
+          ipi_rate: it.ipi_rate || 0,
+          active: true
+        }));
+
+        // Send single request to bulk import endpoint
+        const res = await axios.post(`${API_BASE}/products/import`, payloadItems);
+        const data = res.data || {}; 
+        const created = data.created || 0;
+        const updated = data.updated || 0;
+        const failed = data.failed || 0;
+        if (failed > 0 && data.results) {
+          console.warn('Import errors:', data.results.filter(r => r.status === 'error'));
+        }
+
+        // Prepara relatório para modal (pré-visualização) e habilita botão de download
+        let reportHeader = ['code','sku','barcode','name','qty','price','status','message','id'];
+        let reportRows = [];
+        if (data.results && Array.isArray(data.results) && data.results.length) {
+          reportRows = data.results.map(r => {
+            const item = r.item || {};
+            return {
+              code: item.code || '',
+              sku: item.sku || '',
+              barcode: item.barcode || '',
+              name: item.name || '',
+              qty: (item.stock !== undefined ? item.stock : (item.qty !== undefined ? item.qty : '')),
+              price: item.price !== undefined ? item.price : '',
+              status: r.status || '',
+              message: r.message || r.error || '',
+              id: r.id || '',
+              storedBarcode: r.storedBarcode,
+              storedStock: r.storedStock
+            };
+          });
+        }
+
+        // Monta tabela HTML para modal (inclui coluna debug)
+        // helper to escape HTML
+        const escapeHtml = s => {
+          if (s === null || s === undefined) return '';
+          return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        };
+
+        const tableHeaderHtml = reportHeader.map(h => `<th>${h}</th>`).join('');
+        const tableRowsHtml = reportRows.map(row => {
+          const debugCell = ''; 
+          return `
+          <tr>
+            <td>${escapeHtml(row.code)}</td>
+            <td>${escapeHtml(row.sku)}</td>
+            <td>${escapeHtml(row.storedBarcode !== undefined ? (row.storedBarcode || '') : (row.barcode || ''))}</td>
+            <td>${escapeHtml(row.name)}</td>
+            <td>${escapeHtml(row.storedStock !== undefined ? (row.storedStock || row.qty || '') : (row.qty || ''))}</td>
+            <td>${escapeHtml(row.price)}</td>
+            <td>${escapeHtml(row.status)}</td>
+            <td>${escapeHtml(row.message)}</td>
+            <td>${escapeHtml(row.id)}</td>
+          </tr>
+        `}).join('');
+
+        const summaryHtml = `<div class="mb-2"><strong>Resumo:</strong> ${created} criados, ${updated} atualizados, ${failed} falhas.</div>`;
+        const tableHtml = `<div class="table-responsive"><table class="table table-sm table-striped"><thead><tr>${tableHeaderHtml}</tr></thead><tbody>${tableRowsHtml}</tbody></table></div>`;
+        const modalContent = summaryHtml + tableHtml;
+        document.getElementById('importReportContent').innerHTML = modalContent;
+
+        // configura botão de download para gerar CSV quando clicado
+        document.getElementById('downloadImportReportBtn').onclick = function(){
+          if (!reportRows.length) { Toast.warning('Nenhum dado disponível para exportar.'); return; }
+          const header = reportHeader;
+          const rows = reportRows.map(r => [r.code, r.sku, r.barcode, r.name, r.qty, r.price, r.status, r.message, r.id]);
+          // Usar ponto e vírgula como separador (padrão brasileiro/Excel)
+          const separator = ';';
+          const csvEscape = v => {
+            if (v === null || v === undefined) return '';
+            let s = String(v).replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+            // Sempre envolver em aspas para garantir campos corretos
+            return '"' + s.replace(/"/g, '""') + '"';
+          };
+          const csvContent = header.map(h => '"' + h + '"').join(separator) + '\r\n' + rows.map(r => r.map(csvEscape).join(separator)).join('\r\n');
+          const bom = '\uFEFF';
+          const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+          const fileName = `import-report-${DateTimeUtils.formatDateTimeISO(new Date()).replace(/[:\s]/g, '-')}.csv`;
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(link.href);
+        };
+
+        // abre modal do relatório
+        $('#xmlModal').modal('hide');
+        $('#importReportModal').modal('show');
+
+        Toast.success(`Importação concluída: ${created} criados, ${updated} atualizados, ${failed} falhas.`);
+        $('#xmlModal').modal('hide');
+        await loadProducts();
+      } catch (err) {
+        console.error('Erro ao importar via bulk:', err, err.response && err.response.data);
+        if (err.response && err.response.data && err.response.data.detail) {
+          Toast.error(`Erro ao importar: ${err.response.data.detail}`);
+        } else {
+          Toast.error('Erro ao importar itens. Veja o console para detalhes.');
+        }
+      } finally {
+        btn.disabled = false; if (original) btn.innerHTML = original;
+      }
+    }
+
+    // ========== Fim Importar XML ========== 
+
+    function showLoading(show) {
+      const btn = document.getElementById('refreshBtn');
+      btn.innerHTML = show ? '<i class="fa fa-spinner fa-spin"></i> Carregando...' : '<i class="fa fa-sync-alt"></i> Atualizar';
+      btn.disabled = show;
+    }
+    
+    function exportProducts() {
+      // Perguntar formato
+      const format = prompt('Escolha o formato de exportação:\n1 - JSON\n2 - CSV', '2');
+      
+      if (format === '1') {
+        // Exportar JSON
+        const data = {
+          data: DateTimeUtils.formatDateTime(new Date()),
+          produtos: productsData.products.map(p => ({ nome: p.name, sku: p.code, preco: p.price, estoque: p.stock, categoria: p.category }))
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `produtos-${DateTimeUtils.todayISO()}.json`;
+        a.click();
+      } else {
+        // Exportar CSV organizado (ponto e vírgula como separador)
+        const separator = ';';
+        const header = ['Código', 'Nome', 'Categoria', 'Preço', 'Custo', 'Estoque', 'Estoque Mín', 'Unidade', 'NCM'];
+        
+        const csvEscape = v => {
+          if (v === null || v === undefined) return '""';
+          let s = String(v).replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+          return '"' + s.replace(/"/g, '""') + '"';
+        };
+        
+        const rows = productsData.products.map(p => [
+          p.code || p.barcode || '',
+          p.name || '',
+          p.category || '',
+          (Number(p.price) || 0).toFixed(2).replace('.', ','),
+          (Number(p.cost) || 0).toFixed(2).replace('.', ','),
+          p.stock || 0,
+          p.minStock || 0,
+          p.unit || 'UN',
+          p.ncm || ''
+        ]);
+        
+        const csvContent = header.map(h => '"' + h + '"').join(separator) + '\r\n' + 
+                          rows.map(r => r.map(csvEscape).join(separator)).join('\r\n');
+        
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `produtos_${DateTimeUtils.todayISO()}.csv`;
+        a.click();
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      loadProducts();
+
+      // Debug: detect clicks on save button even if listener not attached
+      document.addEventListener('click', function(e){
+        try {
+          const el = e.target.closest && e.target.closest('#saveProd');
+          if (el) console.log('capture: saveProd clicked');
+        } catch(err){ console.warn('click capture error', err); }
+      });
+
+      // Test if localStorage is accessible (Tracking Prevention may block storage)
+      try {
+        localStorage.setItem('__tp_test', '1');
+        localStorage.removeItem('__tp_test');
+        console.log('localStorage OK');
+      } catch(err) {
+        console.warn('⚠️ localStorage blocked by browser (Tracking Prevention?)', err);
+      }
+      
+      document.getElementById('refreshBtn').addEventListener('click', loadProducts);
+      document.getElementById('btnNew').addEventListener('click', function() {
+        ['prodId','prodCode','prodBarcode','prodName','prodShortDescription','prodSubCategory','prodBrand','prodDescription'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('prodUnit').value = 'UN';
+        document.getElementById('prodCategory').value = '';
+        document.getElementById('prodCost').value = 0;
+        document.getElementById('prodMargin').value = 0;
+        document.getElementById('prodPrice').value = 0;
+        document.getElementById('prodStock').value = 0;
+        document.getElementById('prodMinStock').value = 5;
+        document.getElementById('prodNcm').value = '';
+        document.getElementById('prodIcmsRate').value = '';
+        document.getElementById('prodPisRate').value = '';
+        document.getElementById('prodCofinsRate').value = '';
+        document.getElementById('prodIpiRate').value = '';
+        // reset photo input
+        document.getElementById('prodPhoto').value = '';
+        document.getElementById('prodPhotoData').value = '';
+        document.getElementById('modalProdTitle').innerHTML = '<i class="fa fa-box-open"></i> Novo Produto';
+        $('#modalProd').modal('show');
+      });
+      
+      // File input: store base64 data
+      document.getElementById('prodPhoto').addEventListener('change', function(e){
+        const file = this.files[0];
+        if (!file) {
+          document.getElementById('prodPhotoData').value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(ev){
+          document.getElementById('prodPhotoData').value = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      let searchTimeout;
+      document.getElementById('search').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(loadProducts, 300);
+      });
+      
+      document.getElementById('filterCat').addEventListener('change', loadProducts);
+      
+      // Integrar importação por XML
+      const btnImportXml = document.getElementById('btnImportXml');
+      if (btnImportXml) btnImportXml.addEventListener('click', openXmlModal);
+      const xmlFileEl = document.getElementById('xmlFile'); if (xmlFileEl) xmlFileEl.addEventListener('change', handleXmlFileChange);
+      const xmlPreviewBtn = document.getElementById('xmlPreviewBtn'); if (xmlPreviewBtn) xmlPreviewBtn.addEventListener('click', () => parseXmlAndPreview(document.getElementById('xmlText').value));
+      const importXmlBtn = document.getElementById('importXmlBtn'); if (importXmlBtn) importXmlBtn.addEventListener('click', importSelectedItems);
+
+      document.addEventListener('keydown', (e) => {
+        switch(e.key) {
+          case 'F1': e.preventDefault(); Modal.info('F1 - Ajuda\nF2 - Atualizar lista\nF3 - Novo produto\nF4 - Pesquisar\nF5 - Exportar\nF6 - Dashboard\nF9 - PDV', 'Atalhos de Teclado'); break;
+          case 'F2': e.preventDefault(); loadProducts(); break;
+          case 'F3': e.preventDefault(); document.getElementById('btnNew').click(); break;
+          case 'F4': e.preventDefault(); document.getElementById('search').focus(); break;
+          case 'F5': e.preventDefault(); exportProducts(); break;
+          case 'F6': e.preventDefault(); window.location.href = 'dashboard.html'; break;
+          case 'F9': e.preventDefault(); window.location.href = 'pdv.html'; break;
+          case 'Escape': $('#modalProd').modal('hide'); break;
+        }
+      });
+      
+      setInterval(() => {
+        document.getElementById('currentTime').textContent = DateTimeUtils.formatTime(new Date());
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

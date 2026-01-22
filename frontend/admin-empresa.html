@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestão de Funcionários - Admin</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <script src="js/datetime-utils.js"></script>
+  <style>
+    .page-header {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+    
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .page-header p { opacity: 0.9; margin: 0; }
+    
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #fff;
+    }
+    
+    .stat-value { font-size: 24px; font-weight: 800; color: var(--gray-800); }
+    .stat-label { font-size: 13px; color: var(--gray-500); }
+    
+    .user-card {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: all 0.3s;
+    }
+    
+    .user-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--brand);
+    }
+    
+    .user-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #fff;
+      font-weight: 700;
+    }
+    
+    .user-info h5 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 4px 0;
+      color: var(--gray-800);
+    }
+    
+    .user-info small {
+      color: var(--gray-500);
+      font-size: 13px;
+    }
+    
+    .role-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .role-admin { background: rgba(99, 102, 241, 0.15); color: #6366f1; }
+    .role-gerente { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .role-caixa { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .role-user { background: rgba(100, 116, 139, 0.15); color: #64748b; }
+    
+    .status-badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    
+    .status-active { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .status-inactive { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    
+    .user-actions .btn {
+      padding: 8px 12px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+    
+    .permission-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    
+    .permission-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--gray-50);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .permission-item:hover { background: var(--gray-100); }
+    .permission-item input { margin: 0; }
+    .permission-item label { margin: 0; cursor: pointer; font-size: 13px; }
+    
+    .modal-header-custom {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: #fff;
+      border-radius: 12px 12px 0 0;
+      padding: 20px 24px;
+    }
+    
+    .modal-header-custom .close { color: #fff; opacity: 0.8; }
+    
+    .form-section {
+      background: var(--gray-50);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .form-section h6 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gray-700);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .caixa-info {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 1px solid #a7f3d0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 12px;
+    }
+    
+    .caixa-info h6 { color: #059669; margin-bottom: 8px; }
+    .caixa-info p { color: #047857; margin: 0; font-size: 13px; }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--gray-500);
+    }
+    
+    .empty-state i {
+      font-size: 60px;
+      margin-bottom: 16px;
+      display: block;
+      opacity: 0.5;
+    }
+    
+    .filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-bar .form-control,
+    .filter-bar .btn {
+      height: 44px;
+    }
+    
+    .user-last-login {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+    
+    .user-last-login i { margin-right: 4px; }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h4>GESTÃO COMERCIAL</h4>
+      <ul class="sidebar-menu">
+        <li><a href="index.html"><span class="menu-icon"><i class="fa fa-home"></i></span><span class="menu-label">Início</span></a></li>
+        <li><a href="pdv.html"><span class="menu-icon"><i class="fa fa-cash-register"></i></span><span class="menu-label">PDV</span></a></li>
+        <li><a href="dashboard.html"><span class="menu-icon"><i class="fa fa-chart-pie"></i></span><span class="menu-label">Painel</span></a></li>
+        <li><a href="nfe-emissao.html"><span class="menu-icon"><i class="fa fa-file-invoice"></i></span><span class="menu-label">Notas Fiscais</span></a></li>
+        <li><a href="movimentos.html"><span class="menu-icon"><i class="fa fa-exchange-alt"></i></span><span class="menu-label">Movimentos</span></a></li>
+        <li><a href="relatorios.html"><span class="menu-icon"><i class="fa fa-chart-bar"></i></span><span class="menu-label">Relatórios</span></a></li>
+        <li><a href="pessoas.html"><span class="menu-icon"><i class="fa fa-users"></i></span><span class="menu-label">Clientes</span></a></li>
+        <li><a href="produtos.html"><span class="menu-icon"><i class="fa fa-boxes"></i></span><span class="menu-label">Produtos</span></a></li>
+        <li><a href="agenda.html"><span class="menu-icon"><i class="fa fa-calendar"></i></span><span class="menu-label">Agenda</span></a></li>
+        <li><a href="admin.html" class="active"><span class="menu-icon"><i class="fa fa-cogs"></i></span><span class="menu-label">Admin</span></a></li>
+      </ul>
+      <div class="sidebar-footer" data-admin>
+        <a href="admin-empresa.html" class="btn btn-sm btn-outline-light w-100"><i class="fa fa-users-cog mr-2"></i>Gerenciar Funcionários</a>
+      </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-users-cog"></i> Gestão de Funcionários</h3>
+        <div class="header-info">
+          <span class="user-name mr-3"></span>
+          <button class="btn btn-light btn-sm" onclick="window.authGuard.logout()"><i class="fa fa-sign-out-alt"></i> Sair</button>
+        </div>
+      </div>
+      
+      <div class="container-fluid py-4">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1><i class="fas fa-users-cog"></i> Gestão de Funcionários</h1>
+          <p>Cadastre e gerencie os funcionários da sua empresa. Cada funcionário terá seu próprio acesso e caixa individual.</p>
+        </div>
+        
+        <!-- Stats -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+              <i class="fas fa-users"></i>
+            </div>
+            <div>
+              <div class="stat-value" id="totalUsers">0</div>
+              <div class="stat-label">Total de Funcionários</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+              <i class="fas fa-user-check"></i>
+            </div>
+            <div>
+              <div class="stat-value" id="activeUsers">0</div>
+              <div class="stat-label">Ativos</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+              <i class="fas fa-cash-register"></i>
+            </div>
+            <div>
+              <div class="stat-value" id="caixasAbertos">0</div>
+              <div class="stat-label">Caixas Abertos Hoje</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+              <i class="fas fa-user-shield"></i>
+            </div>
+            <div>
+              <div class="stat-value" id="maxUsers">5</div>
+              <div class="stat-label">Limite do Plano</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+        
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <div class="input-group" style="max-width: 350px;">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+            </div>
+            <input type="text" id="searchUser" class="form-control" placeholder="Buscar por nome ou usuário...">
+          </div>
+          <select class="form-control" id="filterRole" style="max-width: 200px;">
+            <option value="">Todos os cargos</option>
+            <option value="gerente">Gerentes</option>
+            <option value="caixa">Operadores de Caixa</option>
+            <option value="user">Usuários</option>
+          </select>
+          <select class="form-control" id="filterStatus" style="max-width: 150px;">
+            <option value="">Todos</option>
+            <option value="1">Ativos</option>
+            <option value="0">Inativos</option>
+          </select>
+          <button class="btn btn-primary ml-auto" onclick="openUserModal()">
+            <i class="fas fa-plus mr-2"></i>Novo Funcionário
+          </button>
+        </div>
+        
+        <!-- Users List -->
+        <div id="usersList">
+          <div class="text-center py-5">
+            <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+            <p class="text-muted">Carregando funcionários...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal: Novo/Editar Funcionário -->
+  <div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header modal-header-custom">
+          <h5 class="modal-title" id="userModalTitle"><i class="fas fa-user-plus mr-2"></i>Novo Funcionário</h5>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="userForm">
+            <input type="hidden" id="userId">
+            
+            <div class="form-section">
+              <h6><i class="fas fa-user"></i> Dados Pessoais</h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Nome Completo *</label>
+                    <input type="text" class="form-control" id="userName" required placeholder="Ex: João da Silva">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" class="form-control" id="userEmail" placeholder="email@exemplo.com">
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h6><i class="fas fa-key"></i> Dados de Acesso</h6>
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Usuário de Login *</label>
+                    <input type="text" class="form-control" id="userUsername" required placeholder="usuario.login">
+                    <small class="form-text text-muted">Usado para entrar no sistema</small>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label id="passwordLabel">Senha *</label>
+                    <input type="password" class="form-control" id="userPassword" placeholder="Mínimo 6 caracteres">
+                    <small class="form-text text-muted" id="passwordHint">O funcionário deverá alterar no primeiro acesso</small>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label>Confirmar Senha</label>
+                    <input type="password" class="form-control" id="userPasswordConfirm" placeholder="Repita a senha">
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h6><i class="fas fa-id-badge"></i> Cargo e Permissões</h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Cargo *</label>
+                    <select class="form-control" id="userRole" required>
+                      <option value="caixa">Operador de Caixa</option>
+                      <option value="gerente">Gerente</option>
+                      <option value="user">Usuário</option>
+                    </select>
+                    <small class="form-text text-muted" id="roleDescription">Define o nível de acesso no sistema</small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Status</label>
+                    <select class="form-control" id="userActive">
+                      <option value="1">Ativo</option>
+                      <option value="0">Inativo</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="caixa-info">
+                <h6><i class="fas fa-info-circle"></i> Caixa Individual</h6>
+                <p>Cada funcionário terá seu próprio caixa. Ao iniciar o turno, ele deverá abrir o caixa com o valor inicial. 
+                   Todas as vendas e movimentações serão registradas individualmente, permitindo controle total por funcionário.</p>
+              </div>
+            </div>
+            
+            <div class="form-section" id="permissionsSection">
+              <h6><i class="fas fa-shield-alt"></i> Permissões Específicas</h6>
+              <div class="permission-grid">
+                <div class="permission-item">
+                  <input type="checkbox" id="perm_pdv" value="pdv">
+                  <label for="perm_pdv">Acesso ao PDV</label>
+                </div>
+                <div class="permission-item">
+                  <input type="checkbox" id="perm_produtos" value="produtos">
+                  <label for="perm_produtos">Gerenciar Produtos</label>
+                </div>
+                <div class="permission-item">
+                  <input type="checkbox" id="perm_estoque" value="estoque">
+                  <label for="perm_estoque">Gerenciar Estoque</label>
+                </div>
+                <div class="permission-item">
+                  <input type="checkbox" id="perm_clientes" value="clientes">
+                  <label for="perm_clientes">Gerenciar Clientes</label>
+                </div>
+                <div class="permission-item">
+                  <input type="checkbox" id="perm_relatorios" value="relatorios">
+                  <label for="perm_relatorios">Ver Relatórios</label>
+                </div>
+                <div class="permission-item">
+                  <input type="checkbox" id="perm_cancelar" value="cancelar">
+                  <label for="perm_cancelar">Cancelar Vendas</label>
+                </div>
+                <div class="permission-item">
+                  <input type="checkbox" id="perm_desconto" value="desconto">
+                  <label for="perm_desconto">Aplicar Descontos</label>
+                </div>
+                <div class="permission-item">
+                  <input type="checkbox" id="perm_sangria" value="sangria">
+                  <label for="perm_sangria">Fazer Sangria</label>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="saveUser()">
+            <i class="fas fa-save mr-2"></i>Salvar Funcionário
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal: Detalhes do Funcionário -->
+  <div class="modal fade" id="userDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header modal-header-custom">
+          <h5 class="modal-title"><i class="fas fa-user mr-2"></i>Detalhes do Funcionário</h5>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body" id="userDetailsContent">
+          <!-- Conteúdo carregado dinamicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <!-- Sistema de Toasts Elegantes -->
+  <script src="js/toast.js"></script>
+  <script>
+    const API_BASE = '/api';
+    let users = [];
+    let currentTenant = null;
+    
+    document.addEventListener('DOMContentLoaded', async function() {
+      await window.authGuard.init();
+      
+      // Verificar se é admin
+      if (!window.authGuard.isAdmin()) {
+        window.authGuard.showAccessDenied();
+        return;
+      }
+      
+      currentTenant = {
+        id: window.authGuard.tenantId,
+        name: localStorage.getItem('tenantName') || 'Empresa'
+      };
+      
+      loadUsers();
+      setupFilters();
+      setupRoleDescription();
+    });
+    
+    function setupFilters() {
+      document.getElementById('searchUser').addEventListener('input', filterUsers);
+      document.getElementById('filterRole').addEventListener('change', filterUsers);
+      document.getElementById('filterStatus').addEventListener('change', filterUsers);
+    }
+    
+    function setupRoleDescription() {
+      const roleSelect = document.getElementById('userRole');
+      const description = document.getElementById('roleDescription');
+      
+      const descriptions = {
+        'gerente': 'Acesso a relatórios, produtos, estoque e PDV. Não pode gerenciar usuários.',
+        'caixa': 'Acesso ao PDV e visualização básica. Ideal para operadores de caixa.',
+        'user': 'Acesso limitado. Apenas visualização de dados básicos.'
+      };
+      
+      roleSelect.addEventListener('change', function() {
+        description.textContent = descriptions[this.value] || '';
+        setDefaultPermissions(this.value);
+      });
+    }
+    
+    function setDefaultPermissions(role) {
+      // Limpar todas
+      document.querySelectorAll('[id^="perm_"]').forEach(cb => cb.checked = false);
+      
+      // Definir padrões por cargo
+      const defaults = {
+        'gerente': ['pdv', 'produtos', 'estoque', 'clientes', 'relatorios', 'cancelar', 'desconto', 'sangria'],
+        'caixa': ['pdv', 'clientes', 'desconto'],
+        'user': []
+      };
+      
+      (defaults[role] || []).forEach(perm => {
+        const cb = document.getElementById('perm_' + perm);
+        if (cb) cb.checked = true;
+      });
+    }
+    
+    async function loadUsers() {
+      try {
+        const response = await window.authGuard.fetch(`${API_BASE}/auth/users`);
+        users = await response.json();
+        
+        renderUsers(users);
+        updateStats();
+      } catch (error) {
+        console.error('Erro ao carregar funcionários:', error);
+        showAlert('Erro ao carregar funcionários', 'danger');
+      }
+    }
+    
+    function filterUsers() {
+      const search = document.getElementById('searchUser').value.toLowerCase();
+      const role = document.getElementById('filterRole').value;
+      const status = document.getElementById('filterStatus').value;
+      
+      const filtered = users.filter(u => {
+        const matchSearch = !search || 
+          u.name.toLowerCase().includes(search) || 
+          u.username.toLowerCase().includes(search);
+        const matchRole = !role || u.role === role;
+        const matchStatus = status === '' || String(u.active) === status;
+        
+        return matchSearch && matchRole && matchStatus;
+      });
+      
+      renderUsers(filtered);
+    }
+    
+    function renderUsers(data) {
+      const container = document.getElementById('usersList');
+      
+      if (!data || data.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <h4>Nenhum funcionário encontrado</h4>
+            <p>Clique em "Novo Funcionário" para adicionar o primeiro</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = data.map(u => `
+        <div class="user-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+              <div class="user-avatar" style="background: ${getAvatarColor(u.role)};">
+                ${u.name.charAt(0).toUpperCase()}
+              </div>
+              <div class="user-info ml-3">
+                <h5>${u.name}</h5>
+                <small>@${u.username} ${u.email ? '• ' + u.email : ''}</small>
+                <div class="user-last-login mt-1">
+                  <i class="fas fa-clock"></i>
+                  ${u.last_login ? 'Último acesso: ' + formatDateTime(u.last_login) : 'Nunca acessou'}
+                </div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <span class="role-badge role-${u.role}">${getRoleLabel(u.role)}</span>
+              <span class="status-badge status-${u.active ? 'active' : 'inactive'}">${u.active ? 'Ativo' : 'Inativo'}</span>
+              <div class="user-actions ml-3">
+                <button class="btn btn-sm btn-outline-primary mr-1" onclick="viewUser('${u.id}')" title="Ver detalhes">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary mr-1" onclick="editUser('${u.id}')" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning mr-1" onclick="resetPassword('${u.id}', '${u.name}')" title="Resetar senha">
+                  <i class="fas fa-key"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${u.id}', '${u.name}')" title="Excluir">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function getAvatarColor(role) {
+      const colors = {
+        'admin': 'linear-gradient(135deg, #6366f1, #4f46e5)',
+        'gerente': 'linear-gradient(135deg, #10b981, #059669)',
+        'caixa': 'linear-gradient(135deg, #f59e0b, #d97706)',
+        'user': 'linear-gradient(135deg, #64748b, #475569)'
+      };
+      return colors[role] || colors.user;
+    }
+    
+    function getRoleLabel(role) {
+      const labels = {
+        'admin': 'Administrador',
+        'gerente': 'Gerente',
+        'caixa': 'Op. Caixa',
+        'user': 'Usuário'
+      };
+      return labels[role] || 'Usuário';
+    }
+    
+    function updateStats() {
+      document.getElementById('totalUsers').textContent = users.length;
+      document.getElementById('activeUsers').textContent = users.filter(u => u.active).length;
+      
+      // Limite do plano (será buscado do backend)
+      // Por enquanto, valor fixo
+      document.getElementById('maxUsers').textContent = localStorage.getItem('maxUsers') || '5';
+    }
+    
+    function openUserModal(user = null) {
+      document.getElementById('userForm').reset();
+      document.getElementById('userId').value = '';
+      document.getElementById('userModalTitle').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Novo Funcionário';
+      
+      // Mostrar campos de senha
+      document.getElementById('userPassword').required = true;
+      document.getElementById('passwordLabel').textContent = 'Senha *';
+      document.getElementById('passwordHint').textContent = 'O funcionário deverá alterar no primeiro acesso';
+      
+      // Limpar permissões
+      document.querySelectorAll('[id^="perm_"]').forEach(cb => cb.checked = false);
+      
+      // Definir permissões padrão para caixa
+      setDefaultPermissions('caixa');
+      
+      if (user) {
+        document.getElementById('userId').value = user.id;
+        document.getElementById('userModalTitle').innerHTML = '<i class="fas fa-user-edit mr-2"></i>Editar Funcionário';
+        document.getElementById('userName').value = user.name || '';
+        document.getElementById('userEmail').value = user.email || '';
+        document.getElementById('userUsername').value = user.username || '';
+        document.getElementById('userRole').value = user.role || 'user';
+        document.getElementById('userActive').value = user.active ? '1' : '0';
+        
+        // Senha não é obrigatória na edição
+        document.getElementById('userPassword').required = false;
+        document.getElementById('passwordLabel').textContent = 'Nova Senha (opcional)';
+        document.getElementById('passwordHint').textContent = 'Deixe em branco para manter a senha atual';
+        
+        // Carregar permissões
+        if (user.permissions) {
+          try {
+            const perms = typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions;
+            perms.forEach(perm => {
+              const cb = document.getElementById('perm_' + perm);
+              if (cb) cb.checked = true;
+            });
+          } catch (e) {}
+        }
+      }
+      
+      $('#userModal').modal('show');
+    }
+    
+    async function saveUser() {
+      const id = document.getElementById('userId').value;
+      const isNew = !id;
+      
+      const name = document.getElementById('userName').value.trim();
+      const username = document.getElementById('userUsername').value.trim();
+      const email = document.getElementById('userEmail').value.trim();
+      const password = document.getElementById('userPassword').value;
+      const passwordConfirm = document.getElementById('userPasswordConfirm').value;
+      const role = document.getElementById('userRole').value;
+      const active = document.getElementById('userActive').value === '1';
+      
+      // Coletar permissões
+      const permissions = [];
+      document.querySelectorAll('[id^="perm_"]:checked').forEach(cb => {
+        permissions.push(cb.value);
+      });
+      
+      // Validações
+      if (!name || !username) {
+        showAlert('Preencha todos os campos obrigatórios', 'danger');
+        return;
+      }
+      
+      if (isNew && (!password || password.length < 6)) {
+        showAlert('A senha deve ter no mínimo 6 caracteres', 'danger');
+        return;
+      }
+      
+      if (password && password !== passwordConfirm) {
+        showAlert('As senhas não conferem', 'danger');
+        return;
+      }
+      
+      const data = { name, username, email, role, active, permissions };
+      if (password) {
+        data.password = password;
+      }
+      
+      try {
+        const url = isNew ? `${API_BASE}/auth/users` : `${API_BASE}/auth/users/${id}`;
+        const method = isNew ? 'POST' : 'PUT';
+        
+        const response = await window.authGuard.fetch(url, {
+          method,
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success || response.ok) {
+          showAlert(isNew ? 'Funcionário cadastrado com sucesso!' : 'Funcionário atualizado com sucesso!', 'success');
+          $('#userModal').modal('hide');
+          loadUsers();
+        } else {
+          showAlert(result.error || 'Erro ao salvar funcionário', 'danger');
+        }
+      } catch (error) {
+        console.error('Erro ao salvar:', error);
+        showAlert('Erro ao salvar funcionário', 'danger');
+      }
+    }
+    
+    function editUser(id) {
+      const user = users.find(u => u.id === id);
+      if (user) {
+        openUserModal(user);
+      }
+    }
+    
+    async function viewUser(id) {
+      const user = users.find(u => u.id === id);
+      if (!user) return;
+      
+      // Buscar informações do caixa
+      let caixaInfo = 'Sem caixa aberto';
+      try {
+        const response = await window.authGuard.fetch(`${API_BASE}/caixa/usuario/${id}`);
+        const caixaData = await response.json();
+        if (caixaData.caixa) {
+          caixaInfo = `
+            <div class="alert alert-success">
+              <strong><i class="fas fa-cash-register"></i> Caixa Aberto</strong><br>
+              Abertura: ${caixaData.caixa.hora_abertura}<br>
+              Valor Inicial: R$ ${parseFloat(caixaData.caixa.valor_inicial || 0).toFixed(2)}
+            </div>
+          `;
+        }
+      } catch (e) {}
+      
+      let permsHtml = '-';
+      if (user.permissions) {
+        try {
+          const perms = typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions;
+          if (perms.length > 0) {
+            permsHtml = perms.map(p => `<span class="badge badge-info mr-1">${p}</span>`).join('');
+          }
+        } catch (e) {}
+      }
+      
+      document.getElementById('userDetailsContent').innerHTML = `
+        <div class="row">
+          <div class="col-md-6 mb-4">
+            <div class="d-flex align-items-center">
+              <div class="user-avatar mr-3" style="background: ${getAvatarColor(user.role)}; width: 70px; height: 70px; font-size: 28px;">
+                ${user.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h4 class="mb-0">${user.name}</h4>
+                <small class="text-muted">@${user.username}</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-4 text-right">
+            <span class="role-badge role-${user.role} mr-2">${getRoleLabel(user.role)}</span>
+            <span class="status-badge status-${user.active ? 'active' : 'inactive'}">${user.active ? 'Ativo' : 'Inativo'}</span>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="text-muted small">E-mail</label>
+            <div>${user.email || 'Não informado'}</div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="text-muted small">Último Acesso</label>
+            <div>${user.last_login ? formatDateTime(user.last_login) : 'Nunca acessou'}</div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="text-muted small">Cadastrado em</label>
+            <div>${formatDateTime(user.created_at)}</div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="text-muted small">Deve Alterar Senha</label>
+            <div>${user.must_change_password ? '<span class="badge badge-warning">Sim</span>' : '<span class="badge badge-success">Não</span>'}</div>
+          </div>
+        </div>
+        
+        <hr>
+        
+        <h6 class="text-muted mb-3"><i class="fas fa-shield-alt mr-2"></i>Permissões</h6>
+        <div class="mb-3">${permsHtml}</div>
+        
+        <hr>
+        
+        <h6 class="text-muted mb-3"><i class="fas fa-cash-register mr-2"></i>Status do Caixa Hoje</h6>
+        ${caixaInfo}
+      `;
+      
+      $('#userDetailsModal').modal('show');
+    }
+    
+    async function resetPassword(userId, name) {
+      const newPassword = prompt(`Digite a nova senha para ${name}:`, 'mudar123');
+      if (!newPassword) return;
+      
+      if (newPassword.length < 6) {
+        showAlert('A senha deve ter no mínimo 6 caracteres', 'danger');
+        return;
+      }
+      
+      try {
+        const response = await window.authGuard.fetch(`${API_BASE}/auth/users/${userId}/reset-password`, {
+          method: 'POST',
+          body: JSON.stringify({ newPassword })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showAlert(`Senha de ${name} resetada com sucesso!`, 'success');
+          loadUsers();
+        } else {
+          showAlert(result.error || 'Erro ao resetar senha', 'danger');
+        }
+      } catch (error) {
+        showAlert('Erro ao resetar senha', 'danger');
+      }
+    }
+    
+    async function deleteUser(userId, name) {
+      const confirmar = await Modal.delete(`Tem certeza que deseja excluir o funcionário "${name}"?\n\nEsta ação não pode ser desfeita.`, 'Excluir Funcionário');
+      if (!confirmar) return;
+      
+      try {
+        const response = await window.authGuard.fetch(`${API_BASE}/auth/users/${userId}`, {
+          method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showAlert('Funcionário excluído com sucesso', 'success');
+          loadUsers();
+        } else {
+          showAlert(result.error || 'Erro ao excluir funcionário', 'danger');
+        }
+      } catch (error) {
+        showAlert('Erro ao excluir funcionário', 'danger');
+      }
+    }
+    
+    function showAlert(message, type) {
+      // Usar sistema de toast elegante
+      if (type === 'success') {
+        Toast.success(message);
+      } else if (type === 'danger' || type === 'error') {
+        Toast.error(message);
+      } else {
+        Toast.warning(message);
+      }
+    }
+    
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '-';
+      return DateTimeUtils.formatDateTime(dateStr);
+    }
+  </script>
+</body>
+</html>

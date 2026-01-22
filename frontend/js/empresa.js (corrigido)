@@ -1,0 +1,357 @@
+// Configuração da API
+const API_BASE = 'http://localhost:3000';
+const EMPRESAS_API = `${API_BASE}/api/empresas`;
+
+// Elementos DOM
+let empresasList = null;
+let totalEmpresasEl = null;
+let empresasAtivasEl = null;
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM carregado - inicializando...');
+    
+    // Buscar elementos
+    empresasList = document.getElementById('empresasList');
+    totalEmpresasEl = document.getElementById('totalEmpresas');
+    empresasAtivasEl = document.getElementById('empresasAtivas');
+    
+    console.log('Elementos encontrados:', {
+        empresasList: !!empresasList,
+        totalEmpresasEl: !!totalEmpresasEl,
+        empresasAtivasEl: !!empresasAtivasEl
+    });
+    
+    if (empresasList) {
+        loadEmpresas();
+        setupShortcuts();
+    } else {
+        console.error('❌ Elemento empresasList não encontrado!');
+        // Tentar encontrar novamente após um delay
+        setTimeout(() => {
+            empresasList = document.getElementById('empresasList');
+            if (empresasList) {
+                console.log('✅ Elemento encontrado após delay');
+                loadEmpresas();
+                setupShortcuts();
+            }
+        }, 100);
+    }
+});
+
+// Atalhos de teclado
+function setupShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        switch(e.key) {
+            case 'F2':
+                e.preventDefault();
+                openEmpresaModal();
+                break;
+            case 'F5':
+                e.preventDefault();
+                loadEmpresas();
+                break;
+            case 'Escape':
+                e.preventDefault();
+                window.location.href = 'admin.html';
+                break;
+        }
+    });
+}
+
+// Carregar empresas
+async function loadEmpresas() {
+    try {
+        console.log('🔄 Carregando empresas...');
+        
+        if (!empresasList) {
+            console.error('❌ Elemento empresasList não disponível');
+            return;
+        }
+        
+        // Mostrar loading
+        empresasList.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-3 text-muted">Carregando empresas...</p>
+            </div>
+        `;
+
+        const response = await axios.get(EMPRESAS_API);
+        const empresas = response.data;
+        
+        console.log(`✅ ${empresas.length} empresas carregadas`);
+        
+        // Atualizar estatísticas
+        if (totalEmpresasEl) {
+            totalEmpresasEl.textContent = empresas.length;
+        }
+        
+        if (empresasAtivasEl) {
+            const ativas = empresas.filter(e => e.status === true || e.status === 1).length;
+            empresasAtivasEl.textContent = ativas;
+        }
+        
+        // Renderizar lista
+        if (empresas.length === 0) {
+            empresasList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fa fa-building"></i>
+                    <h5>Nenhuma empresa cadastrada</h5>
+                    <p class="text-muted">Clique em "Nova Empresa" para começar</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        empresas.forEach(empresa => {
+            const statusClass = (empresa.status === true || empresa.status === 1) ? 'badge-success' : 'badge-secondary';
+            const statusText = (empresa.status === true || empresa.status === 1) ? 'Ativa' : 'Inativa';
+            
+            html += `
+                <div class="empresa-card" data-id="${empresa.id}">
+                    <div class="empresa-header">
+                        <div class="empresa-info">
+                            <h5>${empresa.nome_fantasia || empresa.razao_social}</h5>
+                            <div class="empresa-cnpj">${empresa.cnpj || 'CNPJ não informado'}</div>
+                        </div>
+                        <div>
+                            <span class="badge ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                    <div class="empresa-details">
+                        ${empresa.razao_social ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Razão Social</div>
+                                <div class="detail-value">${empresa.razao_social}</div>
+                            </div>
+                        ` : ''}
+                        ${empresa.endereco ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Endereço</div>
+                                <div class="detail-value">${empresa.endereco}, ${empresa.numero || ''} - ${empresa.bairro || ''}</div>
+                            </div>
+                        ` : ''}
+                        ${empresa.cidade ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Cidade/UF</div>
+                                <div class="detail-value">${empresa.cidade}${empresa.uf ? '/' + empresa.uf : ''}</div>
+                            </div>
+                        ` : ''}
+                        ${empresa.telefone ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Telefone</div>
+                                <div class="detail-value">${empresa.telefone}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="mt-3 text-right">
+                        <button class="btn btn-sm btn-outline-primary mr-2" onclick="editEmpresa('${empresa.id}')">
+                            <i class="fa fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteEmpresa('${empresa.id}')">
+                            <i class="fa fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        empresasList.innerHTML = html;
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar empresas:', error);
+        
+        if (!empresasList) {
+            console.error('❌ Elemento empresasList não disponível para mostrar erro');
+            return;
+        }
+        
+        empresasList.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fa fa-exclamation-triangle mr-2"></i>
+                <strong>Erro ao carregar empresas</strong>
+                <p class="mb-2">${error.message || 'Verifique sua conexão com o servidor.'}</p>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-danger mr-2" onclick="loadEmpresas()">
+                        <i class="fa fa-redo"></i> Tentar novamente
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+                        <i class="fa fa-sync"></i> Recarregar página
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Abrir modal para nova empresa
+function openEmpresaModal(id = null) {
+    const modal = $('#empresaModal');
+    const title = document.getElementById('modalTitle');
+    const form = document.getElementById('empresaForm');
+    
+    if (!form) {
+        console.error('❌ Formulário não encontrado');
+        return;
+    }
+    
+    if (id) {
+        title.textContent = 'Editar Empresa';
+        loadEmpresaData(id);
+    } else {
+        title.textContent = 'Nova Empresa';
+        form.reset();
+        document.getElementById('empresaId').value = '';
+        document.getElementById('status').value = '1';
+        document.getElementById('empresaLogoPreview').style.display = 'none';
+        document.getElementById('empresaLogoPreview').src = '';
+    }
+    
+    modal.modal('show');
+
+    // Attach upload handler
+    setTimeout(() => {
+        const uploadBtn = document.getElementById('btnUploadLogo');
+        if (uploadBtn) uploadBtn.addEventListener('click', uploadEmpresaLogo);
+    }, 40);
+}
+
+// Carregar dados da empresa para edição
+async function loadEmpresaData(id) {
+    try {
+        const response = await axios.get(`${EMPRESAS_API}/${id}`);
+        const empresa = response.data;
+        
+        document.getElementById('empresaId').value = empresa.id;
+        document.getElementById('razao_social').value = empresa.razao_social || '';
+        document.getElementById('nome_fantasia').value = empresa.nome_fantasia || '';
+        document.getElementById('cnpj').value = empresa.cnpj || '';
+        document.getElementById('inscricao_estadual').value = empresa.inscricao_estadual || '';
+        document.getElementById('inscricao_municipal').value = empresa.inscricao_municipal || '';
+        document.getElementById('endereco').value = empresa.endereco || '';
+        document.getElementById('numero').value = empresa.numero || '';
+        document.getElementById('bairro').value = empresa.bairro || '';
+        document.getElementById('cidade').value = empresa.cidade || '';
+        document.getElementById('uf').value = empresa.uf || '';
+        document.getElementById('cep').value = empresa.cep || '';
+        document.getElementById('telefone').value = empresa.telefone || '';
+        document.getElementById('email').value = empresa.email || '';
+        document.getElementById('status').value = empresa.status ? '1' : '0';
+        // Logo preview
+        const logoEl = document.getElementById('empresaLogoPreview');
+        if (empresa.logo) { logoEl.src = empresa.logo; logoEl.style.display = 'inline-block'; } else { logoEl.src = ''; logoEl.style.display = 'none'; }
+        
+    } catch (error) {
+        console.error('❌ Erro ao carregar dados da empresa:', error);
+        alert('Erro ao carregar dados da empresa: ' + (error.message || 'Tente novamente'));
+    }
+}
+
+// Salvar empresa
+async function saveEmpresa() {
+    const form = document.getElementById('empresaForm');
+    if (!form) {
+        console.error('❌ Formulário não encontrado');
+        return;
+    }
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const empresaId = document.getElementById('empresaId').value;
+    const empresaData = {
+        razao_social: document.getElementById('razao_social').value,
+        nome_fantasia: document.getElementById('nome_fantasia').value,
+        cnpj: document.getElementById('cnpj').value,
+        inscricao_estadual: document.getElementById('inscricao_estadual').value,
+        inscricao_municipal: document.getElementById('inscricao_municipal').value,
+        endereco: document.getElementById('endereco').value,
+        numero: document.getElementById('numero').value,
+        bairro: document.getElementById('bairro').value,
+        cidade: document.getElementById('cidade').value,
+        uf: document.getElementById('uf').value,
+        cep: document.getElementById('cep').value,
+        telefone: document.getElementById('telefone').value,
+        email: document.getElementById('email').value,
+        status: document.getElementById('status').value === '1'
+    };
+    
+    try {
+        if (empresaId) {
+            // Atualizar empresa existente
+            await axios.put(`${EMPRESAS_API}/${empresaId}`, empresaData);
+            // If a file is selected, upload it
+            const file = document.getElementById('empresaLogoFile')?.files?.[0];
+            if (file) {
+                const fd = new FormData();
+                fd.append('logo', file);
+                await axios.post(`${EMPRESAS_API}/${empresaId}/logo`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            }
+        } else {
+            // Criar nova empresa
+            const res = await axios.post(EMPRESAS_API, empresaData);
+            const newId = res.data.id;
+            const file = document.getElementById('empresaLogoFile')?.files?.[0];
+            if (file) {
+                const fd = new FormData();
+                fd.append('logo', file);
+                await axios.post(`${EMPRESAS_API}/${newId}/logo`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            }
+        }
+        
+        $('#empresaModal').modal('hide');
+        loadEmpresas();
+        
+    } catch (error) {
+        console.error('❌ Erro ao salvar empresa:', error);
+        alert('Erro ao salvar empresa: ' + (error.response?.data?.message || error.message));
+    }
+}
+
+// Excluir empresa
+async function deleteEmpresa(id) {
+    if (!confirm('Tem certeza que deseja excluir esta empresa?')) {
+        return;
+    }
+    
+    try {
+        await axios.delete(`${EMPRESAS_API}/${id}`);
+        loadEmpresas();
+    } catch (error) {
+        console.error('❌ Erro ao excluir empresa:', error);
+        alert('Erro ao excluir empresa: ' + (error.message || 'Tente novamente'));
+    }
+}
+
+// Função para editar empresa
+function editEmpresa(id) {
+    openEmpresaModal(id);
+}
+
+// Enviar logo separadamente (botão de upload)
+async function uploadEmpresaLogo() {
+    const empresaId = document.getElementById('empresaId').value;
+    if (!empresaId) return alert('Salve a empresa antes de enviar o logo');
+    const file = document.getElementById('empresaLogoFile')?.files?.[0];
+    if (!file) return alert('Selecione um arquivo para enviar');
+    try {
+        const fd = new FormData();fd.append('logo', file);
+        const resp = await axios.post(`${EMPRESAS_API}/${empresaId}/logo`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        const url = resp.data.logo;
+        const logoEl = document.getElementById('empresaLogoPreview');
+        if (url) {
+            logoEl.src = url; logoEl.style.display = 'inline-block';
+            if (window.showToast) showToast('Logo enviada com sucesso', 'success'); else alert('Logo enviada com sucesso');
+            loadEmpresas();
+        }
+    } catch (err) {
+        console.error('Erro ao enviar logo:', err);
+        alert('Falha ao enviar logo: ' + (err.response?.data?.error || err.message));
+    }
+}
+
+window.uploadEmpresaLogo = uploadEmpresaLogo;

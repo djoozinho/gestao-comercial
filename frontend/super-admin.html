@@ -1,0 +1,1393 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Super Admin - Gestão do Sistema</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <script src="js/datetime-utils.js"></script>
+  <style>
+    :root {
+      --brand: #dc2626;
+      --brand-dark: #b91c1c;
+      --brand-light: #f87171;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    body { background: #0f172a; min-height: 100vh; margin: 0; }
+    
+    .super-admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+    
+    .header-super {
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 30px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header-super::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E") no-repeat center;
+      background-size: contain;
+    }
+    
+    .header-super h1 {
+      font-size: 32px;
+      font-weight: 800;
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .header-super p { opacity: 0.9; margin: 0; font-size: 16px; }
+    
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .header-actions .btn {
+      padding: 12px 24px;
+      font-weight: 600;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: #1e293b;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid #334155;
+    }
+    
+    .stat-card .icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+    }
+    
+    .stat-card .label {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    
+    .main-card {
+      background: #1e293b;
+      border-radius: 20px;
+      border: 1px solid #334155;
+      overflow: hidden;
+    }
+    
+    .card-header-custom {
+      background: #0f172a;
+      padding: 24px;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-header-custom h3 {
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card-body-custom { padding: 24px; }
+    
+    .search-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      flex: 1;
+      font-size: 14px;
+    }
+    
+    .search-box input::placeholder { color: #64748b; }
+    .search-box i { color: #64748b; }
+    
+    .table-container { overflow-x: auto; }
+    
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .custom-table th {
+      text-align: left;
+      padding: 14px 16px;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #334155;
+    }
+    
+    .custom-table td {
+      padding: 16px;
+      color: #e2e8f0;
+      font-size: 14px;
+      border-bottom: 1px solid #334155;
+    }
+    
+    .custom-table tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+    
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-active { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .status-inactive { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    
+    .btn-action {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    
+    .btn-edit { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+    .btn-edit:hover { background: rgba(99, 102, 241, 0.3); }
+    .btn-delete { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .btn-delete:hover { background: rgba(239, 68, 68, 0.3); }
+    .btn-view { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .btn-view:hover { background: rgba(16, 185, 129, 0.3); }
+    
+    .btn-primary-custom {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(220, 38, 38, 0.3);
+    }
+    
+    .modal-custom .modal-content {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 20px;
+    }
+    
+    .modal-custom .modal-header {
+      border-bottom: 1px solid #334155;
+      padding: 24px;
+    }
+    
+    .modal-custom .modal-title { color: #fff; font-weight: 700; }
+    .modal-custom .close { color: #fff; opacity: 0.8; }
+    .modal-custom .modal-body { padding: 24px; }
+    
+    .form-group-custom label {
+      color: #94a3b8;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .form-control-custom {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #fff;
+      width: 100%;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .form-control-custom:focus {
+      outline: none;
+      border-color: #dc2626;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+    }
+    
+    .form-control-custom::placeholder { color: #64748b; }
+    
+    .modal-custom .modal-footer {
+      border-top: 1px solid #334155;
+      padding: 20px 24px;
+    }
+    
+    .alert-custom {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .alert-success-custom { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .alert-error-custom { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      color: #fff;
+    }
+    
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #dc2626, #991b1b);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    
+    .nav-tabs-custom {
+      border-bottom: 1px solid #334155;
+      margin-bottom: 24px;
+    }
+    
+    .nav-tabs-custom .nav-link {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 14px 20px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+    
+    .nav-tabs-custom .nav-link:hover { color: #fff; }
+    .nav-tabs-custom .nav-link.active {
+      color: #dc2626;
+      border-bottom-color: #dc2626;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #64748b;
+    }
+    
+    .empty-state i {
+      font-size: 60px;
+      margin-bottom: 20px;
+      display: block;
+      opacity: 0.5;
+    }
+    
+    .plan-badge {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    
+    .plan-basic { background: #334155; color: #94a3b8; }
+    .plan-pro { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+    .plan-enterprise { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    
+    /* ============================================
+       MODAL DE CONFIRMAÇÃO ELEGANTE
+       ============================================ */
+    .elegant-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 99998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      animation: elegantModalFadeIn 0.3s ease forwards;
+    }
+    
+    .elegant-modal-overlay.modal-exit {
+      animation: elegantModalFadeOut 0.25s ease forwards;
+    }
+    
+    @keyframes elegantModalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes elegantModalFadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
+    .elegant-modal {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.25);
+      max-width: 440px;
+      width: 90%;
+      transform: scale(0.9) translateY(20px);
+      animation: elegantModalScaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      overflow: hidden;
+    }
+    
+    .elegant-modal-overlay.modal-exit .elegant-modal {
+      animation: elegantModalScaleOut 0.25s ease forwards;
+    }
+    
+    @keyframes elegantModalScaleIn {
+      from {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes elegantModalScaleOut {
+      from {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+      to {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+      }
+    }
+    
+    .elegant-modal-header {
+      padding: 32px 32px 0;
+      text-align: center;
+    }
+    
+    .elegant-modal-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+    }
+    
+    .elegant-modal-icon.icon-success {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #059669;
+    }
+    
+    .elegant-modal-icon.icon-error {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #dc2626;
+    }
+    
+    .elegant-modal-icon.icon-warning {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #d97706;
+    }
+    
+    .elegant-modal-icon.icon-info {
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      color: #0284c7;
+    }
+    
+    .elegant-modal-icon.icon-question {
+      background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+      color: #7c3aed;
+    }
+    
+    .elegant-modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+    
+    .elegant-modal-body {
+      padding: 20px 32px 32px;
+      text-align: center;
+    }
+    
+    .elegant-modal-message {
+      font-size: 15px;
+      color: #64748b;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    
+    .elegant-modal-footer {
+      padding: 0 32px 32px;
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+    }
+    
+    .elegant-modal-btn {
+      padding: 14px 32px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      min-width: 130px;
+    }
+    
+    .elegant-modal-btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    }
+    
+    .elegant-modal-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+    }
+    
+    .elegant-modal-btn-secondary {
+      background: #f1f5f9;
+      color: #475569;
+    }
+    
+    .elegant-modal-btn-secondary:hover {
+      background: #e2e8f0;
+    }
+    
+    .elegant-modal-btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+    }
+    
+    .elegant-modal-btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5);
+    }
+    
+    .elegant-modal-btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    }
+    
+    .elegant-modal-btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5);
+    }
+    
+    @media (max-width: 768px) {
+      .super-admin-container { padding: 15px; }
+      .header-super { padding: 24px; }
+      .header-super h1 { font-size: 24px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="super-admin-container">
+    <!-- Header -->
+    <div class="header-super">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h1><i class="fas fa-shield-alt"></i> Painel Super Admin</h1>
+          <p>Gestão completa do sistema - Controle de empresas e administradores</p>
+        </div>
+        <div class="user-info">
+          <div>
+            <div style="font-weight: 600;" id="superAdminName">Super Administrador</div>
+            <div style="font-size: 13px; opacity: 0.8;">superadmin@sistema.local</div>
+          </div>
+          <div class="user-avatar"><i class="fas fa-crown"></i></div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-light" onclick="openTenantModal()">
+          <i class="fas fa-plus"></i> Nova Empresa
+        </button>
+        <button class="btn btn-outline-light" onclick="loadAuditLogs()">
+          <i class="fas fa-history"></i> Logs de Auditoria
+        </button>
+        <button class="btn btn-outline-light" onclick="window.authGuard.logout()">
+          <i class="fas fa-sign-out-alt"></i> Sair
+        </button>
+      </div>
+    </div>
+    
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff;">
+          <i class="fas fa-building"></i>
+        </div>
+        <div class="value" id="totalTenants">0</div>
+        <div class="label">Empresas Cadastradas</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff;">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="value" id="activeTenants">0</div>
+        <div class="label">Empresas Ativas</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="value" id="totalUsers">0</div>
+        <div class="label">Usuários no Sistema</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="background: linear-gradient(135deg, #ec4899, #db2777); color: #fff;">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <div class="value" id="totalAdmins">0</div>
+        <div class="label">Administradores</div>
+      </div>
+    </div>
+    
+    <!-- Tabs -->
+    <ul class="nav nav-tabs-custom" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link active" data-tab="tenants"><i class="fas fa-building mr-2"></i>Empresas</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-tab="admins"><i class="fas fa-user-shield mr-2"></i>Administradores</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-tab="logs"><i class="fas fa-history mr-2"></i>Auditoria</button>
+      </li>
+    </ul>
+    
+    <!-- Content -->
+    <div class="main-card">
+      <!-- Tab: Empresas -->
+      <div id="tab-tenants" class="tab-content">
+        <div class="card-header-custom">
+          <h3><i class="fas fa-building"></i> Empresas Cadastradas</h3>
+          <button class="btn-primary-custom" onclick="openTenantModal()">
+            <i class="fas fa-plus"></i> Nova Empresa
+          </button>
+        </div>
+        <div class="card-body-custom">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchTenant" placeholder="Buscar empresa por nome, CNPJ ou e-mail...">
+          </div>
+          <div id="alertContainer"></div>
+          <div class="table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Empresa</th>
+                  <th>CNPJ</th>
+                  <th>Plano</th>
+                  <th>Usuários</th>
+                  <th>Status</th>
+                  <th>Criado em</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tenantsTable">
+                <tr>
+                  <td colspan="7" class="text-center" style="color: #64748b; padding: 40px;">
+                    <i class="fas fa-spinner fa-spin fa-2x mb-3 d-block"></i>
+                    Carregando empresas...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tab: Admins -->
+      <div id="tab-admins" class="tab-content" style="display: none;">
+        <div class="card-header-custom">
+          <h3><i class="fas fa-user-shield"></i> Administradores das Empresas</h3>
+        </div>
+        <div class="card-body-custom">
+          <div class="table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Administrador</th>
+                  <th>Usuário</th>
+                  <th>E-mail</th>
+                  <th>Empresa</th>
+                  <th>Último Acesso</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="adminsTable">
+                <tr>
+                  <td colspan="7" class="text-center" style="color: #64748b; padding: 40px;">
+                    Carregando administradores...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tab: Logs -->
+      <div id="tab-logs" class="tab-content" style="display: none;">
+        <div class="card-header-custom">
+          <h3><i class="fas fa-history"></i> Log de Auditoria</h3>
+          <button class="btn-primary-custom" onclick="loadAuditLogs()">
+            <i class="fas fa-sync-alt"></i> Atualizar
+          </button>
+        </div>
+        <div class="card-body-custom">
+          <div class="table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Data/Hora</th>
+                  <th>Ação</th>
+                  <th>Detalhes</th>
+                  <th>IP</th>
+                </tr>
+              </thead>
+              <tbody id="logsTable">
+                <tr>
+                  <td colspan="4" class="text-center" style="color: #64748b; padding: 40px;">
+                    Carregando logs...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal: Nova/Editar Empresa -->
+  <div class="modal fade modal-custom" id="tenantModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tenantModalTitle"><i class="fas fa-building mr-2"></i>Nova Empresa</h5>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="tenantForm">
+            <input type="hidden" id="tenantId">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group-custom mb-3">
+                  <label>Nome da Empresa *</label>
+                  <input type="text" class="form-control-custom" id="tenantName" required placeholder="Ex: Farmácia Central">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-custom mb-3">
+                  <label>CNPJ</label>
+                  <input type="text" class="form-control-custom" id="tenantCnpj" placeholder="00.000.000/0000-00">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group-custom mb-3">
+                  <label>E-mail</label>
+                  <input type="email" class="form-control-custom" id="tenantEmail" placeholder="contato@empresa.com">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-custom mb-3">
+                  <label>Telefone</label>
+                  <input type="text" class="form-control-custom" id="tenantPhone" placeholder="(00) 00000-0000">
+                </div>
+              </div>
+            </div>
+            <div class="form-group-custom mb-3">
+              <label>Endereço</label>
+              <input type="text" class="form-control-custom" id="tenantAddress" placeholder="Rua, número, bairro, cidade - UF">
+            </div>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group-custom mb-3">
+                  <label>Plano</label>
+                  <select class="form-control-custom" id="tenantPlan">
+                    <option value="basic">Básico</option>
+                    <option value="pro">Profissional</option>
+                    <option value="enterprise">Empresarial</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group-custom mb-3">
+                  <label>Máx. Usuários</label>
+                  <input type="number" class="form-control-custom" id="tenantMaxUsers" value="5" min="1" max="100">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group-custom mb-3">
+                  <label>Status</label>
+                  <select class="form-control-custom" id="tenantStatus">
+                    <option value="active">Ativo</option>
+                    <option value="inactive">Inativo</option>
+                    <option value="suspended">Suspenso</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <hr style="border-color: #334155; margin: 24px 0;">
+            <h6 style="color: #fff; margin-bottom: 16px;"><i class="fas fa-user-shield mr-2"></i>Administrador da Empresa</h6>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group-custom mb-3">
+                  <label>Nome do Administrador *</label>
+                  <input type="text" class="form-control-custom" id="adminName" required placeholder="Nome completo">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-custom mb-3">
+                  <label>Usuário de Acesso *</label>
+                  <input type="text" class="form-control-custom" id="adminUsername" required placeholder="usuario.admin">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group-custom mb-3">
+                  <label>Senha Inicial *</label>
+                  <input type="password" class="form-control-custom" id="adminPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-custom mb-3">
+                  <label>Confirmar Senha *</label>
+                  <input type="password" class="form-control-custom" id="adminPasswordConfirm" placeholder="Repita a senha" autocomplete="new-password">
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn-primary-custom" onclick="saveTenant()">
+            <i class="fas fa-save"></i> Salvar Empresa
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal: Detalhes da Empresa -->
+  <div class="modal fade modal-custom" id="tenantDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-building mr-2"></i>Detalhes da Empresa</h5>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body" id="tenantDetailsContent">
+          <!-- Conteúdo carregado dinamicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <!-- Sistema de Toasts Elegantes -->
+  <script src="js/toast.js"></script>
+  <script>
+    const API_BASE = '/api';
+    let tenants = [];
+    let admins = [];
+    
+    // Verificar se é super admin
+    document.addEventListener('DOMContentLoaded', async function() {
+      await window.authGuard.init();
+      
+      if (window.authGuard.user?.role !== 'superadmin') {
+        window.authGuard.showAccessDenied();
+        return;
+      }
+      
+      document.getElementById('superAdminName').textContent = window.authGuard.user.name || 'Super Admin';
+      
+      loadTenants();
+      loadAdmins();
+      setupTabs();
+      setupSearch();
+    });
+    
+    function setupTabs() {
+      document.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          // Remover active de todos
+          document.querySelectorAll('[data-tab]').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+          
+          // Ativar o clicado
+          this.classList.add('active');
+          document.getElementById('tab-' + this.dataset.tab).style.display = 'block';
+          
+          // Carregar dados se necessário
+          if (this.dataset.tab === 'logs') {
+            loadAuditLogs();
+          }
+        });
+      });
+    }
+    
+    function setupSearch() {
+      document.getElementById('searchTenant').addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        const filtered = tenants.filter(t => 
+          t.name.toLowerCase().includes(term) ||
+          (t.cnpj && t.cnpj.includes(term)) ||
+          (t.email && t.email.toLowerCase().includes(term))
+        );
+        renderTenants(filtered);
+      });
+    }
+    
+    async function loadTenants() {
+      try {
+        const response = await window.authGuard.fetch(`${API_BASE}/auth/tenants`);
+        tenants = await response.json();
+        
+        renderTenants(tenants);
+        updateStats();
+      } catch (error) {
+        console.error('Erro ao carregar empresas:', error);
+        showAlert('Erro ao carregar empresas', 'error');
+      }
+    }
+    
+    function renderTenants(data) {
+      const tbody = document.getElementById('tenantsTable');
+      
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <i class="fas fa-building"></i>
+                <h4 style="color: #fff;">Nenhuma empresa cadastrada</h4>
+                <p>Clique em "Nova Empresa" para começar</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      tbody.innerHTML = data.map(t => `
+        <tr>
+          <td>
+            <div style="font-weight: 600; color: #fff;">${t.name}</div>
+            <div style="font-size: 12px; color: #64748b;">${t.slug}</div>
+          </td>
+          <td>${t.cnpj || '-'}</td>
+          <td><span class="plan-badge plan-${t.plan || 'basic'}">${(t.plan || 'basic').toUpperCase()}</span></td>
+          <td>${t.user_count || 0} / ${t.max_users || 5}</td>
+          <td><span class="status-badge status-${t.status === 'active' ? 'active' : 'inactive'}">${t.status === 'active' ? 'Ativo' : 'Inativo'}</span></td>
+          <td>${formatDate(t.created_at)}</td>
+          <td>
+            <button class="btn-action btn-view mr-1" onclick="viewTenant('${t.id}')" title="Ver detalhes">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn-action btn-edit mr-1" onclick="editTenant('${t.id}')" title="Editar">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn-action btn-delete" onclick="deleteTenant('${t.id}', '${t.name}')" title="Excluir">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+    
+    async function loadAdmins() {
+      try {
+        const response = await window.authGuard.fetch(`${API_BASE}/auth/admins`);
+        admins = await response.json();
+        renderAdmins(admins);
+      } catch (error) {
+        console.error('Erro ao carregar admins:', error);
+      }
+    }
+    
+    function renderAdmins(data) {
+      const tbody = document.getElementById('adminsTable');
+      
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center" style="color: #64748b; padding: 40px;">
+              Nenhum administrador encontrado
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      tbody.innerHTML = data.map(a => `
+        <tr>
+          <td style="font-weight: 600; color: #fff;">${a.name}</td>
+          <td>${a.username}</td>
+          <td>${a.email || '-'}</td>
+          <td>${a.tenant_name || '-'}</td>
+          <td>${a.last_login ? formatDate(a.last_login) : 'Nunca'}</td>
+          <td><span class="status-badge status-${a.active ? 'active' : 'inactive'}">${a.active ? 'Ativo' : 'Inativo'}</span></td>
+          <td>
+            <button class="btn-action btn-edit mr-1" onclick="resetAdminPassword('${a.id}', '${a.name}')" title="Resetar senha">
+              <i class="fas fa-key"></i>
+            </button>
+            <button class="btn-action btn-${a.active ? 'delete' : 'view'}" onclick="toggleAdminStatus('${a.id}', ${a.active})" title="${a.active ? 'Desativar' : 'Ativar'}">
+              <i class="fas fa-${a.active ? 'ban' : 'check'}"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+    
+    async function loadAuditLogs() {
+      try {
+        const response = await window.authGuard.fetch(`${API_BASE}/auth/audit-logs?limit=100`);
+        const logs = await response.json();
+        renderLogs(logs);
+      } catch (error) {
+        console.error('Erro ao carregar logs:', error);
+      }
+    }
+    
+    function renderLogs(data) {
+      const tbody = document.getElementById('logsTable');
+      
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center" style="color: #64748b; padding: 40px;">
+              Nenhum log encontrado
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      tbody.innerHTML = data.map(log => `
+        <tr>
+          <td>${formatDateTime(log.created_at)}</td>
+          <td><span class="status-badge ${getActionClass(log.action)}">${log.action}</span></td>
+          <td>${log.details || '-'}</td>
+          <td>${log.ip_address || '-'}</td>
+        </tr>
+      `).join('');
+    }
+    
+    function getActionClass(action) {
+      if (action.includes('success') || action.includes('created')) return 'status-active';
+      if (action.includes('failed') || action.includes('deleted')) return 'status-inactive';
+      return 'status-pending';
+    }
+    
+    function updateStats() {
+      document.getElementById('totalTenants').textContent = tenants.length;
+      document.getElementById('activeTenants').textContent = tenants.filter(t => t.status === 'active').length;
+      
+      const totalUsers = tenants.reduce((sum, t) => sum + (t.user_count || 0), 0);
+      document.getElementById('totalUsers').textContent = totalUsers;
+      document.getElementById('totalAdmins').textContent = admins.length;
+    }
+    
+    function openTenantModal(tenant = null) {
+      document.getElementById('tenantForm').reset();
+      document.getElementById('tenantId').value = '';
+      document.getElementById('tenantModalTitle').innerHTML = '<i class="fas fa-building mr-2"></i>Nova Empresa';
+      
+      // Mostrar campos de admin
+      document.querySelectorAll('#tenantForm [id^="admin"]').forEach(el => {
+        el.closest('.form-group-custom').style.display = 'block';
+        if (el.hasAttribute('required')) el.setAttribute('required', 'required');
+      });
+      
+      if (tenant) {
+        document.getElementById('tenantId').value = tenant.id;
+        document.getElementById('tenantModalTitle').innerHTML = '<i class="fas fa-edit mr-2"></i>Editar Empresa';
+        document.getElementById('tenantName').value = tenant.name || '';
+        document.getElementById('tenantCnpj').value = tenant.cnpj || '';
+        document.getElementById('tenantEmail').value = tenant.email || '';
+        document.getElementById('tenantPhone').value = tenant.phone || '';
+        document.getElementById('tenantAddress').value = tenant.address || '';
+        document.getElementById('tenantPlan').value = tenant.plan || 'basic';
+        document.getElementById('tenantMaxUsers').value = tenant.max_users || 5;
+        document.getElementById('tenantStatus').value = tenant.status || 'active';
+        
+        // Esconder campos de admin na edição
+        document.querySelectorAll('#tenantForm [id^="admin"]').forEach(el => {
+          el.closest('.form-group-custom').style.display = 'none';
+          el.removeAttribute('required');
+        });
+      }
+      
+      $('#tenantModal').modal('show');
+    }
+    
+    async function saveTenant() {
+      const id = document.getElementById('tenantId').value;
+      const isNew = !id;
+      
+      const data = {
+        name: document.getElementById('tenantName').value,
+        cnpj: document.getElementById('tenantCnpj').value,
+        email: document.getElementById('tenantEmail').value,
+        phone: document.getElementById('tenantPhone').value,
+        address: document.getElementById('tenantAddress').value,
+        plan: document.getElementById('tenantPlan').value,
+        maxUsers: parseInt(document.getElementById('tenantMaxUsers').value) || 5,
+        status: document.getElementById('tenantStatus').value
+      };
+      
+      if (isNew) {
+        data.adminName = document.getElementById('adminName').value;
+        data.adminUsername = document.getElementById('adminUsername').value;
+        data.adminPassword = document.getElementById('adminPassword').value;
+        
+        const confirmPassword = document.getElementById('adminPasswordConfirm').value;
+        
+        if (!data.name || !data.adminName || !data.adminUsername) {
+          showAlert('Preencha todos os campos obrigatórios', 'error');
+          return;
+        }
+        
+        if (!data.adminPassword || data.adminPassword.length < 6) {
+          showAlert('A senha deve ter no mínimo 6 caracteres', 'error');
+          return;
+        }
+        
+        if (data.adminPassword !== confirmPassword) {
+          showAlert('As senhas não conferem', 'error');
+          return;
+        }
+      }
+      
+      try {
+        const url = isNew ? `${API_BASE}/auth/tenants` : `${API_BASE}/auth/tenants/${id}`;
+        const method = isNew ? 'POST' : 'PUT';
+        
+        const response = await window.authGuard.fetch(url, {
+          method,
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success || response.ok) {
+          showAlert(isNew ? 'Empresa criada com sucesso!' : 'Empresa atualizada com sucesso!', 'success');
+          $('#tenantModal').modal('hide');
+          loadTenants();
+          loadAdmins();
+        } else {
+          showAlert(result.error || 'Erro ao salvar empresa', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao salvar:', error);
+        showAlert('Erro ao salvar empresa', 'error');
+      }
+    }
+    
+    function editTenant(id) {
+      const tenant = tenants.find(t => t.id === id);
+      if (tenant) {
+        openTenantModal(tenant);
+      }
+    }
+    
+    async function viewTenant(id) {
+      const tenant = tenants.find(t => t.id === id);
+      if (!tenant) return;
+      
+      document.getElementById('tenantDetailsContent').innerHTML = `
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label style="color: #64748b; font-size: 12px;">NOME</label>
+            <div style="color: #fff; font-weight: 600;">${tenant.name}</div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label style="color: #64748b; font-size: 12px;">CNPJ</label>
+            <div style="color: #fff;">${tenant.cnpj || 'Não informado'}</div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label style="color: #64748b; font-size: 12px;">E-MAIL</label>
+            <div style="color: #fff;">${tenant.email || 'Não informado'}</div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label style="color: #64748b; font-size: 12px;">TELEFONE</label>
+            <div style="color: #fff;">${tenant.phone || 'Não informado'}</div>
+          </div>
+          <div class="col-md-12 mb-3">
+            <label style="color: #64748b; font-size: 12px;">ENDEREÇO</label>
+            <div style="color: #fff;">${tenant.address || 'Não informado'}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label style="color: #64748b; font-size: 12px;">PLANO</label>
+            <div><span class="plan-badge plan-${tenant.plan || 'basic'}">${(tenant.plan || 'basic').toUpperCase()}</span></div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label style="color: #64748b; font-size: 12px;">USUÁRIOS</label>
+            <div style="color: #fff;">${tenant.user_count || 0} de ${tenant.max_users || 5}</div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label style="color: #64748b; font-size: 12px;">STATUS</label>
+            <div><span class="status-badge status-${tenant.status === 'active' ? 'active' : 'inactive'}">${tenant.status === 'active' ? 'Ativo' : 'Inativo'}</span></div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label style="color: #64748b; font-size: 12px;">CRIADO EM</label>
+            <div style="color: #fff;">${formatDateTime(tenant.created_at)}</div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label style="color: #64748b; font-size: 12px;">SLUG</label>
+            <div style="color: #fff;">${tenant.slug}</div>
+          </div>
+        </div>
+      `;
+      
+      $('#tenantDetailsModal').modal('show');
+    }
+    
+    async function deleteTenant(id, name) {
+      // Buscar dados da empresa para mostrar no modal
+      const tenant = tenants.find(t => t.id === id);
+      const userCount = tenant?.user_count || 0;
+      
+      const mensagemDetalhada = `
+⚠️ EXCLUSÃO PERMANENTE
+
+Você está prestes a excluir COMPLETAMENTE a empresa:
+"${name}"
+
+Isso irá remover PERMANENTEMENTE:
+• Todos os ${userCount} usuários da empresa
+• Todas as sessões ativas
+• Todos os logs de auditoria
+• Todos os registros de caixa
+• Todo o banco de dados da empresa
+• Produtos, vendas, clientes, etc.
+
+Esta ação é IRREVERSÍVEL!`;
+
+      const confirmar1 = await Modal.delete(mensagemDetalhada, 'Excluir Empresa Permanentemente');
+      if (!confirmar1) return;
+      
+      // Segunda confirmação digitando o nome
+      const nomeDigitado = prompt(`Para confirmar a exclusão PERMANENTE, digite o nome da empresa:\n\n"${name}"`);
+      if (!nomeDigitado) {
+        showAlert('Exclusão cancelada', 'warning');
+        return;
+      }
+      
+      if (nomeDigitado.toLowerCase().trim() !== name.toLowerCase().trim()) {
+        showAlert('Nome incorreto. Exclusão cancelada por segurança.', 'error');
+        return;
+      }
+      
+      try {
+        // Mostrar loading
+        const btnDelete = document.querySelector(`button[onclick*="deleteTenant('${id}"]`);
+        if (btnDelete) {
+          btnDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+          btnDelete.disabled = true;
+        }
+        
+        const response = await window.authGuard.fetch(`${API_BASE}/auth/tenants/${id}`, {
+          method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Mostrar detalhes do que foi removido
+          let mensagem = 'Empresa excluída completamente do sistema!';
+          if (result.details) {
+            mensagem += `\n\n${result.details}`;
+          }
+          showAlert(mensagem, 'success');
+          
+          // Recarregar dados
+          await loadTenants();
+          await loadAdmins();
+        } else {
+          showAlert(result.error || 'Erro ao excluir empresa', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao excluir:', error);
+        showAlert('Erro ao excluir empresa: ' + (error.message || 'Erro desconhecido'), 'error');
+      } finally {
+        // Restaurar botão (caso a tabela não tenha sido recarregada)
+        const btnDelete = document.querySelector(`button[onclick*="deleteTenant('${id}"]`);
+        if (btnDelete) {
+          btnDelete.innerHTML = '<i class="fas fa-trash"></i>';
+          btnDelete.disabled = false;
+        }
+      }
+    }
+    
+    async function resetAdminPassword(userId, name) {
+      const newPassword = prompt(`Digite a nova senha para ${name}:`, 'mudar123');
+      if (!newPassword) return;
+      
+      if (newPassword.length < 6) {
+        showAlert('A senha deve ter no mínimo 6 caracteres', 'error');
+        return;
+      }
+      
+      try {
+        const response = await window.authGuard.fetch(`${API_BASE}/auth/users/${userId}/reset-password`, {
+          method: 'POST',
+          body: JSON.stringify({ newPassword })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showAlert('Senha resetada com sucesso!', 'success');
+        } else {
+          showAlert(result.error || 'Erro ao resetar senha', 'error');
+        }
+      } catch (error) {
+        showAlert('Erro ao resetar senha', 'error');
+      }
+    }
+    
+    async function toggleAdminStatus(userId, currentStatus) {
+      try {
+        const response = await window.authGuard.fetch(`${API_BASE}/auth/users/${userId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ active: !currentStatus })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showAlert(`Usuário ${currentStatus ? 'desativado' : 'ativado'} com sucesso`, 'success');
+          loadAdmins();
+        } else {
+          showAlert(result.error || 'Erro ao alterar status', 'error');
+        }
+      } catch (error) {
+        showAlert('Erro ao alterar status', 'error');
+      }
+    }
+    
+    function showAlert(message, type) {
+      // Usar sistema de toast elegante
+      if (type === 'success') {
+        Toast.success(message);
+      } else if (type === 'error') {
+        Toast.error(message);
+      } else {
+        Toast.warning(message);
+      }
+    }
+    
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      return DateTimeUtils.formatDate(dateStr);
+    }
+    
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '-';
+      return DateTimeUtils.formatDateTime(dateStr);
+    }
+  </script>
+</body>
+</html>

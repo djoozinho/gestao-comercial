@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suporte e Ajuda - Admin</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Auth Guard - Proteção de acesso -->
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <script src="js/sidebar.js"></script>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar"><h4>SISTEMA</h4></div>
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-headset"></i> Suporte e Ajuda</h3>
+        <div class="header-info">
+          <button class="btn btn-light mr-2" onclick="location.href='admin.html'"><i class="fa fa-arrow-left"></i> Voltar</button>
+          <button class="btn btn-primary" onclick="openTicketModal()"><i class="fa fa-plus"></i> Abrir Ticket</button>
+        </div>
+      </div>
+      <div class="container-fluid py-4">
+        <div class="card mb-4"><div class="card-body"><div class="row"><div class="col-md-6"><div class="input-group"><div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-search"></i></span></div><input id="searchTicket" class="form-control" placeholder="Buscar tickets..."></div></div><div class="col-md-3"><button class="btn btn-secondary btn-block" onclick="loadTickets()"><i class="fa fa-sync-alt"></i> Atualizar</button></div></div></div></div>
+        <div id="ticketsList"><div class="text-center py-5 text-muted"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Carregando...</p></div></div>
+      </div>
+      <footer class="footer-shortcuts"><div class="shortcut-item"><span><kbd>F2</kbd> Novo</span></div></footer>
+    </div>
+  </div>
+
+  <div class="modal fade" id="ticketModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="fa fa-ticket mr-2"></i> <span id="ticketModalTitle">Abrir Ticket</span></h5><button class="close" data-dismiss="modal"><span>&times;</span></button></div><div class="modal-body"><form id="ticketForm"><input type="hidden" id="ticketId"><div class="form-row"><div class="form-group col-md-6"><label>Assunto</label><input id="ticketSubject" class="form-control"></div><div class="form-group col-md-6"><label>Prioridade</label><select id="ticketPriority" class="form-control"><option>Baixa</option><option>Média</option><option>Alta</option></select></div></div><div class="form-group"><label>Descrição</label><textarea id="ticketDesc" class="form-control"></textarea></div></form></div><div class="modal-footer"><button class="btn btn-secondary" data-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="saveTicket()"><i class="fa fa-save"></i> Enviar</button></div></div></div></div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="js/suporte.js"></script>
+</body>
+</html> 

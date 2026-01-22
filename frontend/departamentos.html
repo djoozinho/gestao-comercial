@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Departamentos - Sistema</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Auth Guard - Proteção de acesso -->
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <style>
+    .dept-tree { padding: 0; }
+    .dept-item { background: #fff; border: 1px solid var(--gray-200); border-radius: 12px; margin-bottom: 12px; overflow: hidden; transition: all 0.2s; }
+    .dept-item:hover { box-shadow: var(--shadow-md); border-color: var(--brand); }
+    .dept-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .dept-header:hover { background: var(--gray-50); }
+    .dept-info { display: flex; align-items: center; gap: 16px; flex: 1; }
+    .dept-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; }
+    .dept-icon.departamento { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .dept-icon.grupo { background: linear-gradient(135deg, #10b981, #059669); }
+    .dept-icon.subgrupo { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+    .dept-name { font-weight: 600; color: var(--gray-800); font-size: 15px; }
+    .dept-code { font-size: 12px; color: var(--gray-500); }
+    .dept-stats { display: flex; gap: 20px; margin-right: 20px; }
+    .dept-stat { text-align: center; }
+    .dept-stat-value { font-weight: 700; color: var(--gray-800); font-size: 14px; }
+    .dept-stat-label { font-size: 11px; color: var(--gray-500); }
+    .dept-actions { display: flex; gap: 8px; }
+    .dept-children { padding-left: 40px; padding-bottom: 16px; display: none; }
+    .dept-children.show { display: block; }
+    .level-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .level-badge.departamento { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+    .level-badge.grupo { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .level-badge.subgrupo { background: rgba(14, 165, 233, 0.1); color: #0284c7; }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); display: flex; align-items: center; gap: 16px; }
+    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; }
+    .stat-value { font-size: 24px; font-weight: 800; color: var(--gray-800); }
+    .stat-label { font-size: 13px; color: var(--gray-500); }
+    .toggle-icon { transition: transform 0.2s; color: var(--gray-400); }
+    .toggle-icon.rotated { transform: rotate(90deg); }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar">
+      <h4>SISTEMA</h4>
+      <ul class="sidebar-menu">
+        <li><a href="index.html"><span class="menu-icon"><i class="fa fa-home"></i></span><span class="menu-label">Início</span></a></li>
+        <li><a href="pdv.html"><span class="menu-icon"><i class="fa fa-cash-register"></i></span><span class="menu-label">PDV</span></a></li>
+        <li><a href="dashboard.html"><span class="menu-icon"><i class="fa fa-chart-pie"></i></span><span class="menu-label">Painel</span></a></li>
+        <li><a href="nfe-emissao.html"><span class="menu-icon"><i class="fa fa-file-invoice"></i></span><span class="menu-label">Notas Fiscais</span></a></li>
+        <li><a href="movimentos.html"><span class="menu-icon"><i class="fa fa-exchange-alt"></i></span><span class="menu-label">Movimentos</span></a></li>
+        <li><a href="relatorios.html"><span class="menu-icon"><i class="fa fa-chart-bar"></i></span><span class="menu-label">Relatórios</span></a></li>
+        <li><a href="pessoas.html"><span class="menu-icon"><i class="fa fa-users"></i></span><span class="menu-label">Clientes</span></a></li>
+        <li><a href="produtos.html"><span class="menu-icon"><i class="fa fa-boxes"></i></span><span class="menu-label">Produtos</span></a></li>
+        <li><a href="agenda.html"><span class="menu-icon"><i class="fa fa-calendar"></i></span><span class="menu-label">Agenda</span></a></li>
+        <li><a href="admin.html" class="active"><span class="menu-icon"><i class="fa fa-cogs"></i></span><span class="menu-label">Admin</span></a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-sitemap"></i> Departamentos e Grupos</h3>
+        <div class="header-info">
+          <button class="btn btn-light mr-2" onclick="location.href='admin.html'"><i class="fa fa-arrow-left"></i> Voltar</button>
+          <button class="btn btn-primary" onclick="openModal()"><i class="fa fa-plus"></i> Novo Departamento</button>
+        </div>
+      </div>
+
+      <div class="container-fluid py-4">
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i class="fa fa-building"></i></div>
+            <div>
+              <div class="stat-value" id="totalDepts">0</div>
+              <div class="stat-label">Departamentos</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="fa fa-layer-group"></i></div>
+            <div>
+              <div class="stat-value" id="totalGroups">0</div>
+              <div class="stat-label">Grupos</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);"><i class="fa fa-th"></i></div>
+            <div>
+              <div class="stat-value" id="totalSubgroups">0</div>
+              <div class="stat-label">Subgrupos</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fa fa-search"></i></span>
+                  </div>
+                  <input type="text" id="searchInput" class="form-control" placeholder="Buscar departamento, grupo ou subgrupo...">
+                </div>
+              </div>
+              <div class="col-md-3">
+                <select id="levelFilter" class="form-control">
+                  <option value="">Todos os níveis</option>
+                  <option value="departamento">Departamentos</option>
+                  <option value="grupo">Grupos</option>
+                  <option value="subgrupo">Subgrupos</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <button class="btn btn-secondary btn-block" onclick="loadDepartamentos()"><i class="fa fa-sync-alt"></i> Atualizar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Departments Tree -->
+        <div id="deptTree" class="dept-tree">
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-3 text-muted">Carregando departamentos...</p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-shortcuts">
+        <div class="shortcut-item"><span><kbd>F2</kbd> Novo</span></div>
+        <div class="shortcut-item"><span><kbd>F3</kbd> Buscar</span></div>
+        <div class="shortcut-item"><span><kbd>F5</kbd> Atualizar</span></div>
+        <div class="shortcut-item"><span><kbd>ESC</kbd> Voltar</span></div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Modal Cadastro -->
+  <div class="modal fade" id="deptModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa fa-sitemap mr-2"></i> <span id="modalTitle">Novo Departamento</span></h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="deptForm">
+            <input type="hidden" id="deptId">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Código</label>
+                  <input type="text" id="code" class="form-control" placeholder="DEP001">
+                </div>
+              </div>
+              <div class="col-md-8">
+                <div class="form-group">
+                  <label>Nome <span class="text-danger">*</span></label>
+                  <input type="text" id="name" class="form-control" placeholder="Nome do departamento" required>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Nível</label>
+                  <select id="level" class="form-control">
+                    <option value="departamento">Departamento</option>
+                    <option value="grupo">Grupo</option>
+                    <option value="subgrupo">Subgrupo</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-8">
+                <div class="form-group">
+                  <label>Departamento/Grupo Pai</label>
+                  <select id="parentId" class="form-control">
+                    <option value="">Nenhum (raiz)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Margem Padrão (%)</label>
+                  <input type="number" id="marginPercent" class="form-control" step="0.01" value="0" placeholder="30.00">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Comissão Padrão (%)</label>
+                  <input type="number" id="commissionPercent" class="form-control" step="0.01" value="0" placeholder="5.00">
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Descrição</label>
+              <textarea id="description" class="form-control" rows="3" placeholder="Descrição do departamento..."></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="saveDepartamento()"><i class="fa fa-save"></i> Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- Sistema de Toasts Elegantes -->
+  <script src="js/toast.js"></script>
+  <script>
+    const API_BASE = 'http://localhost:3000/api';
+    let departamentos = [];
+
+    async function loadDepartamentos() {
+      try {
+        const search = document.getElementById('searchInput').value;
+        const level = document.getElementById('levelFilter').value;
+        
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (level) params.append('level', level);
+
+        const res = await axios.get(`${API_BASE}/departamentos?${params}`);
+        departamentos = res.data.data || res.data || [];
+        
+        updateStats();
+        renderTree();
+        updateParentSelect();
+      } catch (err) {
+        console.error('Erro ao carregar departamentos:', err);
+        document.getElementById('deptTree').innerHTML = `
+          <div class="alert alert-warning">
+            <i class="fa fa-exclamation-triangle mr-2"></i>
+            Erro ao carregar departamentos. <a href="javascript:location.reload()">Tentar novamente</a>
+          </div>`;
+      }
+    }
+
+    function updateStats() {
+      const depts = departamentos.filter(d => d.level === 'departamento');
+      const groups = departamentos.filter(d => d.level === 'grupo');
+      const subgroups = departamentos.filter(d => d.level === 'subgrupo');
+      
+      document.getElementById('totalDepts').textContent = depts.length;
+      document.getElementById('totalGroups').textContent = groups.length;
+      document.getElementById('totalSubgroups').textContent = subgroups.length;
+    }
+
+    function renderTree() {
+      const container = document.getElementById('deptTree');
+      
+      if (departamentos.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-5">
+            <i class="fa fa-folder-open fa-4x text-muted mb-3"></i>
+            <h5>Nenhum departamento cadastrado</h5>
+            <p class="text-muted">Clique em "Novo Departamento" para começar</p>
+          </div>`;
+        return;
+      }
+
+      // Organiza hierarquicamente
+      const roots = departamentos.filter(d => !d.parentId);
+      let html = '';
+      
+      roots.forEach(dept => {
+        html += renderDeptItem(dept);
+      });
+      
+      container.innerHTML = html;
+    }
+
+    function renderDeptItem(dept) {
+      const children = departamentos.filter(d => d.parentId === dept.id);
+      const hasChildren = children.length > 0;
+      
+      let childrenHtml = '';
+      if (hasChildren) {
+        childrenHtml = `<div class="dept-children" id="children-${dept.id}">`;
+        children.forEach(child => {
+          childrenHtml += renderDeptItem(child);
+        });
+        childrenHtml += '</div>';
+      }
+      
+      return `
+        <div class="dept-item">
+          <div class="dept-header" onclick="${hasChildren ? `toggleChildren('${dept.id}')` : ''}">
+            <div class="dept-info">
+              ${hasChildren ? `<i class="fa fa-chevron-right toggle-icon" id="toggle-${dept.id}"></i>` : '<span style="width: 20px;"></span>'}
+              <div class="dept-icon ${dept.level}">
+                <i class="fa ${dept.level === 'departamento' ? 'fa-building' : dept.level === 'grupo' ? 'fa-layer-group' : 'fa-th'}"></i>
+              </div>
+              <div>
+                <div class="dept-name">${dept.name}</div>
+                <div class="dept-code">${dept.code || 'Sem código'}</div>
+              </div>
+              <span class="level-badge ${dept.level}">${dept.level}</span>
+            </div>
+            <div class="dept-stats">
+              <div class="dept-stat">
+                <div class="dept-stat-value">${dept.marginPercent}%</div>
+                <div class="dept-stat-label">Margem</div>
+              </div>
+              <div class="dept-stat">
+                <div class="dept-stat-value">${dept.commissionPercent}%</div>
+                <div class="dept-stat-label">Comissão</div>
+              </div>
+            </div>
+            <div class="dept-actions">
+              <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); editDepartamento('${dept.id}')"><i class="fa fa-edit"></i></button>
+              <button class="btn btn-sm btn-outline-success" onclick="event.stopPropagation(); addChild('${dept.id}')"><i class="fa fa-plus"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteDepartamento('${dept.id}')"><i class="fa fa-trash"></i></button>
+            </div>
+          </div>
+          ${childrenHtml}
+        </div>`;
+    }
+
+    function toggleChildren(id) {
+      const children = document.getElementById(`children-${id}`);
+      const toggle = document.getElementById(`toggle-${id}`);
+      if (children) {
+        children.classList.toggle('show');
+        toggle.classList.toggle('rotated');
+      }
+    }
+
+    function updateParentSelect() {
+      const select = document.getElementById('parentId');
+      const currentId = document.getElementById('deptId').value;
+      
+      select.innerHTML = '<option value="">Nenhum (raiz)</option>';
+      
+      departamentos
+        .filter(d => d.id !== currentId && d.level !== 'subgrupo')
+        .forEach(d => {
+          const prefix = d.level === 'grupo' ? '└── ' : '';
+          select.innerHTML += `<option value="${d.id}">${prefix}${d.name}</option>`;
+        });
+    }
+
+    function openModal(dept = null) {
+      document.getElementById('deptForm').reset();
+      document.getElementById('deptId').value = '';
+      document.getElementById('modalTitle').textContent = 'Novo Departamento';
+      updateParentSelect();
+      
+      if (dept) {
+        document.getElementById('deptId').value = dept.id;
+        document.getElementById('modalTitle').textContent = 'Editar Departamento';
+        document.getElementById('code').value = dept.code || '';
+        document.getElementById('name').value = dept.name || '';
+        document.getElementById('level').value = dept.level || 'departamento';
+        document.getElementById('parentId').value = dept.parentId || '';
+        document.getElementById('marginPercent').value = dept.marginPercent || 0;
+        document.getElementById('commissionPercent').value = dept.commissionPercent || 0;
+        document.getElementById('description').value = dept.description || '';
+      }
+      
+      $('#deptModal').modal('show');
+    }
+
+    function addChild(parentId) {
+      const parent = departamentos.find(d => d.id === parentId);
+      openModal();
+      document.getElementById('parentId').value = parentId;
+      document.getElementById('level').value = parent.level === 'departamento' ? 'grupo' : 'subgrupo';
+    }
+
+    function editDepartamento(id) {
+      const dept = departamentos.find(d => d.id === id);
+      if (dept) openModal(dept);
+    }
+
+    async function saveDepartamento() {
+      const id = document.getElementById('deptId').value;
+      const data = {
+        code: document.getElementById('code').value,
+        name: document.getElementById('name').value,
+        level: document.getElementById('level').value,
+        parentId: document.getElementById('parentId').value || null,
+        marginPercent: parseFloat(document.getElementById('marginPercent').value) || 0,
+        commissionPercent: parseFloat(document.getElementById('commissionPercent').value) || 0,
+        description: document.getElementById('description').value
+      };
+
+      if (!data.name) {
+        Toast.warning('O nome é obrigatório!');
+        return;
+      }
+
+      try {
+        if (id) {
+          await axios.put(`${API_BASE}/departamentos/${id}`, data);
+        } else {
+          await axios.post(`${API_BASE}/departamentos`, data);
+        }
+        $('#deptModal').modal('hide');
+        Toast.success(id ? 'Departamento atualizado com sucesso!' : 'Departamento cadastrado com sucesso!');
+        loadDepartamentos();
+      } catch (err) {
+        console.error('Erro ao salvar:', err);
+        Toast.error('Erro ao salvar departamento');
+      }
+    }
+
+    async function deleteDepartamento(id) {
+      const confirmDelete = await Modal.delete('Deseja realmente excluir este departamento?', 'Excluir Departamento');
+      if (!confirmDelete) return;
+      
+      try {
+        await axios.delete(`${API_BASE}/departamentos/${id}`);
+        Toast.success('Departamento excluído com sucesso!');
+        loadDepartamentos();
+      } catch (err) {
+        console.error('Erro ao excluir:', err);
+        Toast.error('Erro ao excluir departamento');
+      }
+    }
+
+    // Eventos
+    document.getElementById('searchInput').addEventListener('input', debounce(loadDepartamentos, 300));
+    document.getElementById('levelFilter').addEventListener('change', loadDepartamentos);
+
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+
+    // Atalhos de teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      switch(e.key) {
+        case 'F2':
+          e.preventDefault();
+          openModal();
+          break;
+        case 'F3':
+          e.preventDefault();
+          document.getElementById('searchInput').focus();
+          break;
+        case 'F5':
+          e.preventDefault();
+          loadDepartamentos();
+          break;
+        case 'Escape':
+          if ($('#deptModal').hasClass('show')) {
+            $('#deptModal').modal('hide');
+          } else {
+            location.href = 'admin.html';
+          }
+          break;
+      }
+    });
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', loadDepartamentos);
+  </script>
+</body>
+</html>

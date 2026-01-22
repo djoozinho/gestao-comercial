@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login - Sistema de Gestão Comercial</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #6366f1;
+      --brand-dark: #4f46e5;
+      --brand-light: #818cf8;
+      --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+      --success: #10b981;
+      --danger: #ef4444;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --gray-900: #0f172a;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    body {
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+    
+    /* ========================================
+       LADO ESQUERDO - IMAGEM DE FUNDO
+       ======================================== */
+    .login-side-image {
+      flex: 1;
+      background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      overflow: hidden;
+    }
+    
+    /* Imagem de fundo personalizável */
+    .login-side-image::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: var(--bg-image, none);
+      background-size: cover;
+      background-position: center;
+      opacity: 0.4;
+      transition: opacity 0.5s ease;
+    }
+    
+    /* Overlay gradiente */
+    .login-side-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.85) 0%, rgba(139, 92, 246, 0.85) 100%);
+      pointer-events: none;
+    }
+    
+    .login-brand {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      color: #fff;
+      max-width: 500px;
+    }
+    
+    .login-logo-container {
+      width: 140px;
+      height: 140px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px auto;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .login-logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 15px;
+    }
+    
+    .login-logo-container i {
+      font-size: 60px;
+      color: #fff;
+    }
+    
+    .login-brand h1 {
+      font-size: 38px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .login-brand p {
+      font-size: 18px;
+      opacity: 0.9;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+    
+    .login-features {
+      position: relative;
+      z-index: 1;
+      margin-top: 50px;
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .login-feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .login-feature i {
+      width: 36px;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    
+    /* ========================================
+       LADO DIREITO - FORMULÁRIO
+       ======================================== */
+    .login-side-form {
+      width: 520px;
+      min-width: 420px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      position: relative;
+    }
+    
+    .login-form-header {
+      margin-bottom: 40px;
+    }
+    
+    .login-form-header h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 8px;
+    }
+    
+    .login-form-header p {
+      font-size: 15px;
+      color: var(--gray-500);
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 10px;
+    }
+    
+    .input-wrapper {
+      position: relative;
+    }
+    
+    .input-wrapper i {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-500);
+      font-size: 18px;
+      transition: color 0.2s ease;
+    }
+    
+    .input-wrapper input {
+      width: 100%;
+      padding: 16px 18px 16px 52px;
+      font-size: 15px;
+      border: 2px solid var(--gray-200);
+      border-radius: 14px;
+      transition: all 0.2s ease;
+      background: var(--gray-50);
+      color: var(--gray-800);
+    }
+    
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: var(--brand);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+    
+    .input-wrapper input:focus + i,
+    .input-wrapper:focus-within i {
+      color: var(--brand);
+    }
+    
+    .input-wrapper input::placeholder {
+      color: var(--gray-500);
+    }
+    
+    .remember-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    
+    .remember-row label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      color: var(--gray-500);
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0;
+    }
+    
+    .remember-row label input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      accent-color: var(--brand);
+    }
+    
+    .remember-row a {
+      color: var(--brand);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .remember-row a:hover {
+      text-decoration: underline;
+    }
+    
+    .btn-login {
+      width: 100%;
+      padding: 18px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--brand-gradient);
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .btn-login:hover {
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+      filter: brightness(1.05);
+    }
+    
+    .btn-login:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    .login-footer {
+      margin-top: 32px;
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--gray-100);
+    }
+    
+    .login-footer p {
+      color: var(--gray-500);
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .login-footer a {
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .login-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Alertas */
+    .alert {
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .alert-danger {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+    }
+    
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+    
+    /* Versão */
+    .version-badge {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+    
+    /* Spinner */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    /* ========================================
+       RESPONSIVO
+       ======================================== */
+    @media (max-width: 1024px) {
+      .login-side-image {
+        display: none;
+      }
+      
+      .login-side-form {
+        width: 100%;
+        min-width: 100%;
+        min-height: 100vh;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .login-side-form {
+        padding: 30px 24px;
+      }
+      
+      .login-form-header h2 {
+        font-size: 24px;
+      }
+      
+      .btn-login {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- LADO ESQUERDO - IMAGEM E BRANDING -->
+  <div class="login-side-image" id="loginSideImage">
+    <div class="login-brand">
+      <div class="login-logo-container" id="logoContainer">
+        <i class="fas fa-store"></i>
+      </div>
+      <h1 id="brandName">Gestão Comercial</h1>
+      <p id="brandSlogan">Sistema Integrado de Vendas e Gestão</p>
+    </div>
+    
+    <div class="login-features">
+      <div class="login-feature">
+        <i class="fas fa-shield-alt"></i>
+        <span>Acesso Seguro</span>
+      </div>
+      <div class="login-feature">
+        <i class="fas fa-cloud"></i>
+        <span>Na Nuvem</span>
+      </div>
+      <div class="login-feature">
+        <i class="fas fa-mobile-alt"></i>
+        <span>Multi-dispositivo</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- LADO DIREITO - FORMULÁRIO -->
+  <div class="login-side-form">
+    <div class="login-form-header">
+      <h2>Bem-vindo de volta!</h2>
+      <p>Faça login para acessar sua conta</p>
+    </div>
+    
+    <div class="alert alert-danger" id="errorAlert">
+      <i class="fas fa-exclamation-circle"></i>
+      <span id="errorMessage"></span>
+    </div>
+    
+    <div class="alert alert-success" id="successAlert">
+      <i class="fas fa-check-circle"></i>
+      <span id="successMessage"></span>
+    </div>
+    
+    <form id="loginForm">
+      <div class="form-group">
+        <label>Usuário ou E-mail</label>
+        <div class="input-wrapper">
+          <input type="text" id="username" placeholder="Digite seu usuário" required autocomplete="username" />
+          <i class="fas fa-user"></i>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Senha</label>
+        <div class="input-wrapper">
+          <input type="password" id="password" placeholder="Digite sua senha" required autocomplete="current-password" />
+          <i class="fas fa-lock"></i>
+        </div>
+      </div>
+      
+      <div class="remember-row">
+        <label>
+          <input type="checkbox" id="remember" />
+          Lembrar-me
+        </label>
+        <a href="#" onclick="showForgotPassword(); return false;">Esqueceu a senha?</a>
+      </div>
+      
+      <button type="submit" class="btn-login" id="btnLogin">
+        <i class="fas fa-sign-in-alt"></i>
+        <span>Entrar</span>
+      </button>
+    </form>
+    
+    <div class="login-footer">
+      <p>Primeiro acesso?</p>
+      <a href="#" onclick="showFirstAccess(); return false;">Solicitar credenciais ao administrador</a>
+    </div>
+    
+    <div class="version-badge">
+      Versão 1.0.0 &bull; &copy; 2026
+    </div>
+  </div>
+
+  <script src="js/toast.js"></script>
+  <script>
+    const API_BASE = '/api';
+    
+    // ========================================
+    // PERSONALIZAÇÃO / BRANDING
+    // ========================================
+    async function loadBranding() {
+      let settings = {
+        name: 'Gestão Comercial',
+        slogan: 'Sistema Integrado de Vendas e Gestão',
+        logo: null,
+        backgroundImage: null,
+        primaryColor: '#6f42c1'
+      };
+      
+      try {
+        // 1. Tentar carregar do servidor (endpoint público)
+        // Verificar se tem tenantId na URL ou salvo
+        const urlParams = new URLSearchParams(window.location.search);
+        const tenantId = urlParams.get('tenant') || localStorage.getItem('tenantId') || '';
+        
+        const brandingUrl = tenantId 
+          ? `${API_BASE}/empresa/branding/public?tenantId=${encodeURIComponent(tenantId)}`
+          : `${API_BASE}/empresa/branding/public`;
+        
+        const response = await fetch(brandingUrl);
+        
+        if (response.ok) {
+          const data = await response.json();
+          settings.name = data.fantasyName || data.companyName || settings.name;
+          settings.slogan = data.loginSlogan || settings.slogan;
+          settings.logo = data.logo || null;
+          settings.backgroundImage = data.loginBackground || null;
+          settings.primaryColor = data.primaryColor || settings.primaryColor;
+          console.log('✅ Branding carregado do servidor');
+        }
+      } catch (e) {
+        console.warn('⚠️ Não foi possível carregar branding do servidor, usando localStorage');
+        
+        // 2. Fallback: carregar do localStorage
+        try {
+          const saved = localStorage.getItem('companySettings');
+          const loginSettings = localStorage.getItem('loginSettings');
+          
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            settings.name = parsed.fantasyName || parsed.name || settings.name;
+            settings.slogan = parsed.slogan || settings.slogan;
+            settings.logo = parsed.logo || null;
+            settings.primaryColor = parsed.primaryColor || settings.primaryColor;
+          }
+          
+          if (loginSettings) {
+            const loginParsed = JSON.parse(loginSettings);
+            settings.backgroundImage = loginParsed.backgroundImage || null;
+          }
+        } catch(e2) {
+          console.warn('Erro ao carregar localStorage:', e2);
+        }
+      }
+      
+      // Aplicar as configurações na interface
+      applyBrandingSettings(settings);
+    }
+    
+    function applyBrandingSettings(settings) {
+      try {
+        // Aplicar nome da empresa
+        const brandNameEl = document.getElementById('brandName');
+        if (brandNameEl) brandNameEl.textContent = settings.name;
+        document.title = `Login - ${settings.name}`;
+        
+        // Aplicar slogan
+        const brandSloganEl = document.getElementById('brandSlogan');
+        if (brandSloganEl) brandSloganEl.textContent = settings.slogan;
+        
+        // Aplicar logo
+        const logoContainer = document.getElementById('logoContainer');
+        if (logoContainer && settings.logo) {
+          if (settings.logo.startsWith('data:image') || settings.logo.startsWith('/') || settings.logo.startsWith('http')) {
+            logoContainer.innerHTML = `<img src="${settings.logo}" alt="Logo" />`;
+          }
+        }
+        
+        // Aplicar imagem de fundo
+        const sideImage = document.getElementById('loginSideImage');
+        if (sideImage && settings.backgroundImage) {
+          if (settings.backgroundImage.startsWith('data:image') || settings.backgroundImage.startsWith('/') || settings.backgroundImage.startsWith('http')) {
+            sideImage.style.setProperty('--bg-image', `url(${settings.backgroundImage})`);
+          }
+        }
+        
+        // Aplicar cor primária
+        if (settings.primaryColor) {
+          document.documentElement.style.setProperty('--brand', settings.primaryColor);
+          document.documentElement.style.setProperty('--brand-dark', adjustColor(settings.primaryColor, -20));
+          document.documentElement.style.setProperty('--brand-light', adjustColor(settings.primaryColor, 40));
+        }
+        
+      } catch(e) {
+        console.warn('Erro ao aplicar branding:', e);
+      }
+    }
+    
+    // Função auxiliar para ajustar cores
+    function adjustColor(hex, percent) {
+      hex = hex.replace('#', '');
+      let r = parseInt(hex.substring(0, 2), 16);
+      let g = parseInt(hex.substring(2, 4), 16);
+      let b = parseInt(hex.substring(4, 6), 16);
+      r = Math.min(255, Math.max(0, r + percent));
+      g = Math.min(255, Math.max(0, g + percent));
+      b = Math.min(255, Math.max(0, b + percent));
+      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+    
+    // ========================================
+    // INICIALIZAÇÃO
+    // ========================================
+    document.addEventListener('DOMContentLoaded', function() {
+      // Carregar branding
+      loadBranding();
+      
+      // Verificar se já está logado
+      const token = localStorage.getItem('authToken');
+      const tenant = localStorage.getItem('tenantId');
+      
+      if (token && tenant) {
+        fetch(`${API_BASE}/auth/validate`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'X-Tenant-ID': tenant }
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.valid) {
+            window.location.href = '/dashboard.html';
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('tenantId');
+        });
+      }
+      
+      // Verificar usuário lembrado
+      const rememberedUser = localStorage.getItem('rememberedUser');
+      if (rememberedUser) {
+        document.getElementById('username').value = rememberedUser;
+        document.getElementById('remember').checked = true;
+      }
+    });
+    
+    // ========================================
+    // LOGIN
+    // ========================================
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const remember = document.getElementById('remember').checked;
+      const btn = document.getElementById('btnLogin');
+      
+      if (!username || !password) {
+        showError('Preencha todos os campos');
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Entrando...';
+      
+      try {
+        const response = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.token) {
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('tenantId', data.tenantId);
+          localStorage.setItem('userId', data.userId);
+          localStorage.setItem('userName', data.userName);
+          localStorage.setItem('userRole', data.role || 'user');
+          
+          if (remember) {
+            localStorage.setItem('rememberedUser', username);
+          } else {
+            localStorage.removeItem('rememberedUser');
+          }
+          
+          showSuccess('Login realizado com sucesso!');
+          
+          setTimeout(() => {
+            const role = data.role || 'user';
+            switch(role) {
+              case 'superadmin':
+                window.location.href = '/super-admin.html';
+                break;
+              case 'admin':
+                window.location.href = '/admin-empresa.html';
+                break;
+              case 'caixa':
+                window.location.href = '/pdv.html';
+                break;
+              default:
+                window.location.href = '/dashboard.html';
+            }
+          }, 800);
+        } else {
+          showError(data.error || 'Usuário ou senha inválidos');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-sign-in-alt"></i><span>Entrar</span>';
+        }
+      } catch (error) {
+        console.error('Erro ao fazer login:', error);
+        showError('Erro ao conectar com o servidor');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i><span>Entrar</span>';
+      }
+    });
+    
+    // ========================================
+    // HELPERS
+    // ========================================
+    function showError(message) {
+      const alert = document.getElementById('errorAlert');
+      document.getElementById('errorMessage').textContent = message;
+      document.getElementById('successAlert').style.display = 'none';
+      alert.style.display = 'flex';
+    }
+    
+    function showSuccess(message) {
+      const alert = document.getElementById('successAlert');
+      document.getElementById('successMessage').textContent = message;
+      document.getElementById('errorAlert').style.display = 'none';
+      alert.style.display = 'flex';
+    }
+    
+    function showForgotPassword() {
+      alert('Entre em contato com o administrador do sistema para redefinir sua senha.');
+    }
+    
+    function showFirstAccess() {
+      alert('Entre em contato com o administrador do sistema para solicitar suas credenciais de acesso.');
+    }
+  </script>
+</body>
+</html>

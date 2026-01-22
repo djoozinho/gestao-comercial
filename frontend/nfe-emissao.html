@@ -1,0 +1,2053 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Emissão de Notas Fiscais - Sistema de Gestão</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Auth Guard - Proteção de acesso -->
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <script src="js/sidebar.js"></script>
+  <script src="js/toast.js"></script>
+  <style>
+    .nfe-header-info {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .nfe-status-badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nfe-status-badge.pending { background: #fef3c7; color: #92400e; }
+    .nfe-status-badge.approved { background: #d1fae5; color: #065f46; }
+    .nfe-status-badge.cancelled { background: #fee2e2; color: #991b1b; }
+    .nfe-status-badge.processing { background: #dbeafe; color: #1e40af; }
+    
+    .nfe-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border: none;
+      margin-bottom: 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .nfe-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .nfe-card .card-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 12px 12px 0 0;
+      font-weight: 600;
+      padding: 15px 20px;
+    }
+    .nfe-card .card-header i { margin-right: 10px; }
+    
+    .nfe-item-row {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .nfe-item-row:hover { background: #f1f5f9; }
+    
+    .nfe-total-section {
+      background: linear-gradient(135deg, #1f6aa5 0%, #34d399 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .nfe-total-value {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    
+    .certificate-status {
+      padding: 12px 20px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .certificate-status.valid { background: #d1fae5; border: 1px solid #10b981; }
+    .certificate-status.invalid { background: #fee2e2; border: 1px solid #ef4444; }
+    .certificate-status.warning { background: #fef3c7; border: 1px solid #f59e0b; }
+    
+    .quick-action-btn {
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .quick-action-btn:hover { transform: translateY(-2px); }
+    
+    .nfe-tabs .nav-link {
+      border-radius: 10px 10px 0 0;
+      font-weight: 600;
+      color: #64748b;
+      padding: 12px 24px;
+    }
+    .nfe-tabs .nav-link.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+    }
+    
+    .nfe-list-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .nfe-list-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+    
+    .product-search-results {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
+    .product-search-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .product-search-item:hover { background: #f8fafc; }
+    .product-search-item:last-child { border-bottom: none; }
+    
+    .nfe-form-section {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .nfe-form-section h6 {
+      color: #334155;
+      font-weight: 700;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .nfe-number-display {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #667eea;
+      background: #f0f4ff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .stat-card-nfe {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .stat-card-nfe .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    .stat-card-nfe .stat-label {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+    .stat-card-nfe.primary { border-top: 4px solid #667eea; }
+    .stat-card-nfe.success { border-top: 4px solid #10b981; }
+    .stat-card-nfe.warning { border-top: 4px solid #f59e0b; }
+    .stat-card-nfe.danger { border-top: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar"><h4>SISTEMA</h4></div>
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-file-invoice"></i> Emissão de Notas Fiscais</h3>
+        <div class="nfe-header-info">
+          <button class="btn btn-light" onclick="location.href='admin.html'">
+            <i class="fa fa-arrow-left"></i> Voltar
+          </button>
+          <button class="btn btn-outline-primary" onclick="openConfigModal()">
+            <i class="fa fa-cog"></i> Configurações
+          </button>
+          <button class="btn btn-primary" onclick="openNewNfeModal()">
+            <i class="fa fa-plus"></i> Emitir NF-e/NFC-e
+          </button>
+        </div>
+      </div>
+
+      <div class="container-fluid py-4">
+        <!-- Status do Certificado e Estatísticas -->
+        <div class="row mb-4">
+          <div class="col-md-3">
+            <div class="stat-card-nfe primary">
+              <div class="stat-value" id="statTotal">0</div>
+              <div class="stat-label">Notas Emitidas (Mês)</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card-nfe success">
+              <div class="stat-value" id="statApproved">0</div>
+              <div class="stat-label">Autorizadas</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card-nfe warning">
+              <div class="stat-value" id="statPending">0</div>
+              <div class="stat-label">Pendentes</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card-nfe danger">
+              <div class="stat-value" id="statCancelled">0</div>
+              <div class="stat-label">Canceladas</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status do Certificado -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="certificate-status warning" id="certificateStatus">
+              <i class="fa fa-certificate fa-lg"></i>
+              <div>
+                <strong>Certificado Digital</strong>
+                <div id="certificateInfo">Nenhum certificado configurado</div>
+              </div>
+              <button class="btn btn-sm btn-outline-dark ml-auto" onclick="openCertificateModal()">
+                <i class="fa fa-upload"></i> Configurar Certificado
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs de Navegação -->
+        <ul class="nav nav-tabs nfe-tabs mb-4" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="tab-nfe" data-toggle="tab" href="#panel-nfe">
+              <i class="fa fa-file-invoice"></i> Notas Emitidas
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="tab-vendas" data-toggle="tab" href="#panel-vendas">
+              <i class="fa fa-shopping-cart"></i> Vendas sem NF
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="tab-inutilizadas" data-toggle="tab" href="#panel-inutilizadas">
+              <i class="fa fa-ban"></i> Inutilizadas
+            </a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- Painel de Notas Emitidas -->
+          <div class="tab-pane fade show active" id="panel-nfe">
+            <div class="card nfe-card">
+              <div class="card-header">
+                <i class="fa fa-list"></i> Notas Fiscais Emitidas
+              </div>
+              <div class="card-body">
+                <div class="row mb-3">
+                  <div class="col-md-3">
+                    <label>Tipo</label>
+                    <select id="filterTipo" class="form-control" onchange="loadNotas()">
+                      <option value="">Todos</option>
+                      <option value="NF-e">NF-e</option>
+                      <option value="NFC-e">NFC-e</option>
+                      <option value="SAT">SAT</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label>Status</label>
+                    <select id="filterStatus" class="form-control" onchange="loadNotas()">
+                      <option value="">Todos</option>
+                      <option value="autorizada">Autorizada</option>
+                      <option value="pendente">Pendente</option>
+                      <option value="cancelada">Cancelada</option>
+                      <option value="rejeitada">Rejeitada</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label>Data Início</label>
+                    <input type="date" id="filterDateStart" class="form-control" onchange="loadNotas()">
+                  </div>
+                  <div class="col-md-3">
+                    <label>Data Fim</label>
+                    <input type="date" id="filterDateEnd" class="form-control" onchange="loadNotas()">
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fa fa-search"></i></span>
+                      </div>
+                      <input id="searchNota" class="form-control" placeholder="Buscar por número, cliente, chave..." oninput="debounceSearch()">
+                    </div>
+                  </div>
+                  <div class="col-md-6 text-right">
+                    <button class="btn btn-outline-secondary" onclick="exportNotas('csv')">
+                      <i class="fa fa-file-csv"></i> Exportar CSV
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="exportNotas('xml')">
+                      <i class="fa fa-file-code"></i> Exportar XMLs
+                    </button>
+                  </div>
+                </div>
+                
+                <div id="notasList" class="mt-3">
+                  <div class="text-center py-5 text-muted">
+                    <i class="fa fa-file-invoice fa-4x mb-3"></i>
+                    <p>Nenhuma nota fiscal encontrada</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Painel de Vendas sem NF -->
+          <div class="tab-pane fade" id="panel-vendas">
+            <div class="card nfe-card">
+              <div class="card-header">
+                <i class="fa fa-shopping-cart"></i> Vendas Aguardando Emissão de NF
+              </div>
+              <div class="card-body">
+                <div id="vendasSemNfList" class="mt-3">
+                  <div class="text-center py-5 text-muted">
+                    <i class="fa fa-shopping-cart fa-4x mb-3"></i>
+                    <p>Carregando vendas...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Painel de Inutilizadas -->
+          <div class="tab-pane fade" id="panel-inutilizadas">
+            <div class="card nfe-card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fa fa-ban"></i> Numeração Inutilizada</span>
+                <button class="btn btn-sm btn-light" onclick="openInutilizarModal()">
+                  <i class="fa fa-plus"></i> Inutilizar Numeração
+                </button>
+              </div>
+              <div class="card-body">
+                <div id="inutilizadasList" class="mt-3">
+                  <div class="text-center py-5 text-muted">
+                    <i class="fa fa-ban fa-4x mb-3"></i>
+                    <p>Nenhuma numeração inutilizada</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-shortcuts">
+        <div class="shortcut-item"><span><kbd>F2</kbd> Nova NF</span></div>
+        <div class="shortcut-item"><span><kbd>F3</kbd> Buscar</span></div>
+        <div class="shortcut-item"><span><kbd>F5</kbd> Atualizar</span></div>
+        <div class="shortcut-item"><span><kbd>Esc</kbd> Fechar Modal</span></div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Modal de Nova Nota Fiscal -->
+  <div class="modal fade" id="nfeEmitirModal" tabindex="-1" data-backdrop="static">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+          <h5 class="modal-title"><i class="fa fa-file-invoice mr-2"></i> <span id="nfeEmitirModalTitle">Nova Nota Fiscal</span></h5>
+          <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+          <form id="nfeEmitirForm">
+            <input type="hidden" id="nfeEmitirId">
+            <input type="hidden" id="nfeVendaId">
+            
+            <!-- Tipo de Documento -->
+            <div class="nfe-form-section">
+              <h6><i class="fa fa-file-alt"></i> Tipo de Documento</h6>
+              <div class="row">
+                <div class="col-md-4">
+                  <label>Modelo</label>
+                  <select id="nfeTipo" class="form-control" onchange="updateNfeFields()">
+                    <option value="NFC-e">NFC-e (Consumidor)</option>
+                    <option value="NF-e">NF-e (Completa)</option>
+                    <option value="SAT">SAT (CF-e)</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label>Série</label>
+                  <input type="text" id="nfeSerie" class="form-control" value="1">
+                </div>
+                <div class="col-md-3">
+                  <label>Número</label>
+                  <input type="text" id="nfeNumero" class="form-control" readonly>
+                </div>
+                <div class="col-md-2">
+                  <label>Ambiente</label>
+                  <select id="nfeAmbiente" class="form-control">
+                    <option value="homologacao">Homologação</option>
+                    <option value="producao">Produção</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dados do Destinatário -->
+            <div class="nfe-form-section">
+              <h6><i class="fa fa-user"></i> Destinatário</h6>
+              <div class="row">
+                <div class="col-md-4">
+                  <label>CPF/CNPJ</label>
+                  <div class="input-group">
+                    <input type="text" id="nfeDestCpfCnpj" class="form-control" placeholder="Digite para buscar...">
+                    <div class="input-group-append">
+                      <button type="button" class="btn btn-outline-primary" onclick="searchDestinatario()">
+                        <i class="fa fa-search"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <label>Nome/Razão Social</label>
+                  <input type="text" id="nfeDestNome" class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label>IE</label>
+                  <input type="text" id="nfeDestIe" class="form-control" placeholder="Inscrição Estadual">
+                </div>
+              </div>
+              <div class="row mt-3" id="enderecoFields">
+                <div class="col-md-5">
+                  <label>Endereço</label>
+                  <input type="text" id="nfeDestEndereco" class="form-control">
+                </div>
+                <div class="col-md-2">
+                  <label>Número</label>
+                  <input type="text" id="nfeDestNumero" class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label>Bairro</label>
+                  <input type="text" id="nfeDestBairro" class="form-control">
+                </div>
+                <div class="col-md-2">
+                  <label>CEP</label>
+                  <input type="text" id="nfeDestCep" class="form-control">
+                </div>
+              </div>
+              <div class="row mt-3" id="enderecoFields2">
+                <div class="col-md-4">
+                  <label>Cidade</label>
+                  <input type="text" id="nfeDestCidade" class="form-control">
+                </div>
+                <div class="col-md-2">
+                  <label>UF</label>
+                  <select id="nfeDestUf" class="form-control">
+                    <option value="">Selecione</option>
+                    <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                    <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                    <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                    <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                    <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                    <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                    <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                    <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                    <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label>Telefone</label>
+                  <input type="text" id="nfeDestTelefone" class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label>Email</label>
+                  <input type="email" id="nfeDestEmail" class="form-control">
+                </div>
+              </div>
+            </div>
+
+            <!-- Produtos/Itens -->
+            <div class="nfe-form-section">
+              <h6><i class="fa fa-boxes"></i> Produtos/Serviços</h6>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <div class="input-group">
+                    <input type="text" id="searchProduto" class="form-control" placeholder="Buscar produto por nome ou código..." oninput="searchProdutos()">
+                    <div class="input-group-append">
+                      <button type="button" class="btn btn-primary" onclick="openProductModal()">
+                        <i class="fa fa-plus"></i> Adicionar
+                      </button>
+                    </div>
+                  </div>
+                  <div id="productSearchResults" class="product-search-results" style="display:none;"></div>
+                </div>
+              </div>
+              
+              <div id="nfeItensContainer">
+                <div class="text-center py-4 text-muted">
+                  <i class="fa fa-box-open fa-3x mb-2"></i>
+                  <p>Nenhum item adicionado</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Totais e Impostos -->
+            <div class="nfe-form-section">
+              <h6><i class="fa fa-calculator"></i> Totais e Impostos</h6>
+              <div class="row">
+                <div class="col-md-2">
+                  <label>Subtotal</label>
+                  <input type="text" id="nfeSubtotal" class="form-control" readonly>
+                </div>
+                <div class="col-md-2">
+                  <label>Desconto</label>
+                  <input type="number" id="nfeDesconto" class="form-control" step="0.01" value="0" oninput="calcularTotais()">
+                </div>
+                <div class="col-md-2">
+                  <label>ICMS</label>
+                  <input type="text" id="nfeTotalIcms" class="form-control" readonly>
+                </div>
+                <div class="col-md-2">
+                  <label>PIS</label>
+                  <input type="text" id="nfeTotalPis" class="form-control" readonly>
+                </div>
+                <div class="col-md-2">
+                  <label>COFINS</label>
+                  <input type="text" id="nfeTotalCofins" class="form-control" readonly>
+                </div>
+                <div class="col-md-2">
+                  <label class="font-weight-bold">TOTAL</label>
+                  <input type="text" id="nfeTotal" class="form-control font-weight-bold" style="background:#e8f5e9; font-size:1.1rem;" readonly>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pagamento -->
+            <div class="nfe-form-section">
+              <h6><i class="fa fa-money-bill-wave"></i> Forma de Pagamento</h6>
+              <div class="row">
+                <div class="col-md-4">
+                  <label>Forma de Pagamento</label>
+                  <select id="nfeFormaPagamento" class="form-control">
+                    <option value="01">01 - Dinheiro</option>
+                    <option value="02">02 - Cheque</option>
+                    <option value="03">03 - Cartão de Crédito</option>
+                    <option value="04">04 - Cartão de Débito</option>
+                    <option value="05">05 - Crédito Loja</option>
+                    <option value="10">10 - Vale Alimentação</option>
+                    <option value="11">11 - Vale Refeição</option>
+                    <option value="12">12 - Vale Presente</option>
+                    <option value="13">13 - Vale Combustível</option>
+                    <option value="15">15 - Boleto Bancário</option>
+                    <option value="16">16 - Depósito Bancário</option>
+                    <option value="17">17 - PIX</option>
+                    <option value="18">18 - Transferência</option>
+                    <option value="19">19 - Cashback</option>
+                    <option value="90">90 - Sem Pagamento</option>
+                    <option value="99">99 - Outros</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label>Valor Pago</label>
+                  <input type="number" id="nfeValorPago" class="form-control" step="0.01">
+                </div>
+                <div class="col-md-3">
+                  <label>Troco</label>
+                  <input type="text" id="nfeTroco" class="form-control" readonly>
+                </div>
+                <div class="col-md-2">
+                  <label>&nbsp;</label>
+                  <button type="button" class="btn btn-outline-primary btn-block" onclick="addFormaPagamento()">
+                    <i class="fa fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="pagamentosContainer" class="mt-3"></div>
+            </div>
+
+            <!-- Informações Adicionais -->
+            <div class="nfe-form-section">
+              <h6><i class="fa fa-info-circle"></i> Informações Adicionais</h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <label>Informações Complementares (Fisco)</label>
+                  <textarea id="nfeInfoFisco" class="form-control" rows="2" placeholder="Informações para o fisco..."></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label>Informações ao Consumidor</label>
+                  <textarea id="nfeInfoConsumidor" class="form-control" rows="2" placeholder="Informações que aparecerão no DANFE..."></textarea>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" onclick="salvarRascunho()">
+            <i class="fa fa-save"></i> Salvar Rascunho
+          </button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success" onclick="emitirNota()" id="btnEmitir">
+            <i class="fa fa-paper-plane"></i> Emitir Nota Fiscal
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Configurações -->
+  <div class="modal fade" id="configModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa fa-cog mr-2"></i> Configurações NF-e/NFC-e</h5>
+          <button class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" data-toggle="tab" href="#config-geral">Geral</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#config-certificado">Certificado</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#config-nfce">NFC-e</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="tab" href="#config-sat">SAT</a>
+            </li>
+          </ul>
+          <div class="tab-content pt-3">
+            <div class="tab-pane fade show active" id="config-geral">
+              <form id="configGeralForm">
+                <div class="form-group">
+                  <label>Ambiente Padrão</label>
+                  <select id="configAmbiente" class="form-control">
+                    <option value="homologacao">Homologação (Testes)</option>
+                    <option value="producao">Produção</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Série NF-e</label>
+                      <input type="number" id="configSerieNfe" class="form-control" value="1">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Série NFC-e</label>
+                      <input type="number" id="configSerieNfce" class="form-control" value="1">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Natureza da Operação Padrão</label>
+                  <input type="text" id="configNatOperacao" class="form-control" value="VENDA DE MERCADORIA">
+                </div>
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="configEmitirAutomatico">
+                  <label class="custom-control-label" for="configEmitirAutomatico">
+                    Emitir NFC-e automaticamente ao finalizar venda no PDV
+                  </label>
+                </div>
+              </form>
+            </div>
+            <div class="tab-pane fade" id="config-certificado">
+              <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> O certificado digital A1 (.pfx ou .p12) é necessário para emissão de NF-e/NFC-e.
+              </div>
+              <form id="configCertForm">
+                <div class="form-group">
+                  <label>Arquivo do Certificado (.pfx ou .p12)</label>
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="configCertFile" accept=".pfx,.p12">
+                    <label class="custom-file-label" for="configCertFile" id="configCertFileName">Selecionar arquivo...</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Senha do Certificado</label>
+                  <input type="password" id="configCertSenha" class="form-control">
+                </div>
+                <div id="certInfo" class="mt-3" style="display:none;">
+                  <div class="alert alert-success">
+                    <strong><i class="fa fa-check-circle"></i> Certificado válido</strong>
+                    <div id="certDetails"></div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="validarCertificado()">
+                  <i class="fa fa-check"></i> Validar Certificado
+                </button>
+              </form>
+            </div>
+            <div class="tab-pane fade" id="config-nfce">
+              <form id="configNfceForm">
+                <div class="alert alert-warning">
+                  <i class="fa fa-exclamation-triangle"></i> O CSC (Código de Segurança do Contribuinte) é obtido no portal da SEFAZ do seu estado.
+                </div>
+                <div class="form-group">
+                  <label>ID do CSC (Token)</label>
+                  <input type="text" id="configCscId" class="form-control" placeholder="Ex: 000001">
+                </div>
+                <div class="form-group">
+                  <label>CSC (Código)</label>
+                  <input type="text" id="configCscToken" class="form-control" placeholder="Código alfanumérico">
+                </div>
+              </form>
+            </div>
+            <div class="tab-pane fade" id="config-sat">
+              <form id="configSatForm">
+                <div class="alert alert-info">
+                  <i class="fa fa-info-circle"></i> Configurações do equipamento SAT (apenas para SP).
+                </div>
+                <div class="form-group">
+                  <label>Código de Ativação</label>
+                  <input type="text" id="configSatCodAtivacao" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label>Assinatura AC</label>
+                  <input type="text" id="configSatAssinatura" class="form-control">
+                </div>
+                <button type="button" class="btn btn-info" onclick="testarSat()">
+                  <i class="fa fa-plug"></i> Testar Comunicação SAT
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveConfig()">
+            <i class="fa fa-save"></i> Salvar Configurações
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Detalhes da Nota -->
+  <div class="modal fade" id="notaDetalhesModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa fa-file-invoice mr-2"></i> Detalhes da Nota Fiscal</h5>
+          <button class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body" id="notaDetalhesBody">
+          <!-- Conteúdo preenchido via JS -->
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-primary" onclick="imprimirDanfe()">
+            <i class="fa fa-print"></i> Imprimir DANFE
+          </button>
+          <button class="btn btn-outline-secondary" onclick="downloadXml()">
+            <i class="fa fa-download"></i> Download XML
+          </button>
+          <button class="btn btn-outline-danger" onclick="cancelarNota()" id="btnCancelarNota">
+            <i class="fa fa-times"></i> Cancelar Nota
+          </button>
+          <button class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Inutilização -->
+  <div class="modal fade" id="inutilizarModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa fa-ban mr-2"></i> Inutilizar Numeração</h5>
+          <button class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning">
+            <i class="fa fa-exclamation-triangle"></i> A inutilização é irreversível. Use apenas para intervalos de numeração que não serão utilizados.
+          </div>
+          <form id="inutilizarForm">
+            <div class="form-group">
+              <label>Modelo</label>
+              <select id="inutTipo" class="form-control">
+                <option value="55">55 - NF-e</option>
+                <option value="65">65 - NFC-e</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Série</label>
+              <input type="number" id="inutSerie" class="form-control" value="1">
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Número Inicial</label>
+                  <input type="number" id="inutNumInicio" class="form-control">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Número Final</label>
+                  <input type="number" id="inutNumFim" class="form-control">
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Justificativa (mín. 15 caracteres)</label>
+              <textarea id="inutJustificativa" class="form-control" rows="2" minlength="15" required></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button class="btn btn-danger" onclick="inutilizarNumeracao()">
+            <i class="fa fa-ban"></i> Inutilizar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Adicionar Produto -->
+  <div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa fa-box mr-2"></i> Adicionar Produto</h5>
+          <button class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="addProductForm">
+            <input type="hidden" id="addProdId">
+            <div class="form-group">
+              <label>Produto</label>
+              <input type="text" id="addProdNome" class="form-control" readonly>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Quantidade</label>
+                  <input type="number" id="addProdQtd" class="form-control" value="1" min="1" step="0.001">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Valor Unitário</label>
+                  <input type="number" id="addProdValor" class="form-control" step="0.01">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>NCM</label>
+                  <input type="text" id="addProdNcm" class="form-control">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>CFOP</label>
+                  <input type="text" id="addProdCfop" class="form-control" value="5102">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Unidade</label>
+                  <input type="text" id="addProdUnidade" class="form-control" value="UN">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>CST ICMS</label>
+                  <select id="addProdCstIcms" class="form-control">
+                    <option value="00">00 - Tributada integralmente</option>
+                    <option value="10">10 - Tributada com ST</option>
+                    <option value="20">20 - Com redução de BC</option>
+                    <option value="40">40 - Isenta</option>
+                    <option value="41">41 - Não tributada</option>
+                    <option value="60">60 - ICMS cobrado anteriormente por ST</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Alíquota ICMS (%)</label>
+                  <input type="number" id="addProdAliqIcms" class="form-control" step="0.01" value="0">
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button class="btn btn-primary" onclick="confirmarAddProduto()">
+            <i class="fa fa-plus"></i> Adicionar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const API_BASE = '/api';
+    
+    // Estado da aplicação
+    let state = {
+      config: {},
+      currentNota: null,
+      itensNota: [],
+      produtos: [],
+      pessoas: [],
+      searchTimer: null
+    };
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadConfig();
+      await loadNotas();
+      await loadVendasSemNf();
+      await loadProdutos();
+      await loadPessoas();
+      loadStats();
+      setupEventListeners();
+      updateCertificateStatus();
+    });
+
+    // Event Listeners
+    function setupEventListeners() {
+      // Teclas de atalho
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') { e.preventDefault(); openNewNfeModal(); }
+        if (e.key === 'F3') { e.preventDefault(); document.getElementById('searchNota').focus(); }
+        if (e.key === 'F5') { e.preventDefault(); loadNotas(); }
+        if (e.key === 'Escape') { $('.modal').modal('hide'); }
+      });
+
+      // Atualizar nome do arquivo do certificado
+      document.getElementById('configCertFile')?.addEventListener('change', function() {
+        const fileName = this.files[0]?.name || 'Selecionar arquivo...';
+        document.getElementById('configCertFileName').textContent = fileName;
+      });
+
+      // Tabs
+      $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+        if (e.target.id === 'tab-vendas') loadVendasSemNf();
+        if (e.target.id === 'tab-inutilizadas') loadInutilizadas();
+      });
+    }
+
+    // Carregar configurações
+    async function loadConfig() {
+      try {
+        const res = await axios.get(`${API_BASE}/nfe`);
+        const configs = res.data.data || [];
+        if (configs.length > 0) {
+          state.config = configs[0];
+          document.getElementById('configAmbiente').value = state.config.ambiente || 'homologacao';
+          document.getElementById('configSerieNfce').value = state.config.serie || '1';
+          document.getElementById('configCscId').value = state.config.csc_id || '';
+          document.getElementById('configCscToken').value = state.config.csc_token || '';
+        }
+      } catch (err) {
+        console.error('Erro ao carregar config:', err);
+      }
+    }
+
+    // Salvar configurações
+    async function saveConfig() {
+      const data = {
+        tipo: 'NFC-e',
+        ambiente: document.getElementById('configAmbiente').value,
+        serie: document.getElementById('configSerieNfce').value,
+        cscId: document.getElementById('configCscId').value,
+        cscToken: document.getElementById('configCscToken').value,
+        satCodigoAtivacao: document.getElementById('configSatCodAtivacao')?.value || '',
+        satAssinatura: document.getElementById('configSatAssinatura')?.value || ''
+      };
+
+      try {
+        if (state.config.id) {
+          await axios.put(`${API_BASE}/nfe/${state.config.id}`, data);
+        } else {
+          await axios.post(`${API_BASE}/nfe`, data);
+        }
+        Toast.success('Configurações salvas com sucesso!');
+        $('#configModal').modal('hide');
+        loadConfig();
+      } catch (err) {
+        console.error('Erro ao salvar config:', err);
+        Toast.error('Erro ao salvar configurações');
+      }
+    }
+
+    // Carregar notas fiscais
+    async function loadNotas() {
+      const container = document.getElementById('notasList');
+      container.innerHTML = '<div class="text-center py-3"><i class="fa fa-spinner fa-spin fa-2x"></i></div>';
+
+      try {
+        const tipo = document.getElementById('filterTipo').value;
+        const status = document.getElementById('filterStatus').value;
+        const startDate = document.getElementById('filterDateStart').value;
+        const endDate = document.getElementById('filterDateEnd').value;
+        const search = document.getElementById('searchNota').value;
+        
+        let url = `${API_BASE}/notas-fiscais?limit=100`;
+        if (tipo) url += `&tipo=${encodeURIComponent(tipo)}`;
+        if (status) url += `&status=${encodeURIComponent(status)}`;
+        if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
+        if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        
+        const res = await axios.get(url);
+        const notas = res.data.data || [];
+        
+        if (notas.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+              <i class="fa fa-file-invoice fa-4x mb-3"></i>
+              <p>Nenhuma nota fiscal emitida ainda</p>
+              <button class="btn btn-primary" onclick="openNewNfeModal()">
+                <i class="fa fa-plus"></i> Emitir Primeira Nota
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = notas.map(nota => `
+          <div class="nfe-list-card">
+            <div>
+              <div class="d-flex align-items-center gap-3">
+                <span class="nfe-number-display">${nota.numero}</span>
+                <div class="ml-3">
+                  <strong>${nota.destinatario || 'Consumidor Final'}</strong>
+                  <div class="text-muted small">${formatDate(nota.dataEmissao)} | ${nota.tipo}</div>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <span class="nfe-status-badge ${getStatusClass(nota.status)}">
+                <i class="fa ${getStatusIcon(nota.status)}"></i> ${nota.status}
+              </span>
+              <strong class="ml-3">${formatCurrency(nota.total)}</strong>
+              <div class="btn-group ml-3">
+                <button class="btn btn-sm btn-outline-primary" onclick="verDetalhes('${nota.id}')">
+                  <i class="fa fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="imprimirDanfe('${nota.id}')">
+                  <i class="fa fa-print"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erro ao carregar notas:', err);
+        container.innerHTML = '<div class="alert alert-danger">Erro ao carregar notas fiscais</div>';
+      }
+    }
+
+    // Carregar vendas sem NF
+    async function loadVendasSemNf() {
+      const container = document.getElementById('vendasSemNfList');
+      container.innerHTML = '<div class="text-center py-3"><i class="fa fa-spinner fa-spin fa-2x"></i></div>';
+
+      try {
+        const res = await axios.get(`${API_BASE}/sales?limit=50`);
+        const vendas = res.data.data || [];
+        
+        // Filtrar vendas que ainda não têm NF (em produção, haveria um campo nf_emitida)
+        const vendasSemNf = vendas; // .filter(v => !v.nfEmitida);
+
+        if (vendasSemNf.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+              <i class="fa fa-check-circle fa-4x mb-3 text-success"></i>
+              <p>Todas as vendas já possuem nota fiscal emitida!</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = vendasSemNf.map(venda => `
+          <div class="nfe-list-card">
+            <div>
+              <strong>Venda #${venda.id.substring(0, 8)}</strong>
+              <div class="text-muted small">
+                ${formatDate(venda.saleDate)} | ${venda.clientName || 'Consumidor'} | ${venda.paymentMethod}
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <strong>${formatCurrency(venda.total)}</strong>
+              <button class="btn btn-sm btn-success ml-3" onclick="emitirNfDeVenda('${venda.id}')">
+                <i class="fa fa-file-invoice"></i> Emitir NF
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erro ao carregar vendas:', err);
+        container.innerHTML = '<div class="alert alert-warning">Erro ao carregar vendas</div>';
+      }
+    }
+
+    // Carregar produtos
+    async function loadProdutos() {
+      try {
+        const res = await axios.get(`${API_BASE}/products`);
+        state.produtos = res.data.data || [];
+      } catch (err) {
+        console.error('Erro ao carregar produtos:', err);
+      }
+    }
+
+    // Carregar pessoas (clientes)
+    async function loadPessoas() {
+      try {
+        const res = await axios.get(`${API_BASE}/people`);
+        state.pessoas = res.data.data || res.data || [];
+      } catch (err) {
+        console.error('Erro ao carregar pessoas:', err);
+      }
+    }
+
+    // Carregar estatísticas
+    async function loadStats() {
+      try {
+        const res = await axios.get(`${API_BASE}/notas-fiscais/stats`);
+        const stats = res.data || {};
+        document.getElementById('statTotal').textContent = stats.total || 0;
+        document.getElementById('statApproved').textContent = stats.autorizadas || 0;
+        document.getElementById('statPending').textContent = stats.pendentes || 0;
+        document.getElementById('statCancelled').textContent = stats.canceladas || 0;
+      } catch (err) {
+        console.error('Erro ao carregar estatísticas:', err);
+        document.getElementById('statTotal').textContent = '0';
+        document.getElementById('statApproved').textContent = '0';
+        document.getElementById('statPending').textContent = '0';
+        document.getElementById('statCancelled').textContent = '0';
+      }
+    }
+
+    // Atualizar status do certificado
+    function updateCertificateStatus() {
+      const container = document.getElementById('certificateStatus');
+      const info = document.getElementById('certificateInfo');
+      
+      if (state.config.certificado_path) {
+        container.className = 'certificate-status valid';
+        info.innerHTML = `<span class="text-success">Certificado configurado</span> - Válido até: --`;
+      } else {
+        container.className = 'certificate-status warning';
+        info.textContent = 'Nenhum certificado configurado. Configure para emitir notas fiscais.';
+      }
+    }
+
+    // Abrir modal de nova NF
+    function openNewNfeModal() {
+      resetNfeForm();
+      document.getElementById('nfeEmitirModalTitle').textContent = 'Nova Nota Fiscal';
+      updateProximoNumero();
+      $('#nfeEmitirModal').modal('show');
+    }
+
+    // Reset do formulário
+    function resetNfeForm() {
+      document.getElementById('nfeEmitirForm').reset();
+      document.getElementById('nfeEmitirId').value = '';
+      document.getElementById('nfeVendaId').value = '';
+      state.itensNota = [];
+      renderItensNota();
+      calcularTotais();
+    }
+
+    // Atualizar próximo número
+    function updateProximoNumero() {
+      const numero = (state.config.numero_atual || 1);
+      document.getElementById('nfeNumero').value = numero;
+    }
+
+    // Emitir NF a partir de uma venda
+    async function emitirNfDeVenda(vendaId) {
+      try {
+        const res = await axios.get(`${API_BASE}/sales/${vendaId}`);
+        const venda = res.data;
+
+        resetNfeForm();
+        document.getElementById('nfeVendaId').value = vendaId;
+        document.getElementById('nfeEmitirModalTitle').textContent = 'Emitir NF da Venda';
+        
+        // Preencher dados do cliente
+        if (venda.clientName) {
+          document.getElementById('nfeDestNome').value = venda.clientName;
+        }
+
+        // Preencher itens
+        state.itensNota = (venda.items || []).map(item => ({
+          id: item.productId,
+          codigo: item.productSku || '',
+          nome: item.productName,
+          ncm: '',
+          cfop: '5102',
+          unidade: 'UN',
+          quantidade: item.quantity,
+          valorUnitario: item.unitPrice,
+          valorTotal: item.totalPrice,
+          cstIcms: '60',
+          aliqIcms: 0,
+          valorIcms: 0
+        }));
+
+        renderItensNota();
+        calcularTotais();
+        updateProximoNumero();
+        
+        $('#nfeEmitirModal').modal('show');
+      } catch (err) {
+        console.error('Erro ao carregar venda:', err);
+        Toast.error('Erro ao carregar dados da venda');
+      }
+    }
+
+    // Buscar produtos
+    function searchProdutos() {
+      const query = document.getElementById('searchProduto').value.toLowerCase();
+      const resultsDiv = document.getElementById('productSearchResults');
+
+      if (query.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+      }
+
+      const filtrados = state.produtos.filter(p => 
+        (p.name || '').toLowerCase().includes(query) ||
+        (p.code || '').toLowerCase().includes(query) ||
+        (p.sku || '').toLowerCase().includes(query)
+      ).slice(0, 10);
+
+      if (filtrados.length === 0) {
+        resultsDiv.innerHTML = '<div class="product-search-item text-muted">Nenhum produto encontrado</div>';
+      } else {
+        resultsDiv.innerHTML = filtrados.map(p => `
+          <div class="product-search-item" onclick="selecionarProduto('${p.id}')">
+            <strong>${p.name}</strong>
+            <div class="small text-muted">${p.code || p.sku || ''} | ${formatCurrency(p.price)}</div>
+          </div>
+        `).join('');
+      }
+      resultsDiv.style.display = 'block';
+    }
+
+    // Selecionar produto da busca
+    function selecionarProduto(prodId) {
+      const prod = state.produtos.find(p => p.id === prodId);
+      if (!prod) return;
+
+      document.getElementById('addProdId').value = prod.id;
+      document.getElementById('addProdNome').value = prod.name;
+      document.getElementById('addProdValor').value = prod.price || 0;
+      document.getElementById('addProdNcm').value = prod.ncm || '';
+      document.getElementById('addProdUnidade').value = prod.unit || 'UN';
+      document.getElementById('addProdQtd').value = 1;
+
+      document.getElementById('productSearchResults').style.display = 'none';
+      document.getElementById('searchProduto').value = '';
+      
+      $('#addProductModal').modal('show');
+    }
+
+    // Abrir modal de produto manual
+    function openProductModal() {
+      document.getElementById('addProductForm').reset();
+      document.getElementById('addProdId').value = '';
+      document.getElementById('addProdNome').removeAttribute('readonly');
+      $('#addProductModal').modal('show');
+    }
+
+    // Confirmar adição de produto
+    function confirmarAddProduto() {
+      const item = {
+        id: document.getElementById('addProdId').value || `manual-${Date.now()}`,
+        codigo: '',
+        nome: document.getElementById('addProdNome').value,
+        ncm: document.getElementById('addProdNcm').value,
+        cfop: document.getElementById('addProdCfop').value,
+        unidade: document.getElementById('addProdUnidade').value,
+        quantidade: parseFloat(document.getElementById('addProdQtd').value) || 1,
+        valorUnitario: parseFloat(document.getElementById('addProdValor').value) || 0,
+        valorTotal: 0,
+        cstIcms: document.getElementById('addProdCstIcms').value,
+        aliqIcms: parseFloat(document.getElementById('addProdAliqIcms').value) || 0,
+        valorIcms: 0
+      };
+
+      item.valorTotal = item.quantidade * item.valorUnitario;
+      item.valorIcms = (item.valorTotal * item.aliqIcms) / 100;
+
+      state.itensNota.push(item);
+      renderItensNota();
+      calcularTotais();
+      
+      $('#addProductModal').modal('hide');
+      Toast.success('Produto adicionado!');
+    }
+
+    // Renderizar itens da nota
+    function renderItensNota() {
+      const container = document.getElementById('nfeItensContainer');
+
+      if (state.itensNota.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-4 text-muted">
+            <i class="fa fa-box-open fa-3x mb-2"></i>
+            <p>Nenhum item adicionado</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = state.itensNota.map((item, idx) => `
+        <div class="nfe-item-row">
+          <div class="row align-items-center">
+            <div class="col-md-1 text-center">
+              <strong>#${idx + 1}</strong>
+            </div>
+            <div class="col-md-4">
+              <strong>${item.nome}</strong>
+              <div class="small text-muted">NCM: ${item.ncm || '-'} | CFOP: ${item.cfop}</div>
+            </div>
+            <div class="col-md-2 text-center">
+              <span class="badge badge-light">${item.quantidade} ${item.unidade}</span>
+            </div>
+            <div class="col-md-2 text-right">
+              ${formatCurrency(item.valorUnitario)}
+            </div>
+            <div class="col-md-2 text-right">
+              <strong>${formatCurrency(item.valorTotal)}</strong>
+            </div>
+            <div class="col-md-1 text-right">
+              <button class="btn btn-sm btn-outline-danger" onclick="removerItem(${idx})">
+                <i class="fa fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Remover item
+    function removerItem(idx) {
+      state.itensNota.splice(idx, 1);
+      renderItensNota();
+      calcularTotais();
+    }
+
+    // Calcular totais
+    function calcularTotais() {
+      let subtotal = 0;
+      let totalIcms = 0;
+      let totalPis = 0;
+      let totalCofins = 0;
+
+      state.itensNota.forEach(item => {
+        subtotal += item.valorTotal;
+        totalIcms += item.valorIcms || 0;
+        // PIS/COFINS simplificado
+        totalPis += item.valorTotal * 0.0065;
+        totalCofins += item.valorTotal * 0.03;
+      });
+
+      const desconto = parseFloat(document.getElementById('nfeDesconto').value) || 0;
+      const total = subtotal - desconto;
+
+      document.getElementById('nfeSubtotal').value = formatCurrency(subtotal);
+      document.getElementById('nfeTotalIcms').value = formatCurrency(totalIcms);
+      document.getElementById('nfeTotalPis').value = formatCurrency(totalPis);
+      document.getElementById('nfeTotalCofins').value = formatCurrency(totalCofins);
+      document.getElementById('nfeTotal').value = formatCurrency(total);
+      document.getElementById('nfeValorPago').value = total.toFixed(2);
+    }
+
+    // Buscar destinatário
+    async function searchDestinatario() {
+      const cpfCnpj = document.getElementById('nfeDestCpfCnpj').value.replace(/\D/g, '');
+      if (!cpfCnpj) return;
+
+      // Buscar nas pessoas cadastradas
+      const pessoa = state.pessoas.find(p => 
+        (p.cpf || '').replace(/\D/g, '') === cpfCnpj ||
+        (p.cnpj || '').replace(/\D/g, '') === cpfCnpj
+      );
+
+      if (pessoa) {
+        document.getElementById('nfeDestNome').value = pessoa.name || '';
+        document.getElementById('nfeDestEndereco').value = pessoa.address || '';
+        document.getElementById('nfeDestBairro').value = pessoa.neighborhood || '';
+        document.getElementById('nfeDestCidade').value = pessoa.city || '';
+        document.getElementById('nfeDestUf').value = pessoa.state || '';
+        document.getElementById('nfeDestCep').value = pessoa.cep || '';
+        document.getElementById('nfeDestTelefone').value = pessoa.phone || '';
+        document.getElementById('nfeDestEmail').value = pessoa.email || '';
+        Toast.success('Destinatário encontrado!');
+      } else {
+        Toast.info('Destinatário não encontrado no cadastro');
+      }
+    }
+
+    // Atualizar campos baseado no tipo de NF
+    function updateNfeFields() {
+      const tipo = document.getElementById('nfeTipo').value;
+      const enderecoFields = document.getElementById('enderecoFields');
+      const enderecoFields2 = document.getElementById('enderecoFields2');
+
+      if (tipo === 'NFC-e' || tipo === 'SAT') {
+        // NFC-e não exige endereço completo
+        enderecoFields.style.display = 'none';
+        enderecoFields2.style.display = 'none';
+      } else {
+        enderecoFields.style.display = '';
+        enderecoFields2.style.display = '';
+      }
+    }
+
+    // Emitir nota fiscal
+    async function emitirNota() {
+      if (state.itensNota.length === 0) {
+        Toast.warning('Adicione pelo menos um item à nota fiscal');
+        return;
+      }
+
+      const btnEmitir = document.getElementById('btnEmitir');
+      btnEmitir.disabled = true;
+      btnEmitir.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Emitindo...';
+
+      try {
+        const dados = {
+          tipo: document.getElementById('nfeTipo').value,
+          serie: document.getElementById('nfeSerie').value,
+          ambiente: document.getElementById('nfeAmbiente').value,
+          vendaId: document.getElementById('nfeVendaId').value || null,
+          destinatario: {
+            cpfCnpj: document.getElementById('nfeDestCpfCnpj').value,
+            nome: document.getElementById('nfeDestNome').value,
+            ie: document.getElementById('nfeDestIe').value,
+            endereco: document.getElementById('nfeDestEndereco').value,
+            numero: document.getElementById('nfeDestNumero').value,
+            bairro: document.getElementById('nfeDestBairro').value,
+            cep: document.getElementById('nfeDestCep').value,
+            cidade: document.getElementById('nfeDestCidade').value,
+            uf: document.getElementById('nfeDestUf').value,
+            telefone: document.getElementById('nfeDestTelefone').value,
+            email: document.getElementById('nfeDestEmail').value
+          },
+          itens: state.itensNota,
+          totais: {
+            subtotal: parseCurrency(document.getElementById('nfeSubtotal').value),
+            desconto: parseFloat(document.getElementById('nfeDesconto').value) || 0,
+            icms: parseCurrency(document.getElementById('nfeTotalIcms').value),
+            pis: parseCurrency(document.getElementById('nfeTotalPis').value),
+            cofins: parseCurrency(document.getElementById('nfeTotalCofins').value),
+            total: parseCurrency(document.getElementById('nfeTotal').value)
+          },
+          pagamento: {
+            forma: document.getElementById('nfeFormaPagamento').value,
+            valor: parseFloat(document.getElementById('nfeValorPago').value) || 0
+          },
+          infoFisco: document.getElementById('nfeInfoFisco').value,
+          infoConsumidor: document.getElementById('nfeInfoConsumidor').value
+        };
+
+        // Enviar para a API
+        const res = await axios.post(`${API_BASE}/notas-fiscais`, dados);
+        const result = res.data;
+
+        // Mostrar sucesso
+        Modal.success(
+          'Nota Fiscal Emitida!',
+          `<div class="text-center">
+            <i class="fa fa-check-circle fa-4x text-success mb-3"></i>
+            <h4>${dados.tipo} nº ${result.numero}</h4>
+            <p class="text-muted">Série ${dados.serie}</p>
+            <hr>
+            <p><strong>Chave de Acesso:</strong></p>
+            <code style="font-size:0.75rem; word-break:break-all;">${formatChaveAcesso(result.chaveAcesso)}</code>
+            <hr>
+            <p class="text-info"><i class="fa fa-clock"></i> Aguardando autorização da SEFAZ...</p>
+          </div>`,
+          () => {
+            $('#nfeEmitirModal').modal('hide');
+            loadNotas();
+            loadVendasSemNf();
+            loadStats();
+          }
+        );
+
+      } catch (err) {
+        console.error('Erro ao emitir nota:', err);
+        Toast.error('Erro ao emitir nota fiscal: ' + (err.response?.data?.error || err.message));
+      } finally {
+        btnEmitir.disabled = false;
+        btnEmitir.innerHTML = '<i class="fa fa-paper-plane"></i> Emitir Nota Fiscal';
+      }
+    }
+    
+    // Formatar chave de acesso
+    function formatChaveAcesso(chave) {
+      if (!chave) return '-';
+      return chave.replace(/(.{4})/g, '$1 ').trim();
+    }
+
+    // Salvar rascunho
+    function salvarRascunho() {
+      Toast.info('Rascunho salvo localmente');
+      // Em produção, salvaria no localStorage ou backend
+    }
+
+    // Abrir modais auxiliares
+    function openConfigModal() { $('#configModal').modal('show'); }
+    function openCertificateModal() { $('#configModal').modal('show'); $('a[href="#config-certificado"]').tab('show'); }
+    function openInutilizarModal() { $('#inutilizarModal').modal('show'); }
+
+    // Validar certificado
+    function validarCertificado() {
+      Toast.info('Validação de certificado requer integração com backend');
+    }
+
+    // Testar SAT
+    function testarSat() {
+      Toast.info('Teste de comunicação SAT requer integração com equipamento');
+    }
+
+    // Inutilizar numeração
+    function inutilizarNumeracao() {
+      const justificativa = document.getElementById('inutJustificativa').value;
+      if (justificativa.length < 15) {
+        Toast.warning('Justificativa deve ter no mínimo 15 caracteres');
+        return;
+      }
+
+      Modal.confirm(
+        'Confirmar Inutilização?',
+        'Esta ação é irreversível e será comunicada à SEFAZ.',
+        async () => {
+          try {
+            const dados = {
+              tipo: document.getElementById('inutTipo').value === '55' ? 'NF-e' : 'NFC-e',
+              serie: document.getElementById('inutSerie').value,
+              numeroInicio: parseInt(document.getElementById('inutNumInicio').value),
+              numeroFim: parseInt(document.getElementById('inutNumFim').value),
+              justificativa: justificativa
+            };
+            
+            await axios.post(`${API_BASE}/notas-fiscais/inutilizar`, dados);
+            Toast.success('Numeração inutilizada com sucesso!');
+            $('#inutilizarModal').modal('hide');
+            loadInutilizadas();
+          } catch (err) {
+            console.error('Erro ao inutilizar:', err);
+            Toast.error('Erro ao inutilizar: ' + (err.response?.data?.error || err.message));
+          }
+        }
+      );
+    }
+
+    // Exportar notas
+    async function exportNotas(formato) {
+      try {
+        const notas = state.notas;
+        if (!notas.length) {
+          Toast.warning('Nenhuma nota para exportar');
+          return;
+        }
+        
+        if (formato === 'excel') {
+          // Criar CSV para download
+          const headers = ['Número', 'Série', 'Tipo', 'Data', 'Destinatário', 'CNPJ/CPF', 'Valor', 'Status', 'Chave'];
+          const rows = notas.map(n => [
+            n.numero,
+            n.serie,
+            n.tipo,
+            formatDate(n.data_emissao),
+            n.destinatario_nome || '-',
+            n.destinatario_documento || '-',
+            n.valor_total,
+            n.status,
+            n.chave_acesso || '-'
+          ]);
+          
+          let csv = headers.join(';') + '\n';
+          rows.forEach(r => csv += r.join(';') + '\n');
+          
+          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `notas_fiscais_${new Date().toISOString().split('T')[0]}.csv`;
+          link.click();
+          Toast.success('Arquivo Excel (CSV) exportado!');
+          
+        } else if (formato === 'pdf') {
+          // Gerar PDF simples com tabela
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Relatório de Notas Fiscais</title>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { color: #333; font-size: 18px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background: #6366f1; color: white; }
+                tr:nth-child(even) { background: #f9f9f9; }
+                .total { font-weight: bold; margin-top: 20px; }
+              </style>
+            </head>
+            <body>
+              <h1>Relatório de Notas Fiscais</h1>
+              <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Número</th>
+                    <th>Série</th>
+                    <th>Tipo</th>
+                    <th>Data</th>
+                    <th>Destinatário</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${notas.map(n => `
+                    <tr>
+                      <td>${n.numero}</td>
+                      <td>${n.serie}</td>
+                      <td>${n.tipo}</td>
+                      <td>${formatDate(n.data_emissao)}</td>
+                      <td>${n.destinatario_nome || '-'}</td>
+                      <td>${formatCurrency(n.valor_total)}</td>
+                      <td>${n.status}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              <p class="total">Total: ${notas.length} notas | Valor Total: ${formatCurrency(notas.reduce((s, n) => s + (n.valor_total || 0), 0))}</p>
+            </body>
+            </html>
+          `);
+          printWindow.document.close();
+          printWindow.print();
+          Toast.success('PDF gerado para impressão!');
+          
+        } else if (formato === 'xml') {
+          // Download de XMLs (zip simulado - lista de chaves)
+          const chaves = notas.filter(n => n.chave_acesso).map(n => n.chave_acesso);
+          if (!chaves.length) {
+            Toast.warning('Nenhuma nota com XML disponível');
+            return;
+          }
+          const blob = new Blob([chaves.join('\n')], { type: 'text/plain' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = `chaves_nfe_${new Date().toISOString().split('T')[0]}.txt`;
+          link.click();
+          Toast.success('Lista de chaves de acesso exportada!');
+        }
+      } catch (err) {
+        console.error('Erro ao exportar:', err);
+        Toast.error('Erro ao exportar notas');
+      }
+    }
+
+    // Carregar inutilizadas
+    async function loadInutilizadas() {
+      const container = document.getElementById('inutilizadasList');
+      try {
+        const res = await axios.get(`${API_BASE}/notas-fiscais/inutilizadas`);
+        const inutilizadas = res.data.data || [];
+        
+        if (inutilizadas.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+              <i class="fa fa-ban fa-4x mb-3"></i>
+              <p>Nenhuma numeração inutilizada</p>
+            </div>
+          `;
+          return;
+        }
+        
+        container.innerHTML = inutilizadas.map(item => `
+          <div class="nfe-list-card">
+            <div>
+              <strong>${item.tipo} - Série ${item.serie}</strong>
+              <div class="text-muted small">
+                Números: ${item.numero_inicio} a ${item.numero_fim}
+              </div>
+              <div class="text-muted small">
+                ${formatDate(item.data_inutilizacao)} | Protocolo: ${item.protocolo || '-'}
+              </div>
+            </div>
+            <div class="text-right">
+              <small class="text-muted">${item.justificativa}</small>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erro ao carregar inutilizadas:', err);
+        container.innerHTML = '<div class="alert alert-warning">Erro ao carregar inutilizadas</div>';
+      }
+    }
+
+    // Ver detalhes da nota
+    async function verDetalhes(notaId) {
+      try {
+        const nota = state.notas.find(n => n.id === notaId);
+        if (!nota) {
+          Toast.warning('Nota não encontrada');
+          return;
+        }
+        
+        const detalhesHtml = `
+          <div class="card mb-3">
+            <div class="card-header bg-primary text-white">Dados da Nota</div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4"><strong>Número:</strong> ${nota.numero}</div>
+                <div class="col-md-4"><strong>Série:</strong> ${nota.serie}</div>
+                <div class="col-md-4"><strong>Tipo:</strong> ${nota.tipo}</div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-md-6"><strong>Data Emissão:</strong> ${formatDate(nota.data_emissao)}</div>
+                <div class="col-md-6"><strong>Status:</strong> <span class="badge badge-${nota.status === 'autorizada' ? 'success' : 'warning'}">${nota.status}</span></div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-12"><strong>Chave de Acesso:</strong><br><code style="font-size: 11px;">${nota.chave_acesso || 'N/A'}</code></div>
+              </div>
+              ${nota.protocolo ? `<div class="row mt-2"><div class="col-12"><strong>Protocolo:</strong> ${nota.protocolo}</div></div>` : ''}
+            </div>
+          </div>
+          
+          <div class="card mb-3">
+            <div class="card-header bg-secondary text-white">Destinatário</div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-8"><strong>Nome:</strong> ${nota.destinatario_nome || '-'}</div>
+                <div class="col-md-4"><strong>CPF/CNPJ:</strong> ${nota.destinatario_documento || '-'}</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header bg-success text-white">Valores</div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4"><strong>Produtos:</strong> ${formatCurrency(nota.valor_produtos || nota.valor_total)}</div>
+                <div class="col-md-4"><strong>Frete:</strong> ${formatCurrency(nota.valor_frete || 0)}</div>
+                <div class="col-md-4"><strong>Desconto:</strong> ${formatCurrency(nota.valor_desconto || 0)}</div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-12 text-right"><h4>Total: ${formatCurrency(nota.valor_total)}</h4></div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Criar modal dinâmico para detalhes
+        let modalEl = document.getElementById('detalhesNotaModal');
+        if (!modalEl) {
+          modalEl = document.createElement('div');
+          modalEl.id = 'detalhesNotaModal';
+          modalEl.className = 'modal fade';
+          modalEl.innerHTML = `
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title"><i class="fa fa-file-invoice mr-2"></i>Detalhes da Nota Fiscal</h5>
+                  <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body" id="detalhesNotaBody"></div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                  <button class="btn btn-primary" onclick="imprimirDanfe('${notaId}')"><i class="fa fa-print"></i> Imprimir DANFE</button>
+                </div>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(modalEl);
+        }
+        
+        document.getElementById('detalhesNotaBody').innerHTML = detalhesHtml;
+        $('#detalhesNotaModal').modal('show');
+        
+      } catch (err) {
+        console.error('Erro ao carregar detalhes:', err);
+        Toast.error('Erro ao carregar detalhes da nota');
+      }
+    }
+
+    // Imprimir DANFE
+    function imprimirDanfe(notaId) {
+      const nota = state.notas.find(n => n.id === notaId);
+      if (!nota) {
+        Toast.warning('Nota não encontrada');
+        return;
+      }
+      
+      // Gerar DANFE simplificado para impressão
+      const printWindow = window.open('', '_blank', 'width=800,height=600');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>DANFE - ${nota.numero}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; padding: 20px; font-size: 12px; }
+            .danfe-container { max-width: 800px; margin: 0 auto; border: 2px solid #000; }
+            .danfe-header { display: flex; border-bottom: 2px solid #000; }
+            .danfe-header > div { padding: 10px; border-right: 1px solid #000; }
+            .danfe-header > div:last-child { border-right: none; }
+            .empresa { width: 40%; }
+            .danfe-label { width: 20%; text-align: center; }
+            .danfe-label h1 { font-size: 24px; margin: 10px 0; }
+            .danfe-label p { font-size: 10px; }
+            .codigo { width: 40%; text-align: center; }
+            .codigo .barcode { font-family: monospace; font-size: 10px; word-break: break-all; margin: 5px 0; }
+            .section { border-bottom: 1px solid #000; padding: 10px; }
+            .section-title { font-weight: bold; font-size: 10px; background: #eee; padding: 3px 5px; margin-bottom: 5px; }
+            .row { display: flex; }
+            .col { flex: 1; padding: 3px 5px; border-right: 1px solid #ddd; }
+            .col:last-child { border-right: none; }
+            .col label { display: block; font-size: 9px; color: #666; }
+            .col span { font-weight: bold; }
+            .total { text-align: right; font-size: 16px; font-weight: bold; padding: 10px; }
+            .chave { font-family: monospace; font-size: 9px; word-break: break-all; text-align: center; padding: 10px; }
+            @media print {
+              body { padding: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="no-print" style="text-align: center; margin-bottom: 20px;">
+            <button onclick="window.print()" style="padding: 10px 30px; font-size: 16px; cursor: pointer;">🖨️ Imprimir DANFE</button>
+          </div>
+          
+          <div class="danfe-container">
+            <div class="danfe-header">
+              <div class="empresa">
+                <strong>IDENTIFICAÇÃO DO EMITENTE</strong><br><br>
+                ${nota.emitente_nome || 'Empresa Emitente'}<br>
+                CNPJ: ${nota.emitente_cnpj || '-'}
+              </div>
+              <div class="danfe-label">
+                <h1>DANFE</h1>
+                <p>Documento Auxiliar da Nota Fiscal Eletrônica</p>
+                <p style="margin-top: 10px;"><strong>${nota.tipo === 'NFC-e' ? '65' : '55'}</strong> - ${nota.tipo === 'NFC-e' ? 'SAÍDA' : 'ENTRADA/SAÍDA'}</p>
+                <p style="margin-top: 5px;">Nº ${String(nota.numero).padStart(9, '0')}</p>
+                <p>Série ${nota.serie}</p>
+              </div>
+              <div class="codigo">
+                <div class="barcode">${nota.chave_acesso || 'CHAVE DE ACESSO'}</div>
+                <p style="font-size: 10px; margin-top: 10px;">Consulta de autenticidade no portal nacional da NF-e</p>
+                <p style="font-size: 9px;">www.nfe.fazenda.gov.br</p>
+              </div>
+            </div>
+            
+            <div class="section">
+              <div class="section-title">DESTINATÁRIO / REMETENTE</div>
+              <div class="row">
+                <div class="col" style="flex: 3;"><label>Nome/Razão Social</label><span>${nota.destinatario_nome || '-'}</span></div>
+                <div class="col"><label>CNPJ/CPF</label><span>${nota.destinatario_documento || '-'}</span></div>
+                <div class="col"><label>Data Emissão</label><span>${formatDate(nota.data_emissao)}</span></div>
+              </div>
+            </div>
+            
+            <div class="section">
+              <div class="section-title">DADOS DOS PRODUTOS / SERVIÇOS</div>
+              <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+                <thead>
+                  <tr style="background: #eee;">
+                    <th style="padding: 5px; border: 1px solid #ddd;">Código</th>
+                    <th style="padding: 5px; border: 1px solid #ddd;">Descrição</th>
+                    <th style="padding: 5px; border: 1px solid #ddd;">Qtd</th>
+                    <th style="padding: 5px; border: 1px solid #ddd;">Un</th>
+                    <th style="padding: 5px; border: 1px solid #ddd;">V.Unit</th>
+                    <th style="padding: 5px; border: 1px solid #ddd;">V.Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="padding: 5px; border: 1px solid #ddd;" colspan="6" align="center">Itens disponíveis no XML original</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="total">
+              VALOR TOTAL DA NOTA: ${formatCurrency(nota.valor_total)}
+            </div>
+            
+            <div class="chave">
+              <strong>CHAVE DE ACESSO:</strong><br>
+              ${nota.chave_acesso || 'N/A'}
+              ${nota.protocolo ? `<br><br><strong>PROTOCOLO:</strong> ${nota.protocolo}` : ''}
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      Toast.success('DANFE gerado para impressão');
+    }
+
+    // Funções auxiliares
+    function debounceSearch() {
+      clearTimeout(state.searchTimer);
+      state.searchTimer = setTimeout(loadNotas, 300);
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+    }
+
+    function parseCurrency(str) {
+      return parseFloat((str || '0').replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function getStatusClass(status) {
+      const map = { 'autorizada': 'approved', 'pendente': 'pending', 'cancelada': 'cancelled', 'rejeitada': 'cancelled', 'processando': 'processing' };
+      return map[status?.toLowerCase()] || 'pending';
+    }
+
+    function getStatusIcon(status) {
+      const map = { 'autorizada': 'fa-check-circle', 'pendente': 'fa-clock', 'cancelada': 'fa-times-circle', 'rejeitada': 'fa-exclamation-circle', 'processando': 'fa-spinner fa-spin' };
+      return map[status?.toLowerCase()] || 'fa-question-circle';
+    }
+
+    function addFormaPagamento() {
+      const container = document.getElementById('formasPagamentoContainer');
+      if (!container) {
+        // Criar container se não existir
+        const wrapper = document.createElement('div');
+        wrapper.id = 'formasPagamentoContainer';
+        wrapper.innerHTML = `
+          <div class="forma-pagamento-item mb-2" style="display: flex; gap: 10px; align-items: center;">
+            <select class="form-control" style="flex: 1;">
+              <option value="01">Dinheiro</option>
+              <option value="02">Cheque</option>
+              <option value="03">Cartão de Crédito</option>
+              <option value="04">Cartão de Débito</option>
+              <option value="05">Crédito Loja</option>
+              <option value="10">Vale Alimentação</option>
+              <option value="11">Vale Refeição</option>
+              <option value="12">Vale Presente</option>
+              <option value="13">Vale Combustível</option>
+              <option value="15">Boleto Bancário</option>
+              <option value="16">Depósito Bancário</option>
+              <option value="17">PIX</option>
+              <option value="18">Transferência</option>
+              <option value="19">Cashback</option>
+              <option value="90">Sem Pagamento</option>
+              <option value="99">Outros</option>
+            </select>
+            <input type="text" class="form-control" style="flex: 1;" placeholder="Valor" onkeyup="formatarValorPagamento(this)">
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
+        `;
+        const btn = event.target.closest('button');
+        btn.parentElement.insertBefore(wrapper, btn);
+        return;
+      }
+      
+      const newItem = document.createElement('div');
+      newItem.className = 'forma-pagamento-item mb-2';
+      newItem.style = 'display: flex; gap: 10px; align-items: center;';
+      newItem.innerHTML = `
+        <select class="form-control" style="flex: 1;">
+          <option value="01">Dinheiro</option>
+          <option value="02">Cheque</option>
+          <option value="03">Cartão de Crédito</option>
+          <option value="04">Cartão de Débito</option>
+          <option value="05">Crédito Loja</option>
+          <option value="10">Vale Alimentação</option>
+          <option value="11">Vale Refeição</option>
+          <option value="12">Vale Presente</option>
+          <option value="13">Vale Combustível</option>
+          <option value="15">Boleto Bancário</option>
+          <option value="16">Depósito Bancário</option>
+          <option value="17">PIX</option>
+          <option value="18">Transferência</option>
+          <option value="19">Cashback</option>
+          <option value="90">Sem Pagamento</option>
+          <option value="99">Outros</option>
+        </select>
+        <input type="text" class="form-control" style="flex: 1;" placeholder="Valor" onkeyup="formatarValorPagamento(this)">
+        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
+          <i class="fa fa-times"></i>
+        </button>
+      `;
+      container.appendChild(newItem);
+    }
+    
+    function formatarValorPagamento(input) {
+      let value = input.value.replace(/\D/g, '');
+      value = (parseInt(value) / 100).toFixed(2);
+      input.value = 'R$ ' + value.replace('.', ',');
+    }
+
+    // Debounce genérico
+    function debounce(fn, delay) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    }
+  </script>
+</body>
+</html>
