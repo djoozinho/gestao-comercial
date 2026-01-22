@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minha Empresa - Configurações</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <style>
+    .config-section {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid var(--gray-200);
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title i {
+      color: var(--brand);
+    }
+    .logo-upload-area {
+      border: 2px dashed var(--gray-300);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: var(--gray-50);
+    }
+    .logo-upload-area:hover {
+      border-color: var(--brand);
+      background: rgba(99, 102, 241, 0.05);
+    }
+    .logo-upload-area.has-logo {
+      border-style: solid;
+      padding: 20px;
+    }
+    .logo-preview {
+      max-width: 200px;
+      max-height: 150px;
+      object-fit: contain;
+      margin-bottom: 12px;
+    }
+    .form-row-custom {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .form-group-custom {
+      margin-bottom: 16px;
+    }
+    .form-group-custom label {
+      font-weight: 600;
+      color: var(--gray-700);
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .form-control-custom {
+      border: 1px solid var(--gray-300);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .form-control-custom:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+    .preview-section {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+    .preview-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-600);
+      margin-bottom: 12px;
+    }
+    .receipt-preview {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-width: 320px;
+      margin: 0 auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .receipt-header {
+      text-align: center;
+      border-bottom: 1px dashed #ccc;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+    .receipt-logo {
+      max-width: 100px;
+      max-height: 60px;
+      margin-bottom: 8px;
+    }
+    .receipt-company-name {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .receipt-company-info {
+      font-size: 10px;
+      color: #666;
+    }
+    .btn-save-config {
+      background: var(--brand-gradient);
+      border: none;
+      color: #fff;
+      padding: 12px 32px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-save-config:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+    .color-picker-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .color-picker-row input[type="color"] {
+      width: 50px;
+      height: 40px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .switch-custom {
+      position: relative;
+      width: 48px;
+      height: 24px;
+    }
+    .switch-custom input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider-custom {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #ccc;
+      transition: 0.3s;
+      border-radius: 24px;
+    }
+    .slider-custom:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    .switch-custom input:checked + .slider-custom {
+      background: var(--brand);
+    }
+    .switch-custom input:checked + .slider-custom:before {
+      transform: translateX(24px);
+    }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar">
+      <h4>SISTEMA</h4>
+      <ul class="sidebar-menu">
+        <li><a href="index.html"><span class="menu-icon"><i class="fa fa-home"></i></span><span class="menu-label">Início</span></a></li>
+        <li><a href="pdv.html"><span class="menu-icon"><i class="fa fa-cash-register"></i></span><span class="menu-label">PDV</span></a></li>
+        <li><a href="dashboard.html"><span class="menu-icon"><i class="fa fa-chart-pie"></i></span><span class="menu-label">Painel</span></a></li>
+        <li><a href="nfe-emissao.html"><span class="menu-icon"><i class="fa fa-file-invoice"></i></span><span class="menu-label">Notas Fiscais</span></a></li>
+        <li><a href="movimentos.html"><span class="menu-icon"><i class="fa fa-exchange-alt"></i></span><span class="menu-label">Movimentos</span></a></li>
+        <li><a href="relatorios.html"><span class="menu-icon"><i class="fa fa-chart-bar"></i></span><span class="menu-label">Relatórios</span></a></li>
+        <li><a href="pessoas.html"><span class="menu-icon"><i class="fa fa-users"></i></span><span class="menu-label">Clientes</span></a></li>
+        <li><a href="produtos.html"><span class="menu-icon"><i class="fa fa-boxes"></i></span><span class="menu-label">Produtos</span></a></li>
+        <li><a href="agenda.html"><span class="menu-icon"><i class="fa fa-calendar"></i></span><span class="menu-label">Agenda</span></a></li>
+        <li><a href="admin.html"><span class="menu-icon"><i class="fa fa-cogs"></i></span><span class="menu-label">Admin</span></a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-building"></i> Minha Empresa</h3>
+        <div class="header-info">
+          <span><i class="fa fa-user-circle mr-2"></i><span id="userName">Admin</span></span>
+          <button class="btn-logout" style="background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:8px;">
+            <i class="fa fa-sign-out-alt"></i> Sair
+          </button>
+        </div>
+      </div>
+
+      <div class="dashboard-container" style="padding:24px;overflow-y:auto;flex:1;">
+        <!-- Logo e Identidade Visual -->
+        <div class="config-section">
+          <h4 class="section-title"><i class="fa fa-image"></i> Logo e Identidade Visual</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group-custom">
+                <label>Logo da Empresa</label>
+                <div class="logo-upload-area" id="logoUploadArea" onclick="document.getElementById('logoInput').click()">
+                  <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+                  <div id="logoPlaceholder">
+                    <i class="fa fa-cloud-upload-alt" style="font-size:48px;color:var(--gray-400);margin-bottom:12px;display:block;"></i>
+                    <p style="margin:0;color:var(--gray-500);">Clique para enviar a logo</p>
+                    <small style="color:var(--gray-400);">PNG, JPG até 2MB (recomendado: 400x200px)</small>
+                  </div>
+                  <img id="logoPreview" class="logo-preview" style="display:none;">
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="removeLogo" style="display:none;" onclick="removeLogo()">
+                  <i class="fa fa-trash"></i> Remover Logo
+                </button>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group-custom">
+                <label>Cores do Sistema</label>
+                <div class="color-picker-row mb-3">
+                  <input type="color" id="primaryColor" value="#6366f1">
+                  <span>Cor Principal</span>
+                </div>
+                <div class="color-picker-row mb-3">
+                  <input type="color" id="accentColor" value="#10b981">
+                  <span>Cor de Destaque</span>
+                </div>
+              </div>
+              <div class="form-group-custom">
+                <label class="d-flex align-items-center gap-2">
+                  <span>Mostrar Logo no Cupom</span>
+                  <label class="switch-custom ml-auto">
+                    <input type="checkbox" id="showLogoReceipt" checked>
+                    <span class="slider-custom"></span>
+                  </label>
+                </label>
+              </div>
+              <div class="form-group-custom">
+                <label class="d-flex align-items-center gap-2">
+                  <span>Mostrar Logo nos Relatórios</span>
+                  <label class="switch-custom ml-auto">
+                    <input type="checkbox" id="showLogoReports" checked>
+                    <span class="slider-custom"></span>
+                  </label>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dados da Empresa -->
+        <div class="config-section">
+          <h4 class="section-title"><i class="fa fa-building"></i> Dados da Empresa</h4>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label>Razão Social *</label>
+              <input type="text" id="companyName" class="form-control form-control-custom" placeholder="Nome da empresa">
+            </div>
+            <div class="form-group-custom">
+              <label>Nome Fantasia</label>
+              <input type="text" id="fantasyName" class="form-control form-control-custom" placeholder="Nome fantasia">
+            </div>
+          </div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label>CNPJ</label>
+              <input type="text" id="cnpj" class="form-control form-control-custom" placeholder="00.000.000/0000-00">
+            </div>
+            <div class="form-group-custom">
+              <label>Inscrição Estadual</label>
+              <input type="text" id="stateRegistration" class="form-control form-control-custom" placeholder="Inscrição Estadual">
+            </div>
+          </div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label>Telefone</label>
+              <input type="tel" id="phone" class="form-control form-control-custom" placeholder="(00) 00000-0000">
+            </div>
+            <div class="form-group-custom">
+              <label>WhatsApp</label>
+              <input type="tel" id="whatsapp" class="form-control form-control-custom" placeholder="(00) 00000-0000">
+            </div>
+            <div class="form-group-custom">
+              <label>E-mail</label>
+              <input type="email" id="email" class="form-control form-control-custom" placeholder="contato@empresa.com">
+            </div>
+          </div>
+        </div>
+
+        <!-- Endereço -->
+        <div class="config-section">
+          <h4 class="section-title"><i class="fa fa-map-marker-alt"></i> Endereço</h4>
+          <div class="form-row-custom">
+            <div class="form-group-custom" style="max-width:150px;">
+              <label>CEP</label>
+              <input type="text" id="cep" class="form-control form-control-custom" placeholder="00000-000" onblur="searchCep()">
+            </div>
+            <div class="form-group-custom" style="flex:2;">
+              <label>Logradouro</label>
+              <input type="text" id="street" class="form-control form-control-custom" placeholder="Rua, Avenida...">
+            </div>
+            <div class="form-group-custom" style="max-width:120px;">
+              <label>Número</label>
+              <input type="text" id="number" class="form-control form-control-custom" placeholder="Nº">
+            </div>
+          </div>
+          <div class="form-row-custom">
+            <div class="form-group-custom">
+              <label>Complemento</label>
+              <input type="text" id="complement" class="form-control form-control-custom" placeholder="Sala, Loja...">
+            </div>
+            <div class="form-group-custom">
+              <label>Bairro</label>
+              <input type="text" id="neighborhood" class="form-control form-control-custom" placeholder="Bairro">
+            </div>
+            <div class="form-group-custom">
+              <label>Cidade</label>
+              <input type="text" id="city" class="form-control form-control-custom" placeholder="Cidade">
+            </div>
+            <div class="form-group-custom" style="max-width:100px;">
+              <label>UF</label>
+              <select id="state" class="form-control form-control-custom">
+                <option value="">UF</option>
+                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configurações de Impressão -->
+        <div class="config-section">
+          <h4 class="section-title"><i class="fa fa-print"></i> Configurações de Impressão</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group-custom">
+                <label>Mensagem no Rodapé do Cupom</label>
+                <textarea id="receiptFooter" class="form-control form-control-custom" rows="2" placeholder="Obrigado pela preferência!"></textarea>
+              </div>
+              <div class="form-group-custom">
+                <label>Informações Fiscais</label>
+                <textarea id="fiscalInfo" class="form-control form-control-custom" rows="2" placeholder="Informações fiscais adicionais..."></textarea>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="preview-section">
+                <div class="preview-title"><i class="fa fa-eye"></i> Pré-visualização do Cupom</div>
+                <div class="receipt-preview" id="receiptPreview">
+                  <div class="receipt-header">
+                    <img id="previewLogo" class="receipt-logo" style="display:none;">
+                    <div class="receipt-company-name" id="previewCompanyName">Nome da Empresa</div>
+                    <div class="receipt-company-info" id="previewCompanyInfo">
+                      CNPJ: 00.000.000/0000-00<br>
+                      Endereço completo<br>
+                      Tel: (00) 00000-0000
+                    </div>
+                  </div>
+                  <div style="text-align:center;font-size:11px;padding:8px 0;border-bottom:1px dashed #ccc;">
+                    CUPOM NÃO FISCAL
+                  </div>
+                  <div style="padding:8px 0;font-size:10px;">
+                    01 Produto Exemplo.......R$ 10,00<br>
+                    02 Outro Produto........R$ 25,00
+                  </div>
+                  <div style="border-top:1px dashed #ccc;padding-top:8px;text-align:center;">
+                    <strong>TOTAL: R$ 35,00</strong>
+                  </div>
+                  <div style="font-size:9px;text-align:center;margin-top:8px;color:#666;" id="previewFooter">
+                    Obrigado pela preferência!
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Personalização da Tela de Login -->
+        <div class="config-section">
+          <h4 class="section-title"><i class="fa fa-sign-in-alt"></i> Personalização da Tela de Login</h4>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group-custom">
+                <label>Imagem de Fundo do Login</label>
+                <div class="logo-upload-area" id="bgUploadArea" onclick="document.getElementById('bgInput').click()">
+                  <input type="file" id="bgInput" accept="image/*" style="display:none" onchange="handleBgUpload(event)">
+                  <div id="bgPlaceholder">
+                    <i class="fa fa-image" style="font-size:48px;color:var(--gray-400);margin-bottom:12px;display:block;"></i>
+                    <p style="margin:0;color:var(--gray-500);">Clique para enviar imagem de fundo</p>
+                    <small style="color:var(--gray-400);">JPG, PNG até 5MB (recomendado: 1920x1080px)</small>
+                  </div>
+                  <img id="bgPreview" class="logo-preview" style="display:none;max-width:300px;max-height:180px;">
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="removeBg" style="display:none;" onclick="removeBgImage()">
+                  <i class="fa fa-trash"></i> Remover Imagem
+                </button>
+              </div>
+              <div class="form-group-custom">
+                <label>Slogan / Subtítulo</label>
+                <input type="text" id="loginSlogan" class="form-control form-control-custom" placeholder="Sistema Integrado de Vendas e Gestão">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="preview-section" style="height:100%;">
+                <div class="preview-title"><i class="fa fa-desktop"></i> Pré-visualização do Login</div>
+                <div id="loginPreviewContainer" style="background:linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.15);position:relative;min-height:200px;">
+                  <div id="loginBgPreview" style="position:absolute;inset:0;background-size:cover;background-position:center;opacity:0.4;"></div>
+                  <div style="position:relative;z-index:1;padding:30px;text-align:center;color:#fff;">
+                    <div id="loginLogoPreview" style="width:60px;height:60px;background:rgba(255,255,255,0.2);border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                      <i class="fa fa-store" style="font-size:24px;"></i>
+                    </div>
+                    <h5 id="loginNamePreview" style="margin:0 0 4px;font-weight:700;">Gestão Comercial</h5>
+                    <small id="loginSloganPreview" style="opacity:0.9;">Sistema Integrado de Vendas e Gestão</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão Salvar -->
+        <div class="text-right mb-4">
+          <button type="button" class="btn-save-config" onclick="saveCompanySettings()">
+            <i class="fa fa-save"></i> Salvar Configurações
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- Sistema de Toasts Elegantes -->
+  <script src="js/toast.js"></script>
+  <script>
+    const API_BASE = '/api';
+    let companyData = {};
+
+    // Configurar axios para enviar token
+    axios.interceptors.request.use(function (config) {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    // Carregar dados ao iniciar
+    document.addEventListener('DOMContentLoaded', loadCompanySettings);
+
+    async function loadCompanySettings() {
+      try {
+        // 1. Carregar configurações locais primeiro (fallback)
+        const saved = localStorage.getItem('companySettings');
+        if (saved) {
+          companyData = JSON.parse(saved);
+          populateForm(companyData);
+        }
+        
+        // 2. Tentar carregar branding do servidor (dados por tenant)
+        try {
+          const brandingResp = await axios.get(`${API_BASE}/empresa/branding`);
+          if (brandingResp.data) {
+            const serverData = brandingResp.data;
+            // Mesclar dados do servidor
+            companyData = { 
+              ...companyData, 
+              companyName: serverData.companyName || companyData.companyName,
+              fantasyName: serverData.fantasyName || companyData.fantasyName,
+              logo: serverData.logo || companyData.logo,
+              loginBackgroundImage: serverData.loginBackground || companyData.loginBackgroundImage,
+              slogan: serverData.loginSlogan || companyData.slogan,
+              primaryColor: serverData.primaryColor || companyData.primaryColor,
+              secondaryColor: serverData.secondaryColor || companyData.secondaryColor
+            };
+            populateForm(companyData);
+            console.log('✅ Branding carregado do servidor');
+          }
+        } catch (e) {
+          console.warn('⚠️ Não foi possível carregar branding do servidor:', e.message);
+        }
+        
+        // 3. Tentar carregar dados completos da empresa
+        try {
+          const resp = await axios.get(`${API_BASE}/empresas`);
+          if (resp.data && resp.data.data && resp.data.data.length > 0) {
+            const empresa = resp.data.data[0];
+            companyData = { 
+              ...companyData,
+              companyName: empresa.razao_social || companyData.companyName,
+              fantasyName: empresa.nome_fantasia || companyData.fantasyName,
+              cnpj: empresa.cnpj || companyData.cnpj,
+              stateRegistration: empresa.inscricao_estadual || companyData.stateRegistration,
+              phone: empresa.telefone || companyData.phone,
+              email: empresa.email || companyData.email,
+              street: empresa.endereco || companyData.street,
+              number: empresa.numero || companyData.number,
+              neighborhood: empresa.bairro || companyData.neighborhood,
+              city: empresa.cidade || companyData.city,
+              state: empresa.uf || companyData.state,
+              cep: empresa.cep || companyData.cep,
+              logo: empresa.logo || companyData.logo,
+              empresaId: empresa.id
+            };
+            populateForm(companyData);
+          }
+        } catch (e) {
+          // Sem problema se não carregar
+        }
+        
+        updatePreview();
+      } catch (err) {
+        console.error('Erro ao carregar configurações:', err);
+      }
+    }
+
+    function populateForm(data) {
+      document.getElementById('companyName').value = data.companyName || '';
+      document.getElementById('fantasyName').value = data.fantasyName || '';
+      document.getElementById('cnpj').value = data.cnpj || '';
+      document.getElementById('stateRegistration').value = data.stateRegistration || '';
+      document.getElementById('phone').value = data.phone || '';
+      document.getElementById('whatsapp').value = data.whatsapp || '';
+      document.getElementById('email').value = data.email || '';
+      document.getElementById('cep').value = data.cep || '';
+      document.getElementById('street').value = data.street || '';
+      document.getElementById('number').value = data.number || '';
+      document.getElementById('complement').value = data.complement || '';
+      document.getElementById('neighborhood').value = data.neighborhood || '';
+      document.getElementById('city').value = data.city || '';
+      document.getElementById('state').value = data.state || '';
+      document.getElementById('receiptFooter').value = data.receiptFooter || 'Obrigado pela preferência!';
+      document.getElementById('fiscalInfo').value = data.fiscalInfo || '';
+      document.getElementById('primaryColor').value = data.primaryColor || '#6f42c1';
+      document.getElementById('accentColor').value = data.accentColor || data.secondaryColor || '#10b981';
+      document.getElementById('showLogoReceipt').checked = data.showLogoReceipt !== false;
+      document.getElementById('showLogoReports').checked = data.showLogoReports !== false;
+      document.getElementById('loginSlogan').value = data.slogan || 'Sistema Integrado de Vendas e Gestão';
+      
+      // Logo da empresa
+      if (data.logo) {
+        document.getElementById('logoPreview').src = data.logo;
+        document.getElementById('logoPreview').style.display = 'block';
+        document.getElementById('logoPlaceholder').style.display = 'none';
+        document.getElementById('logoUploadArea').classList.add('has-logo');
+        document.getElementById('removeLogo').style.display = 'inline-block';
+      }
+      
+      // Imagem de fundo do login (do servidor ou localStorage)
+      if (data.loginBackgroundImage) {
+        document.getElementById('bgPreview').src = data.loginBackgroundImage;
+        document.getElementById('bgPreview').style.display = 'block';
+        document.getElementById('bgPlaceholder').style.display = 'none';
+        document.getElementById('bgUploadArea').classList.add('has-logo');
+        document.getElementById('removeBg').style.display = 'inline-block';
+      }
+      
+      // Atualizar preview do login
+      updateLoginPreview();
+    }
+
+    function handleLogoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      if (file.size > 2 * 1024 * 1024) {
+        Toast.warning('Arquivo muito grande. Máximo: 2MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        companyData.logo = e.target.result;
+        document.getElementById('logoPreview').src = e.target.result;
+        document.getElementById('logoPreview').style.display = 'block';
+        document.getElementById('logoPlaceholder').style.display = 'none';
+        document.getElementById('logoUploadArea').classList.add('has-logo');
+        document.getElementById('removeLogo').style.display = 'inline-block';
+        updatePreview();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeLogo() {
+      companyData.logo = null;
+      document.getElementById('logoPreview').style.display = 'none';
+      document.getElementById('logoPlaceholder').style.display = 'block';
+      document.getElementById('logoUploadArea').classList.remove('has-logo');
+      document.getElementById('removeLogo').style.display = 'none';
+      document.getElementById('logoInput').value = '';
+      updatePreview();
+      updateLoginPreview();
+    }
+
+    // Upload de imagem de fundo do login
+    function handleBgUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Verificar tamanho (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        Toast.error('Imagem muito grande. Máximo 5MB.');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        companyData.loginBackgroundImage = e.target.result;
+        document.getElementById('bgPreview').src = e.target.result;
+        document.getElementById('bgPreview').style.display = 'block';
+        document.getElementById('bgPlaceholder').style.display = 'none';
+        document.getElementById('bgUploadArea').classList.add('has-logo');
+        document.getElementById('removeBg').style.display = 'inline-block';
+        updateLoginPreview();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeBgImage() {
+      companyData.loginBackgroundImage = null;
+      document.getElementById('bgPreview').style.display = 'none';
+      document.getElementById('bgPlaceholder').style.display = 'block';
+      document.getElementById('bgUploadArea').classList.remove('has-logo');
+      document.getElementById('removeBg').style.display = 'none';
+      document.getElementById('bgInput').value = '';
+      updateLoginPreview();
+    }
+
+    function updateLoginPreview() {
+      const name = document.getElementById('fantasyName').value || document.getElementById('companyName').value || 'Gestão Comercial';
+      const slogan = document.getElementById('loginSlogan').value || 'Sistema Integrado de Vendas e Gestão';
+      const primaryColor = document.getElementById('primaryColor').value || '#6366f1';
+      
+      // Atualizar nome e slogan
+      document.getElementById('loginNamePreview').textContent = name;
+      document.getElementById('loginSloganPreview').textContent = slogan;
+      
+      // Atualizar cor de fundo
+      const container = document.getElementById('loginPreviewContainer');
+      container.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${adjustColorHex(primaryColor, 30)} 100%)`;
+      
+      // Atualizar imagem de fundo
+      const bgPreview = document.getElementById('loginBgPreview');
+      if (companyData.loginBackgroundImage) {
+        bgPreview.style.backgroundImage = `url(${companyData.loginBackgroundImage})`;
+      } else {
+        bgPreview.style.backgroundImage = 'none';
+      }
+      
+      // Atualizar logo
+      const logoPreview = document.getElementById('loginLogoPreview');
+      if (companyData.logo) {
+        logoPreview.innerHTML = `<img src="${companyData.logo}" style="width:100%;height:100%;object-fit:contain;padding:8px;">`;
+      } else {
+        logoPreview.innerHTML = '<i class="fa fa-store" style="font-size:24px;"></i>';
+      }
+    }
+
+    // Função auxiliar para ajustar cores
+    function adjustColorHex(hex, percent) {
+      hex = hex.replace('#', '');
+      let r = parseInt(hex.substring(0, 2), 16);
+      let g = parseInt(hex.substring(2, 4), 16);
+      let b = parseInt(hex.substring(4, 6), 16);
+      r = Math.min(255, Math.max(0, r + percent));
+      g = Math.min(255, Math.max(0, g + percent));
+      b = Math.min(255, Math.max(0, b + percent));
+      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    function updatePreview() {
+      const name = document.getElementById('fantasyName').value || document.getElementById('companyName').value || 'Nome da Empresa';
+      const cnpj = document.getElementById('cnpj').value || '00.000.000/0000-00';
+      const phone = document.getElementById('phone').value || '(00) 00000-0000';
+      const street = document.getElementById('street').value;
+      const number = document.getElementById('number').value;
+      const city = document.getElementById('city').value;
+      const state = document.getElementById('state').value;
+      const footer = document.getElementById('receiptFooter').value || 'Obrigado pela preferência!';
+      
+      let address = '';
+      if (street) address += street;
+      if (number) address += ', ' + number;
+      if (city) address += ' - ' + city;
+      if (state) address += '/' + state;
+      
+      document.getElementById('previewCompanyName').textContent = name;
+      document.getElementById('previewCompanyInfo').innerHTML = `CNPJ: ${cnpj}<br>${address || 'Endereço completo'}<br>Tel: ${phone}`;
+      document.getElementById('previewFooter').textContent = footer;
+      
+      const previewLogo = document.getElementById('previewLogo');
+      const showLogo = document.getElementById('showLogoReceipt').checked;
+      if (companyData.logo && showLogo) {
+        previewLogo.src = companyData.logo;
+        previewLogo.style.display = 'block';
+      } else {
+        previewLogo.style.display = 'none';
+      }
+      
+      // Atualizar preview do login também
+      updateLoginPreview();
+    }
+
+    // Atualizar preview quando campos mudam
+    document.querySelectorAll('input, textarea, select').forEach(el => {
+      el.addEventListener('input', function() {
+        updatePreview();
+        updateLoginPreview();
+      });
+      el.addEventListener('change', function() {
+        updatePreview();
+        updateLoginPreview();
+      });
+    });
+
+    async function searchCep() {
+      const cep = document.getElementById('cep').value.replace(/\D/g, '');
+      if (cep.length !== 8) return;
+      
+      try {
+        const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await resp.json();
+        if (!data.erro) {
+          document.getElementById('street').value = data.logradouro || '';
+          document.getElementById('neighborhood').value = data.bairro || '';
+          document.getElementById('city').value = data.localidade || '';
+          document.getElementById('state').value = data.uf || '';
+          updatePreview();
+        }
+      } catch (e) {
+        console.error('Erro ao buscar CEP:', e);
+      }
+    }
+
+    async function saveCompanySettings() {
+      try {
+        companyData = {
+          ...companyData,
+          companyName: document.getElementById('companyName').value,
+          fantasyName: document.getElementById('fantasyName').value,
+          cnpj: document.getElementById('cnpj').value,
+          stateRegistration: document.getElementById('stateRegistration').value,
+          phone: document.getElementById('phone').value,
+          whatsapp: document.getElementById('whatsapp').value,
+          email: document.getElementById('email').value,
+          cep: document.getElementById('cep').value,
+          street: document.getElementById('street').value,
+          number: document.getElementById('number').value,
+          complement: document.getElementById('complement').value,
+          neighborhood: document.getElementById('neighborhood').value,
+          city: document.getElementById('city').value,
+          state: document.getElementById('state').value,
+          receiptFooter: document.getElementById('receiptFooter').value,
+          fiscalInfo: document.getElementById('fiscalInfo').value,
+          primaryColor: document.getElementById('primaryColor').value,
+          accentColor: document.getElementById('accentColor').value,
+          showLogoReceipt: document.getElementById('showLogoReceipt').checked,
+          showLogoReports: document.getElementById('showLogoReports').checked,
+          slogan: document.getElementById('loginSlogan').value
+        };
+        
+        // Salvar no localStorage como backup
+        localStorage.setItem('companySettings', JSON.stringify(companyData));
+        
+        // 1. Salvar branding no servidor (por tenant)
+        try {
+          const brandingData = {
+            logo: companyData.logo || null,
+            loginBackground: companyData.loginBackgroundImage || null,
+            loginSlogan: companyData.slogan || 'Sistema Integrado de Vendas e Gestão',
+            primaryColor: companyData.primaryColor || '#6f42c1',
+            secondaryColor: companyData.accentColor || '#5a32a3'
+          };
+          
+          await axios.put(`${API_BASE}/empresa/branding`, brandingData);
+          console.log('✅ Branding salvo no servidor');
+        } catch (e) {
+          console.warn('⚠️ Não foi possível salvar branding no servidor:', e.message);
+        }
+        
+        // 2. Atualizar dados da empresa (se existe ID)
+        if (companyData.empresaId) {
+          try {
+            const empresaData = {
+              razao_social: companyData.companyName,
+              nome_fantasia: companyData.fantasyName,
+              cnpj: companyData.cnpj,
+              inscricao_estadual: companyData.stateRegistration,
+              telefone: companyData.phone,
+              email: companyData.email,
+              endereco: companyData.street,
+              numero: companyData.number,
+              bairro: companyData.neighborhood,
+              cidade: companyData.city,
+              uf: companyData.state,
+              cep: companyData.cep,
+              logo: companyData.logo
+            };
+            
+            await axios.put(`${API_BASE}/empresas/${companyData.empresaId}`, empresaData);
+            console.log('✅ Dados da empresa salvos');
+          } catch (e) {
+            console.warn('⚠️ Não foi possível salvar dados da empresa:', e.message);
+          }
+        }
+        
+        // Aplicar branding imediatamente
+        if (typeof applyBranding === 'function') {
+          applyBranding();
+        }
+        
+        Toast.success('Configurações salvas com sucesso!');
+      } catch (err) {
+        console.error('Erro ao salvar:', err);
+        Toast.error('Erro ao salvar configurações');
+      }
+    }
+
+    // Máscara CNPJ
+    document.getElementById('cnpj').addEventListener('input', function(e) {
+      let v = e.target.value.replace(/\D/g, '');
+      if (v.length > 14) v = v.slice(0, 14);
+      v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+      v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+      v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+      v = v.replace(/(\d{4})(\d)/, '$1-$2');
+      e.target.value = v;
+    });
+
+    // Máscara telefone
+    ['phone', 'whatsapp'].forEach(id => {
+      document.getElementById(id).addEventListener('input', function(e) {
+        let v = e.target.value.replace(/\D/g, '');
+        if (v.length > 11) v = v.slice(0, 11);
+        if (v.length > 6) {
+          v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+        } else if (v.length > 2) {
+          v = v.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+        }
+        e.target.value = v;
+      });
+    });
+
+    // Máscara CEP
+    document.getElementById('cep').addEventListener('input', function(e) {
+      let v = e.target.value.replace(/\D/g, '');
+      if (v.length > 8) v = v.slice(0, 8);
+      if (v.length > 5) v = v.replace(/^(\d{5})(\d)/, '$1-$2');
+      e.target.value = v;
+    });
+  </script>
+</body>
+</html>

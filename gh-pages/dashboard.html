@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel - Sistema</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Auth Guard - Proteção de acesso -->
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <script src="js/sidebar.js"></script>
+  <style>
+    .dashboard-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+    .period-selector { display: flex; align-items: center; gap: 10px; background: #fff; padding: 8px 16px; border-radius: 12px; box-shadow: var(--shadow-sm); }
+    .period-btn { padding: 8px 16px; border: none; background: transparent; color: var(--gray-600); border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; }
+    .period-btn:hover { background: var(--gray-100); }
+    .period-btn.active { background: var(--brand-gradient); color: #fff; box-shadow: var(--shadow-md); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 24px; }
+    .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 24px; }
+    .chart-container { padding: 24px; min-height: 320px; max-height: 420px; overflow: hidden; }
+    .chart-container canvas { width: 100% !important; height: 100% !important; display: block; }
+    .ranking-container, .alertas-container, .recent-activities { padding: 20px; max-height: 350px; overflow-y: auto; }
+    .ranking-item { display: flex; align-items: center; padding: 12px 16px; border-radius: 10px; margin-bottom: 8px; background: var(--gray-50); transition: all 0.2s; }
+    .ranking-item:hover { background: var(--gray-100); transform: translateX(4px); }
+    .ranking-position { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; margin-right: 14px; }
+    .ranking-position.gold { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; }
+    .ranking-position.silver { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
+    .ranking-position.bronze { background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; }
+    .ranking-name { font-weight: 600; color: var(--gray-800); font-size: 14px; flex: 1; }
+    .ranking-value { font-weight: 700; color: var(--brand); font-size: 14px; }
+    .alerta-item { display: flex; align-items: center; padding: 14px 16px; border-radius: 10px; margin-bottom: 10px; background: var(--gray-50); border-left: 4px solid var(--warning); }
+    .alerta-item.critical { border-left-color: var(--danger); background: var(--danger-light); }
+    .activity-item { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--gray-100); transition: all 0.2s; }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 16px; font-size: 18px; color: #fff; }
+    .activity-title { font-weight: 600; color: var(--gray-800); font-size: 14px; }
+    .activity-time { font-size: 12px; color: var(--gray-500); }
+    .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+    .quick-action { background: #fff; border: 2px solid var(--gray-200); border-radius: 16px; padding: 24px 16px; text-align: center; cursor: pointer; transition: all 0.3s; text-decoration: none; color: var(--gray-700); }
+    .quick-action:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--brand); color: var(--brand); text-decoration: none; }
+    .quick-action i { font-size: 28px; margin-bottom: 10px; display: block; color: var(--brand); }
+    .quick-action-title { font-weight: 700; font-size: 14px; }
+    .quick-action-desc { font-size: 11px; color: var(--gray-500); }
+    .dashboard-container { padding: 24px; overflow-y: auto; flex: 1; }
+    .fluxo-item { padding: 20px; background: var(--gray-50); border-radius: 12px; transition: all 0.3s; }
+    .fluxo-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .refresh-btn { background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--brand); padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
+    .refresh-btn:hover { background: var(--brand); color: #fff; }
+    .stat-sublabel { margin-top: 8px; font-size: 13px; }
+    .stat-trend { font-size: 13px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+    .stat-trend.positive { color: var(--success); }
+    .stat-trend.negative { color: var(--danger); }
+    .caixa-inicial-box { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .caixa-inicial-box label { font-weight: 600; color: var(--gray-700); margin-bottom: 8px; display: block; }
+    .caixa-inicial-box input { max-width: 200px; }
+    .empty-state { text-align: center; padding: 30px; color: var(--gray-500); }
+    .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
+    @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar">
+      <h4>SISTEMA</h4>
+      <ul class="sidebar-menu">
+        <li><a href="index.html"><span class="menu-icon"><i class="fa fa-home"></i></span><span class="menu-label">Início</span></a></li>
+        <li><a href="pdv.html"><span class="menu-icon"><i class="fa fa-cash-register"></i></span><span class="menu-label">PDV</span></a></li>
+        <li><a href="dashboard.html" class="active"><span class="menu-icon"><i class="fa fa-chart-pie"></i></span><span class="menu-label">Painel</span></a></li>
+        <li><a href="nfe-emissao.html"><span class="menu-icon"><i class="fa fa-file-invoice"></i></span><span class="menu-label">Notas Fiscais</span></a></li>
+        <li><a href="movimentos.html"><span class="menu-icon"><i class="fa fa-exchange-alt"></i></span><span class="menu-label">Movimentos</span></a></li>
+        <li><a href="relatorios.html"><span class="menu-icon"><i class="fa fa-chart-bar"></i></span><span class="menu-label">Relatórios</span></a></li>
+        <li><a href="pessoas.html"><span class="menu-icon"><i class="fa fa-users"></i></span><span class="menu-label">Clientes</span></a></li>
+        <li><a href="produtos.html"><span class="menu-icon"><i class="fa fa-boxes"></i></span><span class="menu-label">Produtos</span></a></li>
+        <li><a href="agenda.html"><span class="menu-icon"><i class="fa fa-calendar"></i></span><span class="menu-label">Agenda</span></a></li>
+        <li><a href="admin.html"><span class="menu-icon"><i class="fa fa-cogs"></i></span><span class="menu-label">Admin</span></a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-tachometer-alt"></i> Painel de Controle</h3>
+        <div class="header-info">
+          <span><i class="fa fa-user-circle mr-2"></i><span id="userName">Admin</span></span>
+          <span><i class="fa fa-clock mr-2"></i><span id="currentTime">--:--:--</span></span>
+          <button id="refreshBtn" class="refresh-btn"><i class="fa fa-sync-alt"></i> Atualizar</button>
+          <button class="btn-logout" style="background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:8px;">
+            <i class="fa fa-sign-out-alt"></i> Sair
+          </button>
+        </div>
+      </div>
+
+      <div class="dashboard-container">
+        <div class="dashboard-controls">
+          <div class="period-selector">
+            <span>Período:</span>
+            <button class="period-btn active" data-period="today">Hoje</button>
+            <button class="period-btn" data-period="week">Semana</button>
+            <button class="period-btn" data-period="month">Mês</button>
+            <button class="period-btn" data-period="year">Ano</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <input type="date" id="dateFilter" class="form-control" style="width: 180px;">
+          </div>
+        </div>
+
+        <!-- Caixa Inicial do Dia -->
+        <div class="caixa-inicial-box">
+          <label><i class="fa fa-coins mr-2"></i>Caixa Inicial do Dia</label>
+          <div class="d-flex align-items-center gap-2">
+            <input type="number" id="caixaInicial" class="form-control" placeholder="0,00" step="0.01" min="0">
+            <button id="saveCaixaInicial" class="btn btn-primary btn-sm ml-2"><i class="fa fa-save"></i> Salvar</button>
+            <span id="caixaInicialStatus" class="ml-2 text-muted small"></span>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669)"><i class="fa fa-shopping-cart"></i></div>
+            <div class="stat-value" id="total-sales">R$ 0,00</div>
+            <div class="stat-label">Vendas do Período</div>
+            <div class="stat-sublabel text-muted" id="total-sales-count">0 vendas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed)"><i class="fa fa-receipt"></i></div>
+            <div class="stat-value" id="ticket-medio">R$ 0,00</div>
+            <div class="stat-label">Ticket Médio</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706)"><i class="fa fa-hand-holding-usd"></i></div>
+            <div class="stat-value" id="fiado-geral">R$ 0,00</div>
+            <div class="stat-label">Fiado Geral</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626)"><i class="fa fa-file-invoice-dollar"></i></div>
+            <div class="stat-value" id="contas-pagar">R$ 0,00</div>
+            <div class="stat-label">Contas a Pagar</div>
+            <div class="stat-sublabel text-muted">(futuras)</div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #0ea5e9, #0284c7)"><i class="fa fa-box-open"></i></div>
+            <div class="stat-value" id="total-products">0</div>
+            <div class="stat-label">Produtos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #ea580c)"><i class="fa fa-users"></i></div>
+            <div class="stat-value" id="total-customers">0</div>
+            <div class="stat-label">Clientes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #b91c1c)"><i class="fa fa-exclamation-triangle"></i></div>
+            <div class="stat-value" id="low-stock">0</div>
+            <div class="stat-label">Estoque Crítico</div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header"><i class="fa fa-wallet"></i> Fluxo de Caixa</div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4 text-center">
+                <div class="fluxo-item">
+                  <i class="fa fa-arrow-circle-up fa-2x text-success mb-2"></i>
+                  <h4 class="text-success" id="total-entradas">R$ 0,00</h4>
+                  <small class="text-muted">Entradas</small>
+                </div>
+              </div>
+              <div class="col-md-4 text-center">
+                <div class="fluxo-item">
+                  <i class="fa fa-arrow-circle-down fa-2x text-danger mb-2"></i>
+                  <h4 class="text-danger" id="total-saidas">R$ 0,00</h4>
+                  <small class="text-muted">Saídas</small>
+                </div>
+              </div>
+              <div class="col-md-4 text-center">
+                <div class="fluxo-item">
+                  <i class="fa fa-balance-scale fa-2x text-info mb-2"></i>
+                  <h4 class="text-info" id="saldo-periodo">R$ 0,00</h4>
+                  <small class="text-muted">Saldo</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="card">
+            <div class="card-header"><i class="fa fa-chart-area"></i> Vendas por Período</div>
+            <div class="chart-container"><canvas id="salesChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><i class="fa fa-chart-pie"></i> Distribuição do Período</div>
+            <div class="chart-container"><canvas id="distributionChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><i class="fa fa-money-bill-wave"></i> Pagamentos por Forma</div>
+            <div class="chart-container"><canvas id="paymentsChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i class="fa fa-trophy"></i> Produtos Mais Vendidos (Top 10)</div>
+            <div class="ranking-container" id="ranking-produtos"></div>
+          </div>
+          <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><i class="fa fa-star"></i> Top 10 Clientes</div>
+            <div class="ranking-container" id="ranking-clientes"></div>
+          </div>
+        </div>
+
+        <div class="charts-grid">
+          <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fa fa-bell"></i> Alertas</div>
+            <div class="alertas-container" id="alertas-sistema"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><i class="fa fa-clock"></i> Últimas Transações</div>
+            <div class="recent-activities" id="recent-activities"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><i class="fa fa-bolt"></i> Ações Rápidas</div>
+          <div class="card-body">
+            <div class="quick-actions">
+              <a href="pdv.html" class="quick-action"><i class="fa fa-cash-register"></i><div class="quick-action-title">PDV</div><div class="quick-action-desc">Nova venda</div></a>
+              <a href="produtos.html" class="quick-action"><i class="fa fa-plus-circle"></i><div class="quick-action-title">Produtos</div><div class="quick-action-desc">Cadastrar</div></a>
+              <a href="pessoas.html" class="quick-action"><i class="fa fa-user-plus"></i><div class="quick-action-title">Clientes</div><div class="quick-action-desc">Cadastrar</div></a>
+              <a href="relatorios.html" class="quick-action"><i class="fa fa-file-alt"></i><div class="quick-action-title">Relatórios</div><div class="quick-action-desc">Visualizar</div></a>
+              <a href="movimentos.html" class="quick-action"><i class="fa fa-search"></i><div class="quick-action-title">Vendas</div><div class="quick-action-desc">Histórico</div></a>
+              <a href="agenda.html" class="quick-action"><i class="fa fa-calendar-check"></i><div class="quick-action-title">Agenda</div><div class="quick-action-desc">Eventos</div></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-shortcuts">
+        <div class="shortcut-item"><kbd>F1</kbd> Ajuda</div>
+        <div class="shortcut-item"><kbd>F2</kbd> Atualizar</div>
+        <div class="shortcut-item"><kbd>F4</kbd> PDV</div>
+        <div class="shortcut-item"><kbd>F5</kbd> Relatórios</div>
+        <div class="shortcut-item"><kbd>F6</kbd> Produtos</div>
+        <div class="shortcut-item"><kbd>F9</kbd> Clientes</div>
+      </footer>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- Módulo centralizado de data/hora (Brasília) -->
+  <script src="/js/datetime-utils.js"></script>
+  <script>
+    const API_BASE = '/api';
+    let salesChart, distributionChart, paymentsChart;
+
+    // Configurar axios para enviar token em todas as requisições
+    axios.interceptors.request.use(function (config) {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    }, function (error) {
+      return Promise.reject(error);
+    });
+
+    function updateClock() { 
+      const el = document.getElementById('currentTime');
+      if (el) el.textContent = DateTimeUtils.formatTime(new Date()); 
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    function formatCurrency(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0); }
+    function formatDateISO(d) { return DateTimeUtils.formatDateISO(d); }
+    function addDays(d, n) { return DateTimeUtils.addDays(d, n); }
+    function debounce(fn, wait){ let t = null; return function(...args){ if(t) clearTimeout(t); t = setTimeout(()=>{ fn.apply(this, args); t = null; }, wait || 200); }; }
+
+    // Usar o módulo centralizado para tratar timestamps como Brasília
+    function toBrasiliaDateObj(s) {
+      return DateTimeUtils.parseToDate(s);
+    }
+
+    function formatDateISOinBrasilia(d) {
+      return DateTimeUtils.formatDateISO(d);
+    }
+
+    function getHourInBrasilia(d) {
+      return DateTimeUtils.getHour(d);
+    }
+
+    let dashboardPeriod = 'today';
+    let _debounced = {}; 
+
+    // ========== CAIXA INICIAL ==========
+    function getCaixaInicialKey() {
+      return 'caixaInicial_' + DateTimeUtils.todayISO();
+    }
+    function loadCaixaInicial() {
+      const saved = localStorage.getItem(getCaixaInicialKey());
+      const input = document.getElementById('caixaInicial');
+      const status = document.getElementById('caixaInicialStatus');
+      if (input && status) {
+        if (saved !== null) {
+          input.value = parseFloat(saved).toFixed(2);
+          status.textContent = 'Salvo para hoje';
+        } else {
+          input.value = '';
+          status.textContent = 'Não definido';
+        }
+      }
+    }
+    function saveCaixaInicial() {
+      const input = document.getElementById('caixaInicial');
+      const status = document.getElementById('caixaInicialStatus');
+      if (!input) return;
+      const val = parseFloat(input.value) || 0;
+      localStorage.setItem(getCaixaInicialKey(), val.toFixed(2));
+      if (status) status.textContent = 'Salvo!';
+      // Recalcula saldo
+      if (_debounced.loadDashboardData) _debounced.loadDashboardData();
+    }
+    const saveCaixaBtn = document.getElementById('saveCaixaInicial');
+    if (saveCaixaBtn) saveCaixaBtn.addEventListener('click', saveCaixaInicial);
+
+    // ========== MAIN DATA LOADING ==========
+    async function loadDashboardData() {
+      try {
+        const [products, people] = await Promise.all([
+          axios.get(`${API_BASE}/products`).then(r => r.data.data || r.data || []),
+          axios.get(`${API_BASE}/people`).then(r => r.data.data || r.data || [])
+        ]);
+
+        const elTotalProducts = document.getElementById('total-products');
+        const elTotalCustomers = document.getElementById('total-customers');
+        const elLowStock = document.getElementById('low-stock');
+        if (elTotalProducts) elTotalProducts.textContent = products.length;
+        if (elTotalCustomers) elTotalCustomers.textContent = people.length;
+        if (elLowStock) elLowStock.textContent = products.filter(p => (p.stock || 0) <= 5).length;
+
+        // Alertas de estoque baixo
+        const lowProducts = products.filter(p => (p.stock || 0) <= 5);
+        const elAlertasSistema = document.getElementById('alertas-sistema');
+        if (elAlertasSistema) {
+          if (lowProducts.length > 0) {
+            const list = lowProducts.slice(0, 10).map(p => `
+              <div class="alerta-produto d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <div class="font-weight-700">${p.name}</div>
+                  <div class="text-muted small">SKU: ${p.sku || '—'}</div>
+                </div>
+                <div class="text-right">
+                  <div class="font-weight-700">Estoque: ${p.stock || 0}</div>
+                </div>
+              </div>
+            `).join('');
+            elAlertasSistema.innerHTML = `
+              <div class="alerta-item critical"><i class="fa fa-exclamation-triangle mr-2"></i> ${lowProducts.length} produto(s) com estoque baixo</div>
+              <div class="alertas-list mt-3">${list}</div>
+            `;
+          } else {
+            elAlertasSistema.innerHTML = '<div class="empty-state"><i class="fa fa-check-circle text-success"></i><p>Tudo OK!</p></div>';
+          }
+        }
+
+        // Atualiza período e carrega dados
+        dashboardPeriod = document.querySelector('.period-btn.active')?.dataset.period || 'today';
+        loadSalesForPeriod(dashboardPeriod);
+      } catch (e) { console.error('Erro ao carregar dados:', e); }
+    }
+
+    // ========== VENDAS E CÁLCULOS POR PERÍODO ==========
+    async function loadSalesForPeriod(period) {
+      try {
+        const now = new Date();
+        let start = new Date(now), end = new Date(now);
+
+        if (period === 'today') {
+          // mesmo dia - mantém start e end iguais
+        } else if (period === 'week') {
+          const day = (now.getDay() + 6) % 7;
+          start = addDays(now, -day);
+          end = addDays(start, 6);
+        } else if (period === 'month') {
+          start = new Date(now.getFullYear(), now.getMonth(), 1);
+          end = new Date(now.getFullYear(), now.getMonth()+1, 0);
+        } else if (period === 'year') {
+          start = new Date(now.getFullYear(), 0, 1);
+          end = new Date(now.getFullYear(), 11, 31);
+        }
+
+        const startDate = formatDateISO(start);
+        const endDate = formatDateISO(end);
+
+        // Buscar vendas do período
+        const [vendasResp, receiptsResp, transactionsResp, fiadoResp, topProductsResp, topClientsResp, paymentsResp] = await Promise.all([
+          axios.get(`${API_BASE}/vendas`, { params: { startDate, endDate } }).catch(() => ({ data: { data: [] } })),
+          axios.get(`${API_BASE}/receipts`).catch(() => ({ data: { data: [] } })),
+          axios.get(`${API_BASE}/transactions`).catch(() => ({ data: { data: [] } })),
+          axios.get(`${API_BASE}/dashboard/fiado`).catch(() => ({ data: {} })),
+          axios.get(`${API_BASE}/dashboard/top-products`, { params: { startDate, endDate, limit: 10 } }).catch(() => ({ data: { data: [] } })),
+          axios.get(`${API_BASE}/dashboard/top-clients`, { params: { startDate, endDate, limit: 10 } }).catch(() => ({ data: { data: [] } })),
+          axios.get(`${API_BASE}/dashboard/payments`, { params: { startDate, endDate } }).catch(() => ({ data: { data: [] } }))
+        ]);
+
+        let vendas = vendasResp.data?.data || vendasResp.data || [];
+        // Fallback: se não houver vendas via /api/vendas, tentar /api/sales (alias em inglês)
+        if ((!vendas || vendas.length === 0)) {
+          try {
+            const alt = await axios.get(`${API_BASE}/sales`, { params: { startDate, endDate } }).then(r => r.data.data || r.data || []);
+            if (alt && alt.length) vendas = alt.map(s => ({
+              // garantir compatibilidade com formato esperado (sale_date, total)
+              id: s.id,
+              client_name: s.clientName || s.client_name,
+              total: s.total || s.total,
+              sale_date: s.saleDate || s.sale_date,
+              amount_paid: s.amountPaid || s.amount_paid || 0,
+              notes: s.notes || ''
+            }));
+          } catch (e) { /* ignore */ }
+        }
+
+        const receipts = receiptsResp.data?.data || receiptsResp.data || [];
+        const transactions = transactionsResp.data?.data || transactionsResp.data || [];
+
+        // ========== VENDAS DO PERÍODO ==========
+        // Filtra vendas pelo período
+        const vendasNoPeriodo = vendas.filter(v => {
+          const saleDate = (v.sale_date || v.saleDate || '').slice(0, 10);
+          return saleDate >= startDate && saleDate <= endDate;
+        });
+        const totalVendas = vendasNoPeriodo.reduce((s, v) => s + parseFloat(v.total || 0), 0);
+        const qtdVendas = vendasNoPeriodo.length;
+        
+        const elTotalSales = document.getElementById('total-sales');
+        const elTotalSalesCount = document.getElementById('total-sales-count');
+        if (elTotalSales) elTotalSales.textContent = formatCurrency(totalVendas);
+        if (elTotalSalesCount) elTotalSalesCount.textContent = `${qtdVendas} venda(s)`;
+
+        // ========== TICKET MÉDIO ==========
+        // Ticket médio = total vendas / quantidade de vendas
+        const ticketMedio = qtdVendas > 0 ? totalVendas / qtdVendas : 0;
+        const elTicketMedio = document.getElementById('ticket-medio');
+        if (elTicketMedio) elTicketMedio.textContent = formatCurrency(ticketMedio);
+
+        // ========== FIADO GERAL ==========
+        // Fiado = vendas a prazo - recebimentos dessas vendas
+        const fiadoData = fiadoResp.data || {};
+        const elFiadoGeral = document.getElementById('fiado-geral');
+        if (elFiadoGeral) elFiadoGeral.textContent = formatCurrency(fiadoData.outstanding || 0);
+
+        // ========== CONTAS A PAGAR (FUTURAS) ==========
+        // Somente transações com data futura, tipo saída, não pagas
+        const hoje = formatDateISO(new Date());
+        const contasFuturas = transactions.filter(t => {
+          const dueDate = (t.dueDate || t.due_date || '').slice(0, 10);
+          const val = parseFloat(t.amount || t.value || 0);
+          const isSaida = (t.type || '').toLowerCase() === 'saida' || val < 0 || /fornecedor|conta|pagar|despesa|aluguel/i.test(t.category || '');
+          return isSaida && !t.paid && dueDate > hoje;
+        });
+        const totalContasPagar = contasFuturas.reduce((s, t) => s + Math.abs(parseFloat(t.amount || t.value || 0)), 0);
+        const elContasPagar = document.getElementById('contas-pagar');
+        if (elContasPagar) elContasPagar.textContent = formatCurrency(totalContasPagar);
+
+        // ========== FLUXO DE CAIXA (ENTRADAS E SAÍDAS) ==========
+        // Entradas = recebimentos efetivos (receipts) no período
+        const receiptsNoPeriodo = receipts.filter(r => {
+          const createdAt = (r.createdAt || r.created_at || '').slice(0, 10);
+          return createdAt >= startDate && createdAt <= endDate;
+        });
+        const totalEntradas = receiptsNoPeriodo.reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+        
+        // Saídas = transações de saída pagas no período
+        const saidasNoPeriodo = transactions.filter(t => {
+          const dueDate = (t.dueDate || t.due_date || '').slice(0, 10);
+          const paymentDate = (t.paymentDate || t.payment_date || '').slice(0, 10);
+          const val = parseFloat(t.amount || t.value || 0);
+          const isSaida = (t.type || '').toLowerCase() === 'saida' || val < 0;
+          const dataRef = paymentDate || dueDate;
+          return isSaida && dataRef >= startDate && dataRef <= endDate;
+        });
+        const totalSaidas = saidasNoPeriodo.reduce((s, t) => s + Math.abs(parseFloat(t.amount || t.value || 0)), 0);
+
+        // Caixa inicial do dia
+        const caixaInicial = parseFloat(localStorage.getItem(getCaixaInicialKey()) || 0);
+        const saldo = caixaInicial + totalEntradas - totalSaidas;
+
+        const elTotalEntradas = document.getElementById('total-entradas');
+        const elTotalSaidas = document.getElementById('total-saidas');
+        const elSaldoPeriodo = document.getElementById('saldo-periodo');
+        if (elTotalEntradas) elTotalEntradas.textContent = formatCurrency(totalEntradas);
+        if (elTotalSaidas) elTotalSaidas.textContent = formatCurrency(totalSaidas);
+        if (elSaldoPeriodo) elSaldoPeriodo.textContent = formatCurrency(saldo);
+
+        // ========== GRÁFICO VENDAS POR PERÍODO ==========
+        renderSalesChart(period, start, end, vendasNoPeriodo, receiptsNoPeriodo);
+
+        // ========== GRÁFICO DISTRIBUIÇÃO ==========
+        // Vendas = total das vendas, Recebimentos = total dos receipts
+        const totalRecebimentos = totalEntradas;
+        renderDistributionChart(totalVendas, totalRecebimentos);
+
+        // ========== GRÁFICO PAGAMENTOS POR FORMA ==========
+        renderPaymentsChart(paymentsResp.data?.data || []);
+
+        // ========== TOP 10 PRODUTOS ==========
+        const topProducts = topProductsResp.data?.data || [];
+        renderTopProducts(topProducts);
+
+        // ========== TOP 10 CLIENTES ==========
+        const topClients = topClientsResp.data?.data || [];
+        renderTopClients(topClients);
+
+        // ========== ÚLTIMAS TRANSAÇÕES ==========
+        renderRecentActivities(transactions.slice(0, 5));
+
+      } catch (err) {
+        console.error('Erro ao carregar vendas:', err);
+      }
+    }
+
+    // ========== GRÁFICO VENDAS POR PERÍODO ==========
+    function renderSalesChart(period, start, end, vendas, receipts) {
+      const ctx = document.getElementById('salesChart');
+      if (!ctx) return;
+      if (salesChart) salesChart.destroy();
+
+      const labels = [];
+      const vendasData = [];
+      const entradasData = [];
+
+      if (period === 'today') {
+        // Para "hoje", mostra por hora
+        for (let h = 0; h < 24; h++) {
+          labels.push(`${h.toString().padStart(2,'0')}h`);
+          const vendasHora = vendas.filter(v => {
+            return getHourInBrasilia(v.sale_date || v.saleDate) === h;
+          }).reduce((s, v) => s + parseFloat(v.total || 0), 0);
+          vendasData.push(vendasHora);
+          
+          const receiptsHora = receipts.filter(r => {
+            return getHourInBrasilia(r.createdAt || r.created_at) === h;
+          }).reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+          entradasData.push(receiptsHora);
+        }
+      } else {
+        // Para outros períodos, mostra por dia
+        for (let d = new Date(start); d <= end; d = addDays(d, 1)) {
+          const iso = formatDateISO(d);
+          let label;
+          if (period === 'week') {
+            label = new Intl.DateTimeFormat('pt-BR', { weekday: 'short' }).format(d);
+          } else {
+            label = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(d);
+          }
+          labels.push(label);
+          
+          const vendasDia = vendas.filter(v => formatDateISOinBrasilia(v.sale_date || v.saleDate || '').slice(0,10) === iso)
+            .reduce((s, v) => s + parseFloat(v.total || 0), 0);
+          vendasData.push(vendasDia);
+          
+          const receiptsDia = receipts.filter(r => formatDateISOinBrasilia(r.createdAt || r.created_at || '').slice(0,10) === iso)
+            .reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+          entradasData.push(receiptsDia);
+        }
+      }
+
+      salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Vendas',
+              data: vendasData,
+              borderColor: '#6366f1',
+              backgroundColor: 'rgba(99,102,241,0.1)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3
+            },
+            {
+              label: 'Entradas',
+              data: entradasData,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16,185,129,0.1)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`
+              }
+            },
+            legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true } }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: v => formatCurrency(v) } }
+          }
+        }
+      });
+    }
+
+    // ========== GRÁFICO DISTRIBUIÇÃO (VENDAS vs RECEBIMENTOS) ==========
+    function renderDistributionChart(totalVendas, totalRecebimentos) {
+      const ctx = document.getElementById('distributionChart');
+      if (!ctx) return;
+      if (distributionChart) distributionChart.destroy();
+
+      const total = totalVendas + totalRecebimentos;
+      const labels = ['Vendas', 'Recebimentos'];
+      const values = [totalVendas, totalRecebimentos];
+      const colors = ['#6366f1', '#10b981'];
+
+      if (total === 0) {
+        distributionChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: { labels: ['Sem dados'], datasets: [{ data: [1], backgroundColor: ['#e5e7eb'] }] },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+        return;
+      }
+
+      distributionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{ data: values, backgroundColor: colors }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const v = ctx.raw || 0;
+                  const pct = total ? ((v / total) * 100).toFixed(1) : 0;
+                  return `${ctx.label}: ${formatCurrency(v)} (${pct}%)`;
+                }
+              }
+            },
+            legend: { position: 'top', labels: { boxWidth: 12, usePointStyle: true } }
+          }
+        }
+      });
+    }
+
+    // ========== GRÁFICO PAGAMENTOS POR FORMA ==========
+    function renderPaymentsChart(items) {
+      const ctx = document.getElementById('paymentsChart');
+      if (!ctx) return;
+      if (paymentsChart) paymentsChart.destroy();
+
+      const methodsOrder = [
+        { key: 'cash', label: 'Dinheiro', color: '#10b981' },
+        { key: 'prazo', label: 'A prazo', color: '#f59e0b' },
+        { key: 'card', label: 'Cartão', color: '#6366f1' },
+        { key: 'pix', label: 'PIX', color: '#06b6d4' }
+      ];
+
+      const map = {};
+      methodsOrder.forEach(m => map[m.key] = 0);
+      let othersSum = 0;
+
+      (items || []).forEach(it => {
+        const k = (it.method || '').toLowerCase();
+        const t = parseFloat(it.total || 0);
+        if (map.hasOwnProperty(k)) map[k] += t; else othersSum += t;
+      });
+
+      let labels = methodsOrder.map(m => m.label);
+      let data = methodsOrder.map(m => map[m.key]);
+      let backgroundColor = methodsOrder.map(m => m.color);
+
+      if (othersSum > 0) {
+        labels.push('Outros');
+        data.push(othersSum);
+        backgroundColor.push('#9ca3af');
+      }
+
+      const sum = data.reduce((s, v) => s + v, 0);
+      if (!sum) {
+        labels = ['Sem dados']; data = [0]; backgroundColor = ['#e5e7eb'];
+      }
+
+      paymentsChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Valor (R$)', data, backgroundColor }] },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const v = ctx.raw || 0;
+                  const pct = sum ? ((v / sum) * 100).toFixed(1) : 0;
+                  return `${formatCurrency(v)} (${pct}%)`;
+                }
+              }
+            },
+            legend: { display: false }
+          },
+          scales: {
+            x: { ticks: { callback: v => formatCurrency(v) } }
+          }
+        }
+      });
+    }
+
+    // ========== TOP 10 PRODUTOS ==========
+    function renderTopProducts(products) {
+      const el = document.getElementById('ranking-produtos');
+      if (!el) return;
+      if (!products || products.length === 0) {
+        el.innerHTML = '<div class="empty-state"><i class="fa fa-box-open"></i><p>Sem vendas no período</p></div>';
+        return;
+      }
+      el.innerHTML = products.slice(0, 10).map((p, i) => `
+        <div class="ranking-item">
+          <div class="ranking-position ${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''}">${i + 1}</div>
+          <div class="ranking-name">${p.name || 'Produto'}</div>
+          <div class="ranking-value">${p.qty || 0}x</div>
+        </div>
+      `).join('');
+    }
+
+    // ========== TOP 10 CLIENTES ==========
+    function renderTopClients(clients) {
+      const el = document.getElementById('ranking-clientes');
+      if (!el) return;
+      if (!clients || clients.length === 0) {
+        el.innerHTML = '<div class="empty-state"><i class="fa fa-users"></i><p>Sem clientes no período</p></div>';
+        return;
+      }
+      el.innerHTML = clients.slice(0, 10).map((c, i) => `
+        <div class="ranking-item">
+          <div class="ranking-position ${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''}">${i + 1}</div>
+          <div class="ranking-name">${c.name || 'Cliente'}</div>
+          <div class="ranking-value">${formatCurrency(c.total)}</div>
+        </div>
+      `).join('');
+    }
+
+    // ========== ÚLTIMAS TRANSAÇÕES ==========
+    function renderRecentActivities(transactions) {
+      const el = document.getElementById('recent-activities');
+      if (!el) return;
+      if (!transactions || transactions.length === 0) {
+        el.innerHTML = '<div class="empty-state"><i class="fa fa-inbox"></i><p>Nenhuma atividade</p></div>';
+        return;
+      }
+      el.innerHTML = transactions.map(t => {
+        const val = parseFloat(t.amount || t.value || 0);
+        const isEntrada = val > 0 || (t.type || '').toLowerCase() === 'entrada';
+        const bg = isEntrada ? 'var(--success)' : 'var(--danger)';
+        const icon = isEntrada ? 'fa-arrow-up' : 'fa-arrow-down';
+        const title = t.description || (isEntrada ? 'Entrada' : 'Saída');
+        return `
+          <div class="activity-item">
+            <div class="activity-icon" style="background: ${bg};"><i class="fa ${icon}"></i></div>
+            <div>
+              <div class="activity-title">${title}</div>
+              <div class="activity-time">${formatCurrency(Math.abs(val))}</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // ========== INICIALIZAÇÃO ==========
+    _debounced.loadSalesForPeriod = debounce(loadSalesForPeriod, 300);
+    _debounced.loadDashboardData = debounce(loadDashboardData, 600);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCaixaInicial();
+      _debounced.loadDashboardData();
+    });
+
+    // Botões de período
+    document.querySelectorAll('.period-btn').forEach(btn => btn.addEventListener('click', function() {
+      document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      dashboardPeriod = this.dataset.period;
+      _debounced.loadSalesForPeriod(dashboardPeriod);
+    }));
+
+    // Botão atualizar
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) refreshBtn.addEventListener('click', () => {
+      _debounced.loadDashboardData();
+    });
+
+    // Atualização via storage (outras abas)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'dashboard_refresh') {
+        _debounced.loadDashboardData();
+      }
+    });
+  </script>
+</body>
+</html>

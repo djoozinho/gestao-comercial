@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistema de Gestão Comercial completo para sua empresa. PDV, Controle de Estoque, Financeiro, NF-e e muito mais. Experimente grátis!">
+  <meta name="keywords" content="sistema de gestão, PDV, controle de estoque, financeiro, NF-e, ERP, gestão comercial">
+  <title>GestãoPro - Sistema de Gestão Comercial Completo</title>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #818cf8;
+      --secondary: #8b5cf6;
+      --accent: #a855f7;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #0f172a;
+      --gray-900: #1e293b;
+      --gray-800: #334155;
+      --gray-700: #475569;
+      --gray-600: #64748b;
+      --gray-500: #94a3b8;
+      --gray-400: #cbd5e1;
+      --gray-300: #e2e8f0;
+      --gray-200: #f1f5f9;
+      --gray-100: #f8fafc;
+      --white: #ffffff;
+      --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+      --gradient-dark: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--gray-800);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ===== NAVIGATION ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 16px 0;
+      transition: all 0.3s ease;
+    }
+
+    .navbar.scrolled {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      padding: 12px 0;
+    }
+
+    .navbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .logo-icon i {
+      color: white;
+      font-size: 22px;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--gray-700);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+      transition: color 0.2s;
+    }
+
+    .navbar:not(.scrolled) .nav-links a {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .navbar:not(.scrolled) .nav-links a:hover {
+      color: white;
+    }
+
+    .nav-buttons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--gray-700);
+    }
+
+    .navbar:not(.scrolled) .btn-ghost {
+      color: white;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+    }
+
+    .btn-primary {
+      background: var(--gradient);
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-lg {
+      padding: 16px 32px;
+      font-size: 16px;
+      border-radius: 12px;
+    }
+
+    .btn-white {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-white:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* ===== CONTAINER ===== */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      min-height: 100vh;
+      background: var(--dark);
+      position: relative;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 70%);
+    }
+
+    .hero-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      padding: 120px 0 80px;
+    }
+
+    .hero-text {
+      color: white;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--primary-light);
+      margin-bottom: 24px;
+    }
+
+    .hero-badge i {
+      color: var(--warning);
+    }
+
+    .hero-title {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+
+    .hero-title span {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-description {
+      font-size: 18px;
+      color: var(--gray-400);
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+    }
+
+    .stat-item {
+      text-align: left;
+    }
+
+    .stat-number {
+      font-size: 36px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--gray-500);
+    }
+
+    .hero-image {
+      position: relative;
+    }
+
+    .hero-mockup {
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 
+        0 50px 100px -20px rgba(0, 0, 0, 0.5),
+        0 30px 60px -30px rgba(99, 102, 241, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .floating-card {
+      position: absolute;
+      background: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .floating-card.card-1 {
+      top: 20%;
+      left: -60px;
+      animation-delay: 0s;
+    }
+
+    .floating-card.card-2 {
+      bottom: 20%;
+      right: -40px;
+      animation-delay: 1s;
+    }
+
+    .floating-card.card-3 {
+      top: 60%;
+      left: -40px;
+      animation-delay: 2s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .floating-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .floating-icon.green { background: #d1fae5; color: #059669; }
+    .floating-icon.blue { background: #dbeafe; color: #2563eb; }
+    .floating-icon.purple { background: #ede9fe; color: #7c3aed; }
+
+    .floating-text strong {
+      display: block;
+      font-size: 14px;
+      color: var(--gray-800);
+    }
+
+    .floating-text span {
+      font-size: 12px;
+      color: var(--gray-500);
+    }
+
+    /* ===== SECTIONS COMMON ===== */
+    section {
+      padding: 100px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 60px;
+    }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99, 102, 241, 0.1);
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .section-description {
+      font-size: 18px;
+      color: var(--gray-600);
+      line-height: 1.7;
+    }
+
+    /* ===== FEATURES SECTION ===== */
+    .features {
+      background: var(--gray-100);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      transition: all 0.3s ease;
+      border: 1px solid var(--gray-200);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
+      border-color: var(--primary-light);
+    }
+
+    .feature-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+      background: var(--gradient);
+      color: white;
+      box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      color: var(--gray-600);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ===== MODULES SECTION ===== */
+    .modules {
+      background: white;
+    }
+
+    .modules-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+
+    .module-tab {
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--gray-100);
+      color: var(--gray-600);
+      border: none;
+    }
+
+    .module-tab:hover {
+      background: var(--gray-200);
+    }
+
+    .module-tab.active {
+      background: var(--gradient);
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .module-content {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .module-content.active {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .module-info h3 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 16px;
+    }
+
+    .module-info p {
+      color: var(--gray-600);
+      font-size: 16px;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .module-features {
+      list-style: none;
+    }
+
+    .module-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+      color: var(--gray-700);
+    }
+
+    .module-features li i {
+      color: var(--success);
+      font-size: 18px;
+      margin-top: 2px;
+    }
+
+    .module-image {
+      border-radius: 20px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--gray-200);
+    }
+
+    /* ===== BENEFITS SECTION ===== */
+    .benefits {
+      background: var(--dark);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .benefits::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 30% 0%, rgba(99, 102, 241, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 100%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+    }
+
+    .benefits .section-title {
+      color: white;
+    }
+
+    .benefits .section-description {
+      color: var(--gray-400);
+    }
+
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .benefit-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .benefit-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-8px);
+    }
+
+    .benefit-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
+      background: var(--gradient);
+      color: white;
+    }
+
+    .benefit-card h4 {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .benefit-card p {
+      color: var(--gray-400);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ===== TESTIMONIALS ===== */
+    .testimonials {
+      background: var(--gray-100);
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .testimonial-card {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      border: 1px solid var(--gray-200);
+      transition: all 0.3s ease;
+    }
+
+    .testimonial-card:hover {
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .testimonial-stars {
+      color: var(--warning);
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .testimonial-text {
+      font-size: 15px;
+      color: var(--gray-700);
+      line-height: 1.7;
+      margin-bottom: 24px;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .testimonial-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .testimonial-info strong {
+      display: block;
+      color: var(--gray-900);
+      font-size: 15px;
+    }
+
+    .testimonial-info span {
+      color: var(--gray-500);
+      font-size: 13px;
+    }
+
+    /* ===== PRICING ===== */
+    .pricing {
+      background: white;
+    }
+
+    .pricing-toggle {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .pricing-toggle span {
+      font-weight: 500;
+      color: var(--gray-600);
+    }
+
+    .pricing-toggle span.active {
+      color: var(--gray-900);
+    }
+
+    .toggle-switch {
+      width: 56px;
+      height: 30px;
+      background: var(--gray-300);
+      border-radius: 50px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .toggle-switch.active {
+      background: var(--primary);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(26px);
+    }
+
+    .pricing-badge {
+      background: var(--success);
+      color: white;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-weight: 600;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .pricing-card {
+      background: white;
+      border-radius: 24px;
+      padding: 40px 32px;
+      border: 2px solid var(--gray-200);
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .pricing-card:hover {
+      border-color: var(--primary-light);
+    }
+
+    .pricing-card.popular {
+      background: var(--dark);
+      border-color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .pricing-card.popular .plan-name,
+    .pricing-card.popular .plan-price,
+    .pricing-card.popular .plan-period,
+    .pricing-card.popular .plan-features li {
+      color: white;
+    }
+
+    .pricing-card.popular .plan-features li i {
+      color: var(--success);
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--gradient);
+      color: white;
+      padding: 6px 20px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .plan-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .plan-description {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 24px;
+    }
+
+    .plan-price {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--gray-900);
+    }
+
+    .plan-price sup {
+      font-size: 20px;
+      font-weight: 600;
+      vertical-align: super;
+    }
+
+    .plan-period {
+      color: var(--gray-500);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .plan-features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      color: var(--gray-700);
+      font-size: 14px;
+    }
+
+    .plan-features li i {
+      color: var(--success);
+      font-size: 16px;
+    }
+
+    .plan-features li.disabled {
+      color: var(--gray-400);
+    }
+
+    .plan-features li.disabled i {
+      color: var(--gray-400);
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta {
+      background: var(--gradient);
+      padding: 100px 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta h2 {
+      font-size: 42px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .cta p {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 32px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: var(--dark);
+      padding: 80px 0 40px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 60px;
+    }
+
+    .footer-brand p {
+      color: var(--gray-400);
+      font-size: 14px;
+      line-height: 1.7;
+      margin-top: 16px;
+      max-width: 300px;
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .footer-social a {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-400);
+      transition: all 0.2s;
+    }
+
+    .footer-social a:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .footer-column h4 {
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .footer-column ul {
+      list-style: none;
+    }
+
+    .footer-column li {
+      margin-bottom: 12px;
+    }
+
+    .footer-column a {
+      color: var(--gray-400);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .footer-column a:hover {
+      color: white;
+    }
+
+    .footer-bottom {
+      padding-top: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-bottom p {
+      color: var(--gray-500);
+      font-size: 14px;
+    }
+
+    .footer-bottom-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-bottom-links a {
+      color: var(--gray-500);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .footer-bottom-links a:hover {
+      color: white;
+    }
+
+    /* ===== MOBILE MENU ===== */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .navbar.scrolled .mobile-menu-btn {
+      color: var(--gray-700);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .hero-title {
+        font-size: 42px;
+      }
+
+      .hero-buttons {
+        justify-content: center;
+      }
+
+      .hero-stats {
+        justify-content: center;
+      }
+
+      .hero-image {
+        display: none;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .module-content.active {
+        grid-template-columns: 1fr;
+      }
+
+      .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .testimonials-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .pricing-card.popular {
+        transform: none;
+      }
+
+      .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links, .nav-buttons {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .hero-title {
+        font-size: 32px;
+      }
+
+      .hero-description {
+        font-size: 16px;
+      }
+
+      .hero-buttons {
+        flex-direction: column;
+      }
+
+      .hero-stats {
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .stat-item {
+        text-align: center;
+      }
+
+      .section-title {
+        font-size: 28px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .benefits-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .footer-brand p {
+        max-width: none;
+      }
+
+      .footer-social {
+        justify-content: center;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .cta h2 {
+        font-size: 28px;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="#" class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-store"></i>
+        </div>
+        <span class="logo-text">GestãoPro</span>
+      </a>
+      
+      <ul class="nav-links">
+        <li><a href="#features">Recursos</a></li>
+        <li><a href="#modules">Módulos</a></li>
+        <li><a href="#pricing">Planos</a></li>
+        <li><a href="#testimonials">Depoimentos</a></li>
+        <li><a href="#contact">Contato</a></li>
+      </ul>
+      
+      <div class="nav-buttons">
+        <a href="login.html" class="btn btn-ghost">Entrar</a>
+        <a href="#pricing" class="btn btn-primary">Começar Grátis</a>
+      </div>
+      
+      <button class="mobile-menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <div class="hero-badge">
+            <i class="fas fa-star"></i>
+            Mais de 1.000 empresas confiam em nós
+          </div>
+          <h1 class="hero-title">
+            Gestão Comercial <span>Inteligente</span> para seu Negócio
+          </h1>
+          <p class="hero-description">
+            Simplifique suas operações com nossa plataforma completa. PDV moderno, 
+            controle de estoque, financeiro, emissão de NF-e e muito mais — tudo em 
+            um único lugar, acessível de qualquer dispositivo.
+          </p>
+          <div class="hero-buttons">
+            <a href="#pricing" class="btn btn-primary btn-lg">
+              <i class="fas fa-rocket"></i>
+              Testar Grátis por 14 Dias
+            </a>
+            <a href="#demo" class="btn btn-ghost btn-lg">
+              <i class="fas fa-play-circle"></i>
+              Ver Demonstração
+            </a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="stat-number">1.200+</div>
+              <div class="stat-label">Clientes Ativos</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">50M+</div>
+              <div class="stat-label">Vendas Processadas</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">99.9%</div>
+              <div class="stat-label">Uptime Garantido</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-image">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop" alt="Dashboard GestãoPro" class="hero-mockup">
+          
+          <div class="floating-card card-1">
+            <div class="floating-icon green">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="floating-text">
+              <strong>+32% Vendas</strong>
+              <span>Este mês</span>
+            </div>
+          </div>
+          
+          <div class="floating-card card-2">
+            <div class="floating-icon blue">
+              <i class="fas fa-box"></i>
+            </div>
+            <div class="floating-text">
+              <strong>Estoque OK</strong>
+              <span>1.234 produtos</span>
+            </div>
+          </div>
+          
+          <div class="floating-card card-3">
+            <div class="floating-icon purple">
+              <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="floating-text">
+              <strong>NF-e Emitida</strong>
+              <span>Agora mesmo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">
+          <i class="fas fa-sparkles"></i>
+          Recursos Poderosos
+        </span>
+        <h2 class="section-title">Tudo que Você Precisa em Um Só Lugar</h2>
+        <p class="section-description">
+          Nossa plataforma oferece ferramentas completas para gerenciar todos os aspectos 
+          do seu negócio, desde vendas até relatórios detalhados.
+        </p>
+      </div>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-cash-register"></i>
+          </div>
+          <h3>PDV Completo</h3>
+          <p>
+            Ponto de venda moderno e intuitivo, com suporte a múltiplas formas de pagamento, 
+            parcelamento, desconto e impressão de cupons.
+          </p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-boxes-stacked"></i>
+          </div>
+          <h3>Gestão de Estoque</h3>
+          <p>
+            Controle total do seu inventário com alertas de estoque baixo, movimentações 
+            automáticas e histórico completo de entradas e saídas.
+          </p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <h3>Financeiro Integrado</h3>
+          <p>
+            Contas a pagar e receber, fluxo de caixa, conciliação bancária e relatórios 
+            financeiros detalhados para tomada de decisão.
+          </p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-file-invoice-dollar"></i>
+          </div>
+          <h3>Emissão de NF-e</h3>
+          <p>
+            Emita notas fiscais eletrônicas de forma rápida e segura, com integração 
+            direta à SEFAZ e armazenamento automático dos XMLs.
+          </p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3>Gestão de Clientes</h3>
+          <p>
+            Cadastro completo de clientes com histórico de compras, crediário, 
+            limite de crédito e comunicação personalizada.
+          </p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <h3>Relatórios Inteligentes</h3>
+          <p>
+            Dashboards interativos e relatórios customizáveis para acompanhar 
+            vendas, lucros, produtos mais vendidos e muito mais.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modules Section -->
+  <section class="modules" id="modules">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">
+          <i class="fas fa-puzzle-piece"></i>
+          Módulos Especializados
+        </span>
+        <h2 class="section-title">Soluções Para Cada Área</h2>
+        <p class="section-description">
+          Explore nossos módulos desenvolvidos para atender às necessidades específicas 
+          de cada departamento da sua empresa.
+        </p>
+      </div>
+      
+      <div class="modules-tabs">
+        <button class="module-tab active" data-module="pdv">PDV</button>
+        <button class="module-tab" data-module="estoque">Estoque</button>
+        <button class="module-tab" data-module="financeiro">Financeiro</button>
+        <button class="module-tab" data-module="fiscal">Fiscal</button>
+        <button class="module-tab" data-module="relatorios">Relatórios</button>
+      </div>
+      
+      <div class="module-content active" id="module-pdv">
+        <div class="module-info">
+          <h3>Ponto de Venda Moderno</h3>
+          <p>
+            Nosso PDV foi desenvolvido para agilizar suas vendas e proporcionar a melhor 
+            experiência para seus clientes. Interface intuitiva que funciona em qualquer 
+            dispositivo, online ou offline.
+          </p>
+          <ul class="module-features">
+            <li><i class="fas fa-check-circle"></i> Vendas rápidas com busca inteligente de produtos</li>
+            <li><i class="fas fa-check-circle"></i> Múltiplas formas de pagamento (Dinheiro, Cartão, PIX)</li>
+            <li><i class="fas fa-check-circle"></i> Parcelamento flexível com controle de parcelas</li>
+            <li><i class="fas fa-check-circle"></i> Impressão de cupom fiscal e não fiscal</li>
+            <li><i class="fas fa-check-circle"></i> Controle de caixa com abertura e fechamento</li>
+            <li><i class="fas fa-check-circle"></i> Gestão de contas a prazo (fiado) por cliente</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Saiba Mais</a>
+        </div>
+        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=450&fit=crop" alt="PDV GestãoPro" class="module-image">
+      </div>
+      
+      <div class="module-content" id="module-estoque">
+        <div class="module-info">
+          <h3>Controle Total do Estoque</h3>
+          <p>
+            Mantenha seu estoque sempre organizado e atualizado. Receba alertas automáticos 
+            quando produtos estiverem abaixo do mínimo e nunca mais perca vendas por falta 
+            de mercadoria.
+          </p>
+          <ul class="module-features">
+            <li><i class="fas fa-check-circle"></i> Cadastro completo de produtos com variações</li>
+            <li><i class="fas fa-check-circle"></i> Movimentações de entrada e saída</li>
+            <li><i class="fas fa-check-circle"></i> Alertas de estoque mínimo automáticos</li>
+            <li><i class="fas fa-check-circle"></i> Inventário com conferência por código de barras</li>
+            <li><i class="fas fa-check-circle"></i> Integração automática com vendas</li>
+            <li><i class="fas fa-check-circle"></i> Relatório de giro de estoque</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Saiba Mais</a>
+        </div>
+        <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?w=600&h=450&fit=crop" alt="Estoque GestãoPro" class="module-image">
+      </div>
+      
+      <div class="module-content" id="module-financeiro">
+        <div class="module-info">
+          <h3>Gestão Financeira Completa</h3>
+          <p>
+            Tenha visão clara da saúde financeira do seu negócio. Controle receitas, 
+            despesas, fluxo de caixa e tome decisões baseadas em dados reais.
+          </p>
+          <ul class="module-features">
+            <li><i class="fas fa-check-circle"></i> Contas a pagar e receber organizadas</li>
+            <li><i class="fas fa-check-circle"></i> Fluxo de caixa em tempo real</li>
+            <li><i class="fas fa-check-circle"></i> Conciliação bancária simplificada</li>
+            <li><i class="fas fa-check-circle"></i> Categorização automática de transações</li>
+            <li><i class="fas fa-check-circle"></i> DRE e balanço patrimonial</li>
+            <li><i class="fas fa-check-circle"></i> Integração com bancos e PIX</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Saiba Mais</a>
+        </div>
+        <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=450&fit=crop" alt="Financeiro GestãoPro" class="module-image">
+      </div>
+      
+      <div class="module-content" id="module-fiscal">
+        <div class="module-info">
+          <h3>Emissão Fiscal Simplificada</h3>
+          <p>
+            Emita notas fiscais com facilidade e mantenha-se em conformidade com a 
+            legislação. Integração direta com a SEFAZ para NF-e, NFC-e e muito mais.
+          </p>
+          <ul class="module-features">
+            <li><i class="fas fa-check-circle"></i> Emissão de NF-e e NFC-e</li>
+            <li><i class="fas fa-check-circle"></i> Integração direta com SEFAZ</li>
+            <li><i class="fas fa-check-circle"></i> Armazenamento automático de XMLs</li>
+            <li><i class="fas fa-check-circle"></i> Cancelamento e carta de correção</li>
+            <li><i class="fas fa-check-circle"></i> Relatórios fiscais para contador</li>
+            <li><i class="fas fa-check-circle"></i> Suporte a todos os estados brasileiros</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Saiba Mais</a>
+        </div>
+        <img src="https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=600&h=450&fit=crop" alt="Fiscal GestãoPro" class="module-image">
+      </div>
+      
+      <div class="module-content" id="module-relatorios">
+        <div class="module-info">
+          <h3>Relatórios Estratégicos</h3>
+          <p>
+            Transforme dados em insights acionáveis. Nossos relatórios e dashboards 
+            ajudam você a identificar oportunidades e tomar decisões mais inteligentes.
+          </p>
+          <ul class="module-features">
+            <li><i class="fas fa-check-circle"></i> Dashboard em tempo real</li>
+            <li><i class="fas fa-check-circle"></i> Vendas por período, vendedor, produto</li>
+            <li><i class="fas fa-check-circle"></i> Análise de lucratividade</li>
+            <li><i class="fas fa-check-circle"></i> Curva ABC de produtos</li>
+            <li><i class="fas fa-check-circle"></i> Comissões de vendedores</li>
+            <li><i class="fas fa-check-circle"></i> Exportação para Excel e PDF</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Saiba Mais</a>
+        </div>
+        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=450&fit=crop" alt="Relatórios GestãoPro" class="module-image">
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section class="benefits">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge" style="background: rgba(255,255,255,0.1); color: white;">
+          <i class="fas fa-trophy"></i>
+          Por Que Nos Escolher
+        </span>
+        <h2 class="section-title">Vantagens que Fazem a Diferença</h2>
+        <p class="section-description">
+          Descubra por que mais de mil empresas já transformaram sua gestão com nossa plataforma.
+        </p>
+      </div>
+      
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class="fas fa-cloud"></i>
+          </div>
+          <h4>100% na Nuvem</h4>
+          <p>Acesse de qualquer lugar, a qualquer momento. Seus dados sempre seguros e sincronizados.</p>
+        </div>
+        
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class="fas fa-headset"></i>
+          </div>
+          <h4>Suporte Humanizado</h4>
+          <p>Equipe dedicada pronta para ajudar via chat, telefone ou WhatsApp. Sem robôs!</p>
+        </div>
+        
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class="fas fa-shield-halved"></i>
+          </div>
+          <h4>Segurança Total</h4>
+          <p>Criptografia de ponta, backups automáticos e conformidade com a LGPD.</p>
+        </div>
+        
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <i class="fas fa-gauge-high"></i>
+          </div>
+          <h4>Alta Performance</h4>
+          <p>Sistema rápido e responsivo, mesmo com milhares de produtos e transações.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials" id="testimonials">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">
+          <i class="fas fa-heart"></i>
+          Depoimentos
+        </span>
+        <h2 class="section-title">O Que Nossos Clientes Dizem</h2>
+        <p class="section-description">
+          Histórias reais de empresários que transformaram seus negócios com o GestãoPro.
+        </p>
+      </div>
+      
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-text">
+            "Antes do GestãoPro, eu perdia horas fazendo controle em planilhas. Agora tenho 
+            tudo na palma da mão e consigo focar no que realmente importa: atender meus clientes."
+          </p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">MF</div>
+            <div class="testimonial-info">
+              <strong>Maria Fernanda</strong>
+              <span>Loja de Roupas — São Paulo</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="testimonial-stars">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-text">
+            "O controle de estoque é sensacional! Acabaram os problemas de produtos vencendo 
+            ou faltando. O sistema avisa tudo automaticamente. Recomendo demais!"
+          </p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">RC</div>
+            <div class="testimonial-info">
+              <strong>Roberto Carlos</strong>
+              <span>Mercado — Belo Horizonte</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="testimonial-card">
+          <div class="testimonial-stars">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+            <i class="fas fa-star"></i>
+          </div>
+          <p class="testimonial-text">
+            "Migrei de outro sistema e a diferença é gritante. O suporte é excepcional, 
+            me ajudaram em cada etapa. Hoje não troco por nada!"
+          </p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">AS</div>
+            <div class="testimonial-info">
+              <strong>Ana Silva</strong>
+              <span>Farmácia — Rio de Janeiro</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">
+          <i class="fas fa-tags"></i>
+          Planos e Preços
+        </span>
+        <h2 class="section-title">Escolha o Plano Ideal</h2>
+        <p class="section-description">
+          Planos flexíveis que crescem junto com seu negócio. Comece grátis e 
+          faça upgrade quando precisar.
+        </p>
+      </div>
+      
+      <div class="pricing-toggle">
+        <span class="active">Mensal</span>
+        <div class="toggle-switch" id="pricingToggle"></div>
+        <span>Anual</span>
+        <span class="pricing-badge">2 meses grátis</span>
+      </div>
+      
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="plan-name">Starter</div>
+          <div class="plan-description">Para quem está começando</div>
+          <div class="plan-price"><sup>R$</sup>79</div>
+          <div class="plan-period">/mês por usuário</div>
+          <ul class="plan-features">
+            <li><i class="fas fa-check"></i> PDV completo</li>
+            <li><i class="fas fa-check"></i> Controle de estoque</li>
+            <li><i class="fas fa-check"></i> Cadastro de clientes</li>
+            <li><i class="fas fa-check"></i> Relatórios básicos</li>
+            <li><i class="fas fa-check"></i> Suporte por email</li>
+            <li class="disabled"><i class="fas fa-times"></i> Emissão de NF-e</li>
+            <li class="disabled"><i class="fas fa-times"></i> Multi-lojas</li>
+          </ul>
+          <a href="#" class="btn btn-outline" style="width: 100%;">Começar Grátis</a>
+        </div>
+        
+        <div class="pricing-card popular">
+          <span class="popular-badge">Mais Popular</span>
+          <div class="plan-name">Profissional</div>
+          <div class="plan-description">Para negócios em crescimento</div>
+          <div class="plan-price"><sup>R$</sup>149</div>
+          <div class="plan-period">/mês por usuário</div>
+          <ul class="plan-features">
+            <li><i class="fas fa-check"></i> Tudo do Starter +</li>
+            <li><i class="fas fa-check"></i> Emissão de NF-e ilimitada</li>
+            <li><i class="fas fa-check"></i> Financeiro completo</li>
+            <li><i class="fas fa-check"></i> Comissões de vendedores</li>
+            <li><i class="fas fa-check"></i> Relatórios avançados</li>
+            <li><i class="fas fa-check"></i> Integração PIX/MP</li>
+            <li><i class="fas fa-check"></i> Suporte prioritário</li>
+          </ul>
+          <a href="#" class="btn btn-primary" style="width: 100%;">Começar Grátis</a>
+        </div>
+        
+        <div class="pricing-card">
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-description">Para grandes operações</div>
+          <div class="plan-price"><sup>R$</sup>299</div>
+          <div class="plan-period">/mês por usuário</div>
+          <ul class="plan-features">
+            <li><i class="fas fa-check"></i> Tudo do Profissional +</li>
+            <li><i class="fas fa-check"></i> Multi-lojas ilimitadas</li>
+            <li><i class="fas fa-check"></i> API para integrações</li>
+            <li><i class="fas fa-check"></i> Customizações sob medida</li>
+            <li><i class="fas fa-check"></i> Treinamento presencial</li>
+            <li><i class="fas fa-check"></i> Gerente de sucesso dedicado</li>
+            <li><i class="fas fa-check"></i> SLA garantido</li>
+          </ul>
+          <a href="#" class="btn btn-outline" style="width: 100%;">Falar com Vendas</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta" id="contact">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Pronto para Transformar seu Negócio?</h2>
+        <p>
+          Comece hoje mesmo com 14 dias grátis. Sem cartão de crédito, sem compromisso. 
+          Descubra como o GestãoPro pode revolucionar sua gestão comercial.
+        </p>
+        <div class="cta-buttons">
+          <a href="#pricing" class="btn btn-white btn-lg">
+            <i class="fas fa-rocket"></i>
+            Começar Agora — É Grátis
+          </a>
+          <a href="#" class="btn btn-ghost btn-lg" style="color: white; border: 2px solid rgba(255,255,255,0.3);">
+            <i class="fas fa-calendar"></i>
+            Agendar Demonstração
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="logo">
+            <div class="logo-icon">
+              <i class="fas fa-store"></i>
+            </div>
+            <span class="logo-text">GestãoPro</span>
+          </a>
+          <p>
+            Sistema de gestão comercial completo para empresas que querem crescer 
+            de forma organizada e inteligente.
+          </p>
+          <div class="footer-social">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Produto</h4>
+          <ul>
+            <li><a href="#features">Recursos</a></li>
+            <li><a href="#modules">Módulos</a></li>
+            <li><a href="#pricing">Preços</a></li>
+            <li><a href="#">Integrações</a></li>
+            <li><a href="#">Atualizações</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Empresa</h4>
+          <ul>
+            <li><a href="#">Sobre Nós</a></li>
+            <li><a href="#">Carreiras</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Parceiros</a></li>
+            <li><a href="#">Imprensa</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Suporte</h4>
+          <ul>
+            <li><a href="#">Central de Ajuda</a></li>
+            <li><a href="#">Documentação</a></li>
+            <li><a href="#">Status do Sistema</a></li>
+            <li><a href="#">Contato</a></li>
+            <li><a href="#">WhatsApp</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 GestãoPro. Todos os direitos reservados.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Termos de Uso</a>
+          <a href="#">Política de Privacidade</a>
+          <a href="#">Cookies</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    // Module tabs
+    const moduleTabs = document.querySelectorAll('.module-tab');
+    const moduleContents = document.querySelectorAll('.module-content');
+
+    moduleTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const moduleId = tab.dataset.module;
+        
+        moduleTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        moduleContents.forEach(content => {
+          content.classList.remove('active');
+          if (content.id === `module-${moduleId}`) {
+            content.classList.add('active');
+          }
+        });
+      });
+    });
+
+    // Pricing toggle
+    const pricingToggle = document.getElementById('pricingToggle');
+    const priceElements = document.querySelectorAll('.plan-price');
+    const monthlyPrices = [79, 149, 299];
+    const yearlyPrices = [65, 124, 249]; // ~17% discount
+
+    pricingToggle.addEventListener('click', () => {
+      pricingToggle.classList.toggle('active');
+      const isYearly = pricingToggle.classList.contains('active');
+      
+      const spans = pricingToggle.parentElement.querySelectorAll('span:not(.pricing-badge)');
+      spans.forEach((span, i) => {
+        span.classList.toggle('active', i === (isYearly ? 1 : 0));
+      });
+      
+      priceElements.forEach((el, i) => {
+        const price = isYearly ? yearlyPrices[i] : monthlyPrices[i];
+        el.innerHTML = `<sup>R$</sup>${price}`;
+      });
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

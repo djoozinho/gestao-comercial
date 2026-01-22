@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fornecedores - Sistema</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Auth Guard - Proteção de acesso -->
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <style>
+    .supplier-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 12px; padding: 20px; margin-bottom: 16px; transition: all 0.2s; }
+    .supplier-card:hover { box-shadow: var(--shadow-md); border-color: var(--brand); }
+    .supplier-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .supplier-avatar { width: 56px; height: 56px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #0284c7); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; font-weight: 700; }
+    .supplier-info h5 { margin: 0; font-weight: 700; color: var(--gray-800); }
+    .supplier-info .fantasy { font-size: 13px; color: var(--gray-500); }
+    .supplier-info .document { font-size: 12px; color: var(--gray-400); font-family: monospace; }
+    .supplier-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding-top: 16px; border-top: 1px solid var(--gray-100); }
+    .detail-item { display: flex; align-items: center; gap: 8px; }
+    .detail-item i { color: var(--brand); width: 16px; }
+    .detail-item span { font-size: 13px; color: var(--gray-600); }
+    .supplier-actions { display: flex; gap: 8px; margin-left: auto; }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); display: flex; align-items: center; gap: 16px; }
+    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; }
+    .stat-value { font-size: 24px; font-weight: 800; color: var(--gray-800); }
+    .stat-label { font-size: 13px; color: var(--gray-500); }
+    .credit-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .payment-terms { background: rgba(99, 102, 241, 0.1); color: var(--brand); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .category-badge { background: rgba(249, 115, 22, 0.1); color: #ea580c; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar">
+      <h4>SISTEMA</h4>
+      <ul class="sidebar-menu">
+        <li><a href="index.html"><span class="menu-icon"><i class="fa fa-home"></i></span><span class="menu-label">Início</span></a></li>
+        <li><a href="pdv.html"><span class="menu-icon"><i class="fa fa-cash-register"></i></span><span class="menu-label">PDV</span></a></li>
+        <li><a href="dashboard.html"><span class="menu-icon"><i class="fa fa-chart-pie"></i></span><span class="menu-label">Painel</span></a></li>
+        <li><a href="nfe-emissao.html"><span class="menu-icon"><i class="fa fa-file-invoice"></i></span><span class="menu-label">Notas Fiscais</span></a></li>
+        <li><a href="movimentos.html"><span class="menu-icon"><i class="fa fa-exchange-alt"></i></span><span class="menu-label">Movimentos</span></a></li>
+        <li><a href="relatorios.html"><span class="menu-icon"><i class="fa fa-chart-bar"></i></span><span class="menu-label">Relatórios</span></a></li>
+        <li><a href="pessoas.html"><span class="menu-icon"><i class="fa fa-users"></i></span><span class="menu-label">Clientes</span></a></li>
+        <li><a href="produtos.html"><span class="menu-icon"><i class="fa fa-boxes"></i></span><span class="menu-label">Produtos</span></a></li>
+        <li><a href="agenda.html"><span class="menu-icon"><i class="fa fa-calendar"></i></span><span class="menu-label">Agenda</span></a></li>
+        <li><a href="admin.html" class="active"><span class="menu-icon"><i class="fa fa-cogs"></i></span><span class="menu-label">Admin</span></a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-truck"></i> Fornecedores e Compras</h3>
+        <div class="header-info">
+          <button class="btn btn-light mr-2" onclick="location.href='admin.html'"><i class="fa fa-arrow-left"></i> Voltar</button>
+          <button class="btn btn-primary" onclick="openModal()"><i class="fa fa-plus"></i> Novo Fornecedor</button>
+        </div>
+      </div>
+
+      <div class="container-fluid py-4">
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);"><i class="fa fa-truck"></i></div>
+            <div>
+              <div class="stat-value" id="totalSuppliers">0</div>
+              <div class="stat-label">Fornecedores Ativos</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="fa fa-money-bill-wave"></i></div>
+            <div>
+              <div class="stat-value" id="totalCredit">R$ 0</div>
+              <div class="stat-label">Limite de Crédito Total</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i class="fa fa-tags"></i></div>
+            <div>
+              <div class="stat-value" id="totalCategories">0</div>
+              <div class="stat-label">Categorias</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fa fa-search"></i></span>
+                  </div>
+                  <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nome, CNPJ, e-mail ou telefone...">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <button class="btn btn-secondary btn-block" onclick="loadFornecedores()"><i class="fa fa-sync-alt"></i> Atualizar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suppliers List -->
+        <div id="suppliersList">
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-3 text-muted">Carregando fornecedores...</p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-shortcuts">
+        <div class="shortcut-item"><span><kbd>F2</kbd> Novo</span></div>
+        <div class="shortcut-item"><span><kbd>F3</kbd> Buscar</span></div>
+        <div class="shortcut-item"><span><kbd>F5</kbd> Atualizar</span></div>
+        <div class="shortcut-item"><span><kbd>ESC</kbd> Voltar</span></div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Modal Cadastro -->
+  <div class="modal fade" id="supplierModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fa fa-truck mr-2"></i> <span id="modalTitle">Novo Fornecedor</span></h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="supplierForm">
+            <input type="hidden" id="supplierId">
+            
+            <!-- Dados Principais -->
+            <h6 class="mb-3"><i class="fa fa-building mr-2"></i> Dados da Empresa</h6>
+            <div class="row">
+              <div class="col-md-2">
+                <div class="form-group">
+                  <label>Código</label>
+                  <input type="text" id="code" class="form-control" placeholder="FORN001">
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label>Razão Social <span class="text-danger">*</span></label>
+                  <input type="text" id="name" class="form-control" placeholder="Nome da empresa" required>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="form-group">
+                  <label>Nome Fantasia</label>
+                  <input type="text" id="fantasyName" class="form-control" placeholder="Nome fantasia">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Tipo</label>
+                  <select id="legalType" class="form-control">
+                    <option value="PJ">Pessoa Jurídica</option>
+                    <option value="PF">Pessoa Física</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>CNPJ/CPF</label>
+                  <input type="text" id="document" class="form-control" placeholder="00.000.000/0001-00">
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Inscrição Estadual</label>
+                  <input type="text" id="rgIe" class="form-control" placeholder="IE">
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label>Categoria</label>
+                  <input type="text" id="supplierCategory" class="form-control" placeholder="Ex: Medicamentos">
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            <h6 class="mb-3"><i class="fa fa-phone mr-2"></i> Contato</h6>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>E-mail</label>
+                  <input type="email" id="email" class="form-control" placeholder="email@empresa.com">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Telefone Principal</label>
+                  <input type="text" id="phone" class="form-control" placeholder="(11) 3333-4444">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Telefone Secundário</label>
+                  <input type="text" id="phone2" class="form-control" placeholder="(11) 99999-9999">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Nome do Contato/Vendedor</label>
+                  <input type="text" id="contactName" class="form-control" placeholder="Nome da pessoa de contato">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Telefone do Contato</label>
+                  <input type="text" id="contactPhone" class="form-control" placeholder="(11) 99999-0000">
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            <h6 class="mb-3"><i class="fa fa-map-marker-alt mr-2"></i> Endereço</h6>
+            <div class="row">
+              <div class="col-md-2">
+                <div class="form-group">
+                  <label>CEP</label>
+                  <input type="text" id="cep" class="form-control" placeholder="00000-000" onblur="buscarCep()">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Logradouro</label>
+                  <input type="text" id="street" class="form-control" placeholder="Rua, Avenida...">
+                </div>
+              </div>
+              <div class="col-md-2">
+                <div class="form-group">
+                  <label>Número</label>
+                  <input type="text" id="number" class="form-control" placeholder="Nº">
+                </div>
+              </div>
+              <div class="col-md-2">
+                <div class="form-group">
+                  <label>Complemento</label>
+                  <input type="text" id="complement" class="form-control" placeholder="Sala, Andar">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Bairro</label>
+                  <input type="text" id="neighborhood" class="form-control" placeholder="Bairro">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Cidade</label>
+                  <input type="text" id="city" class="form-control" placeholder="Cidade">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Estado</label>
+                  <select id="state" class="form-control">
+                    <option value="">Selecione</option>
+                    <option value="AC">Acre</option><option value="AL">Alagoas</option><option value="AP">Amapá</option>
+                    <option value="AM">Amazonas</option><option value="BA">Bahia</option><option value="CE">Ceará</option>
+                    <option value="DF">Distrito Federal</option><option value="ES">Espírito Santo</option><option value="GO">Goiás</option>
+                    <option value="MA">Maranhão</option><option value="MT">Mato Grosso</option><option value="MS">Mato Grosso do Sul</option>
+                    <option value="MG">Minas Gerais</option><option value="PA">Pará</option><option value="PB">Paraíba</option>
+                    <option value="PR">Paraná</option><option value="PE">Pernambuco</option><option value="PI">Piauí</option>
+                    <option value="RJ">Rio de Janeiro</option><option value="RN">Rio Grande do Norte</option><option value="RS">Rio Grande do Sul</option>
+                    <option value="RO">Rondônia</option><option value="RR">Roraima</option><option value="SC">Santa Catarina</option>
+                    <option value="SP">São Paulo</option><option value="SE">Sergipe</option><option value="TO">Tocantins</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            <h6 class="mb-3"><i class="fa fa-money-bill-wave mr-2"></i> Condições Comerciais</h6>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Prazo de Pagamento</label>
+                  <input type="text" id="paymentTerms" class="form-control" placeholder="Ex: 30/60/90 dias">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Limite de Crédito (R$)</label>
+                  <input type="number" id="creditLimit" class="form-control" step="0.01" value="0" placeholder="0.00">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Status</label>
+                  <select id="active" class="form-control">
+                    <option value="true">Ativo</option>
+                    <option value="false">Inativo</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Observações</label>
+              <textarea id="notes" class="form-control" rows="3" placeholder="Observações sobre o fornecedor..."></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="saveSupplier()"><i class="fa fa-save"></i> Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- Sistema de Toasts Elegantes -->
+  <script src="js/toast.js"></script>
+  <script>
+    const API_BASE = 'http://localhost:3000/api';
+    let fornecedores = [];
+
+    async function loadFornecedores() {
+      try {
+        const search = document.getElementById('searchInput').value;
+        const params = search ? `?search=${encodeURIComponent(search)}` : '';
+        
+        const res = await axios.get(`${API_BASE}/fornecedores${params}`);
+        fornecedores = res.data.data || res.data || [];
+        
+        updateStats();
+        renderList();
+      } catch (err) {
+        console.error('Erro ao carregar fornecedores:', err);
+        document.getElementById('suppliersList').innerHTML = `
+          <div class="alert alert-warning">
+            <i class="fa fa-exclamation-triangle mr-2"></i>
+            Erro ao carregar fornecedores. <a href="javascript:location.reload()">Tentar novamente</a>
+          </div>`;
+      }
+    }
+
+    function updateStats() {
+      const active = fornecedores.filter(f => f.active !== false);
+      const totalCredit = fornecedores.reduce((sum, f) => sum + (f.creditLimit || 0), 0);
+      const categories = [...new Set(fornecedores.map(f => f.supplierCategory).filter(Boolean))];
+      
+      document.getElementById('totalSuppliers').textContent = active.length;
+      document.getElementById('totalCredit').textContent = `R$ ${totalCredit.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
+      document.getElementById('totalCategories').textContent = categories.length;
+    }
+
+    function renderList() {
+      const container = document.getElementById('suppliersList');
+      
+      if (fornecedores.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-5">
+            <i class="fa fa-truck fa-4x text-muted mb-3"></i>
+            <h5>Nenhum fornecedor cadastrado</h5>
+            <p class="text-muted">Clique em "Novo Fornecedor" para começar</p>
+          </div>`;
+        return;
+      }
+
+      let html = '';
+      fornecedores.forEach(f => {
+        const initials = f.name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+        
+        html += `
+          <div class="supplier-card">
+            <div class="supplier-header">
+              <div class="supplier-avatar">${initials}</div>
+              <div class="supplier-info">
+                <h5>${f.name}</h5>
+                ${f.fantasyName ? `<div class="fantasy">${f.fantasyName}</div>` : ''}
+                <div class="document">${f.document || 'Sem CNPJ'}</div>
+              </div>
+              ${f.supplierCategory ? `<span class="category-badge">${f.supplierCategory}</span>` : ''}
+              ${f.paymentTerms ? `<span class="payment-terms">${f.paymentTerms}</span>` : ''}
+              ${f.creditLimit > 0 ? `<span class="credit-badge">Limite: R$ ${f.creditLimit.toLocaleString('pt-BR')}</span>` : ''}
+              <div class="supplier-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="editSupplier('${f.id}')"><i class="fa fa-edit"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteSupplier('${f.id}')"><i class="fa fa-trash"></i></button>
+              </div>
+            </div>
+            <div class="supplier-details">
+              ${f.email ? `<div class="detail-item"><i class="fa fa-envelope"></i><span>${f.email}</span></div>` : ''}
+              ${f.phone ? `<div class="detail-item"><i class="fa fa-phone"></i><span>${f.phone}</span></div>` : ''}
+              ${f.contactName ? `<div class="detail-item"><i class="fa fa-user"></i><span>${f.contactName}${f.contactPhone ? ` - ${f.contactPhone}` : ''}</span></div>` : ''}
+              ${f.city ? `<div class="detail-item"><i class="fa fa-map-marker-alt"></i><span>${f.city}${f.state ? `/${f.state}` : ''}</span></div>` : ''}
+            </div>
+          </div>`;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    function openModal(supplier = null) {
+      document.getElementById('supplierForm').reset();
+      document.getElementById('supplierId').value = '';
+      document.getElementById('modalTitle').textContent = 'Novo Fornecedor';
+      document.getElementById('active').value = 'true';
+      
+      if (supplier) {
+        document.getElementById('supplierId').value = supplier.id;
+        document.getElementById('modalTitle').textContent = 'Editar Fornecedor';
+        
+        // Preencher campos
+        ['code', 'name', 'fantasyName', 'legalType', 'document', 'rgIe', 'supplierCategory',
+         'email', 'phone', 'phone2', 'contactName', 'contactPhone',
+         'cep', 'street', 'number', 'complement', 'neighborhood', 'city', 'state',
+         'paymentTerms', 'notes'].forEach(field => {
+          const el = document.getElementById(field);
+          if (el) el.value = supplier[field] || '';
+        });
+        
+        document.getElementById('creditLimit').value = supplier.creditLimit || 0;
+        document.getElementById('active').value = supplier.active !== false ? 'true' : 'false';
+      }
+      
+      $('#supplierModal').modal('show');
+    }
+
+    function editSupplier(id) {
+      const supplier = fornecedores.find(f => f.id === id);
+      if (supplier) openModal(supplier);
+    }
+
+    async function saveSupplier() {
+      const id = document.getElementById('supplierId').value;
+      const data = {
+        code: document.getElementById('code').value,
+        name: document.getElementById('name').value,
+        fantasyName: document.getElementById('fantasyName').value,
+        legalType: document.getElementById('legalType').value,
+        document: document.getElementById('document').value,
+        rgIe: document.getElementById('rgIe').value,
+        supplierCategory: document.getElementById('supplierCategory').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        phone2: document.getElementById('phone2').value,
+        contactName: document.getElementById('contactName').value,
+        contactPhone: document.getElementById('contactPhone').value,
+        cep: document.getElementById('cep').value,
+        street: document.getElementById('street').value,
+        number: document.getElementById('number').value,
+        complement: document.getElementById('complement').value,
+        neighborhood: document.getElementById('neighborhood').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        paymentTerms: document.getElementById('paymentTerms').value,
+        creditLimit: parseFloat(document.getElementById('creditLimit').value) || 0,
+        notes: document.getElementById('notes').value,
+        active: document.getElementById('active').value === 'true'
+      };
+
+      if (!data.name) {
+        Toast.warning('O nome/razão social é obrigatório!');
+        return;
+      }
+
+      try {
+        if (id) {
+          await axios.put(`${API_BASE}/people/${id}`, { ...data, type: 'Fornecedor' });
+        } else {
+          await axios.post(`${API_BASE}/fornecedores`, data);
+        }
+        $('#supplierModal').modal('hide');
+        Toast.success(id ? 'Fornecedor atualizado com sucesso!' : 'Fornecedor cadastrado com sucesso!');
+        loadFornecedores();
+      } catch (err) {
+        console.error('Erro ao salvar:', err);
+        Toast.error('Erro ao salvar fornecedor');
+      }
+    }
+
+    async function deleteSupplier(id) {
+      const confirmDelete = await Modal.delete('Deseja realmente excluir este fornecedor?', 'Excluir Fornecedor');
+      if (!confirmDelete) return;
+      
+      try {
+        await axios.delete(`${API_BASE}/people/${id}`);
+        Toast.success('Fornecedor excluído com sucesso!');
+        loadFornecedores();
+      } catch (err) {
+        console.error('Erro ao excluir:', err);
+        Toast.error('Erro ao excluir fornecedor');
+      }
+    }
+
+    async function buscarCep() {
+      const cep = document.getElementById('cep').value.replace(/\D/g, '');
+      if (cep.length !== 8) return;
+      
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+        if (!data.erro) {
+          document.getElementById('street').value = data.logradouro || '';
+          document.getElementById('neighborhood').value = data.bairro || '';
+          document.getElementById('city').value = data.localidade || '';
+          document.getElementById('state').value = data.uf || '';
+        }
+      } catch (err) {
+        console.error('Erro ao buscar CEP:', err);
+      }
+    }
+
+    // Eventos
+    document.getElementById('searchInput').addEventListener('input', debounce(loadFornecedores, 300));
+
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+
+    // Atalhos de teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+      
+      switch(e.key) {
+        case 'F2':
+          e.preventDefault();
+          openModal();
+          break;
+        case 'F3':
+          e.preventDefault();
+          document.getElementById('searchInput').focus();
+          break;
+        case 'F5':
+          e.preventDefault();
+          loadFornecedores();
+          break;
+        case 'Escape':
+          if ($('#supplierModal').hasClass('show')) {
+            $('#supplierModal').modal('hide');
+          } else {
+            location.href = 'admin.html';
+          }
+          break;
+      }
+    });
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', loadFornecedores);
+  </script>
+</body>
+</html>

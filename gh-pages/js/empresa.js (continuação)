@@ -1,0 +1,154 @@
+    container.html(html);
+}
+
+// Atualizar estatísticas
+function updateStats() {
+    const total = empresas.length;
+    const ativas = empresas.filter(e => e.status == 1).length;
+    
+    $('#totalEmpresas').text(total);
+    $('#empresasAtivas').text(ativas);
+}
+
+// Abrir modal para nova empresa
+function openEmpresaModal(empresaId = null) {
+    $('#empresaForm')[0].reset();
+    $('#empresaId').val('');
+    $('#modalTitle').text('Nova Empresa');
+    
+    if (empresaId) {
+        const empresa = empresas.find(e => e.id == empresaId);
+        if (empresa) {
+            $('#modalTitle').text('Editar Empresa');
+            $('#empresaId').val(empresa.id);
+            $('#razao_social').val(empresa.razao_social || '');
+            $('#nome_fantasia').val(empresa.nome_fantasia || '');
+            $('#cnpj').val(empresa.cnpj || '');
+            $('#inscricao_estadual').val(empresa.inscricao_estadual || '');
+            $('#inscricao_municipal').val(empresa.inscricao_municipal || '');
+            $('#endereco').val(empresa.endereco || '');
+            $('#numero').val(empresa.numero || '');
+            $('#bairro').val(empresa.bairro || '');
+            $('#cidade').val(empresa.cidade || '');
+            $('#uf').val(empresa.uf || '');
+            $('#cep').val(empresa.cep || '');
+            $('#telefone').val(empresa.telefone || '');
+            $('#email').val(empresa.email || '');
+            $('#status').val(empresa.status || '1');
+        }
+    }
+    
+    $('#empresaModal').modal('show');
+}
+
+// Salvar empresa
+async function saveEmpresa() {
+    const form = $('#empresaForm')[0];
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const empresaData = {
+        razao_social: $('#razao_social').val(),
+        nome_fantasia: $('#nome_fantasia').val(),
+        cnpj: $('#cnpj').val(),
+        inscricao_estadual: $('#inscricao_estadual').val(),
+        inscricao_municipal: $('#inscricao_municipal').val(),
+        endereco: $('#endereco').val(),
+        numero: $('#numero').val(),
+        bairro: $('#bairro').val(),
+        cidade: $('#cidade').val(),
+        uf: $('#uf').val(),
+        cep: $('#cep').val(),
+        telefone: $('#telefone').val(),
+        email: $('#email').val(),
+        status: $('#status').val()
+    };
+    
+    const empresaId = $('#empresaId').val();
+    
+    try {
+        showLoading();
+        
+        let response;
+        if (empresaId) {
+            // Atualizar empresa existente
+            response = await axios.put(`${EMPRESAS_ENDPOINT}/${empresaId}`, empresaData);
+        } else {
+            // Criar nova empresa
+            response = await axios.post(EMPRESAS_ENDPOINT, empresaData);
+        }
+        
+        if (response.data && response.data.success) {
+            $('#empresaModal').modal('hide');
+            showSuccess(empresaId ? 'Empresa atualizada com sucesso!' : 'Empresa criada com sucesso!');
+            loadEmpresas();
+        } else {
+            showError('Erro ao salvar empresa: ' + (response.data.message || 'Resposta inválida'));
+        }
+    } catch (error) {
+        console.error('Erro ao salvar empresa:', error);
+        
+        if (error.response) {
+            // Erro da API
+            const message = error.response.data?.message || error.response.statusText;
+            showError(`Erro ${error.response.status}: ${message}`);
+        } else if (error.request) {
+            // Sem resposta do servidor
+            showError('Não foi possível conectar ao servidor. Verifique sua conexão.');
+        } else {
+            // Erro na configuração da requisição
+            showError('Erro na configuração da requisição: ' + error.message);
+        }
+    }
+}
+
+// Editar empresa
+function editEmpresa(id) {
+    openEmpresaModal(id);
+}
+
+// Excluir empresa
+async function deleteEmpresa(id) {
+    if (!confirm('Tem certeza que deseja excluir esta empresa?')) {
+        return;
+    }
+    
+    try {
+        showLoading();
+        
+        const response = await axios.delete(`${EMPRESAS_ENDPOINT}/${id}`);
+        
+        if (response.data && response.data.success) {
+            showSuccess('Empresa excluída com sucesso!');
+            loadEmpresas();
+        } else {
+            showError('Erro ao excluir empresa: ' + (response.data.message || 'Resposta inválida'));
+        }
+    } catch (error) {
+        console.error('Erro ao excluir empresa:', error);
+        showError('Erro ao excluir empresa. Tente novamente.');
+    }
+}
+
+// Funções auxiliares
+function showLoading() {
+    // Pode implementar um loading global se necessário
+    console.log('Carregando...');
+}
+
+function showSuccess(message) {
+    alert(message); // Pode substituir por um toast/sweet alert
+}
+
+function showError(message) {
+    alert('Erro: ' + message); // Pode substituir por um toast/sweet alert
+}
+
+// Exportar para uso global (se necessário)
+window.openEmpresaModal = openEmpresaModal;
+window.saveEmpresa = saveEmpresa;
+window.editEmpresa = editEmpresa;
+window.deleteEmpresa = deleteEmpresa;

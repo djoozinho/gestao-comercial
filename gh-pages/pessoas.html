@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clientes e Fornecedores - Sistema</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Auth Guard - Proteção de acesso -->
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <script src="js/sidebar.js"></script>
+  <style>
+    /* Estilos específicos da página de pessoas */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
+    .stat-card { cursor: pointer; }
+    .stat-card .stat-icon { background: var(--brand-gradient); }
+    .stat-card .stat-icon.success { background: linear-gradient(135deg, #10b981, #059669); }
+    .stat-card .stat-icon.danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .stat-card .stat-icon.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .stat-card .stat-icon.info { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+    .stat-trend { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+    .stat-trend.positive { color: var(--success); }
+    .stat-trend.negative { color: var(--danger); }
+    .refresh-btn { background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--brand); }
+    .refresh-btn:hover { background: var(--brand); color: #fff; }
+    .person-row { transition: all 0.2s; }
+    .person-row:hover { background: rgba(99, 102, 241, 0.05); }
+    .person-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--brand-gradient); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; margin-right: 10px; }
+    .badge-cliente { background: rgba(16, 185, 129, 0.15); color: #065f46; }
+    .badge-fornecedor { background: rgba(14, 165, 233, 0.15); color: #0369a1; }
+    .badge-funcionario { background: rgba(245, 158, 11, 0.15); color: #92400e; }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar">
+      <h4>SISTEMA</h4>
+      <ul class="sidebar-menu">
+        <li><a href="index.html"><span class="menu-icon"><i class="fa fa-home"></i></span><span class="menu-label">Início</span></a></li>
+        <li><a href="pdv.html"><span class="menu-icon"><i class="fa fa-cash-register"></i></span><span class="menu-label">PDV</span></a></li>
+        <li><a href="dashboard.html"><span class="menu-icon"><i class="fa fa-chart-pie"></i></span><span class="menu-label">Painel</span></a></li>
+        <li><a href="nfe-emissao.html"><span class="menu-icon"><i class="fa fa-file-invoice"></i></span><span class="menu-label">Notas Fiscais</span></a></li>
+        <li><a href="movimentos.html"><span class="menu-icon"><i class="fa fa-exchange-alt"></i></span><span class="menu-label">Movimentos</span></a></li>
+        <li><a href="relatorios.html"><span class="menu-icon"><i class="fa fa-chart-bar"></i></span><span class="menu-label">Relatórios</span></a></li>
+        <li><a href="pessoas.html" class="active"><span class="menu-icon"><i class="fa fa-users"></i></span><span class="menu-label">Clientes</span></a></li>
+        <li><a href="produtos.html"><span class="menu-icon"><i class="fa fa-boxes"></i></span><span class="menu-label">Produtos</span></a></li>
+        <li><a href="agenda.html"><span class="menu-icon"><i class="fa fa-calendar"></i></span><span class="menu-label">Agenda</span></a></li>
+        <li><a href="admin.html"><span class="menu-icon"><i class="fa fa-cogs"></i></span><span class="menu-label">Admin</span></a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-users"></i> Clientes e Fornecedores</h3>
+        <div class="header-info">
+          <span><i class="fa fa-user-circle mr-2"></i><span id="userName">Admin</span></span>
+          <span><i class="fa fa-clock mr-2"></i><span id="currentTime">--:--:--</span></span>
+          <button id="refreshBtn" class="refresh-btn"><i class="fa fa-sync-alt"></i> Atualizar</button>
+          <button class="btn-logout" style="background:#dc3545;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:8px;">
+            <i class="fa fa-sign-out-alt"></i> Sair
+          </button>
+        </div>
+      </div>
+
+      <div class="dashboard-container">
+        <!-- Cards de Estatísticas -->
+        <div class="stats-grid">
+          <div class="stat-card" data-action="total-customers">
+            <div class="stat-icon success"><i class="fa fa-users"></i></div>
+            <div class="stat-value" id="total-customers">0</div>
+            <div class="stat-label">Total de Clientes</div>
+            <div class="stat-trend" id="customers-trend"><i class="fa fa-arrow-up"></i> <span>0%</span></div>
+          </div>
+          
+          <div class="stat-card" data-action="total-suppliers">
+            <div class="stat-icon info"><i class="fa fa-truck"></i></div>
+            <div class="stat-value" id="total-suppliers">0</div>
+            <div class="stat-label">Fornecedores</div>
+            <div class="stat-trend" id="suppliers-trend"><i class="fa fa-minus"></i> <span>0%</span></div>
+          </div>
+          
+          <div class="stat-card" data-action="total-employees">
+            <div class="stat-icon warning"><i class="fa fa-user-tie"></i></div>
+            <div class="stat-value" id="total-employees">0</div>
+            <div class="stat-label">Funcionários</div>
+            <div class="stat-trend" id="employees-trend"><i class="fa fa-minus"></i> <span>0%</span></div>
+          </div>
+          
+          <div class="stat-card" data-action="new-this-month">
+            <div class="stat-icon"><i class="fa fa-user-plus"></i></div>
+            <div class="stat-value" id="new-this-month">0</div>
+            <div class="stat-label">Novos Este Mês</div>
+            <div class="stat-trend" id="new-trend"><i class="fa fa-arrow-up"></i> <span>0%</span></div>
+          </div>
+        </div>
+
+        <!-- Controles da Tabela -->
+        <div class="card">
+          <div class="card-header">
+            <div class="d-flex align-items-center gap-3">
+              <i class="fa fa-users"></i> Lista de Pessoas
+              <button class="btn btn-sm btn-light ml-3" id="btnNew">
+                <i class="fa fa-plus"></i> Novo Cliente
+              </button>
+              <div class="dropdown ml-2">
+                <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" id="filterDropdown" data-toggle="dropdown">
+                  <i class="fa fa-filter"></i> Filtrar
+                </button>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item filter-type" data-type="all">Todos</a>
+                  <a class="dropdown-item filter-type" data-type="Cliente">Clientes</a>
+                  <a class="dropdown-item filter-type" data-type="Fornecedor">Fornecedores</a>
+                  <a class="dropdown-item filter-type" data-type="Funcionário">Funcionários</a>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <input id="search" class="form-control form-control-sm" placeholder="Pesquisar..." style="width: 200px; background: rgba(255,255,255,0.1); border: none; color: white;" />
+              <span class="small" id="count">0 pessoas</span>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>Tipo</th>
+                    <th>Data Cadastro</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="peopleBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer-shortcuts">
+        <div class="shortcut-item"><span><kbd>F1</kbd> Ajuda</span></div>
+        <div class="shortcut-item"><span><kbd>F2</kbd> Atualizar</span></div>
+        <div class="shortcut-item"><span><kbd>F3</kbd> Novo Cliente</span></div>
+        <div class="shortcut-item"><span><kbd>F4</kbd> Pesquisar</span></div>
+        <div class="shortcut-item"><span><kbd>F5</kbd> Exportar</span></div>
+        <div class="shortcut-item"><span><kbd>F6</kbd> Filtrar</span></div>
+        <div class="shortcut-item"><span><kbd>F9</kbd> Dashboard</span></div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Modal de Cadastro/Edição - Layout Horizontal Full Width -->
+  <div class="modal fade" id="modalPerson" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header py-2">
+          <h5 class="modal-title" id="modalPersonTitle"><i class="fa fa-user-plus"></i> Novo Cliente</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body py-3">
+          <input type="hidden" id="personId" />
+          <input type="hidden" id="personPhotoData" />
+
+          <!-- LINHA 1: Dados Básicos -->
+          <div class="form-row-full">
+            <div class="form-col"><label>Código</label><input id="personCode" class="form-control form-control-sm" placeholder="Auto" /></div>
+            <div class="form-col"><label>Tipo *</label><select id="personType" class="form-control form-control-sm"><option value="Cliente">Cliente</option><option value="Fornecedor">Fornecedor</option><option value="Funcionário">Funcionário</option></select></div>
+            <div class="form-col"><label>Pessoa *</label><select id="personLegalType" class="form-control form-control-sm"><option value="PF">PF</option><option value="PJ">PJ</option></select></div>
+            <div class="form-col flex-2"><label>Nome / Razão Social *</label><input id="personName" class="form-control form-control-sm" required placeholder="Nome completo" /></div>
+            <div class="form-col"><label>Fantasia</label><input id="personFantasyName" class="form-control form-control-sm" placeholder="PJ" /></div>
+          </div>
+
+          <!-- LINHA 2: Documentos e Contato -->
+          <div class="form-row-full">
+            <div class="form-col"><label>CPF/CNPJ *</label><input id="personDocument" class="form-control form-control-sm" required placeholder="000.000.000-00" maxlength="18" /></div>
+            <div class="form-col"><label>RG/IE</label><input id="personRgIe" class="form-control form-control-sm" /></div>
+            <div class="form-col"><label>Nascimento</label><input id="personBirthDate" class="form-control form-control-sm" type="date" /></div>
+            <div class="form-col"><label>Sexo</label><select id="personGender" class="form-control form-control-sm"><option value="">--</option><option value="M">M</option><option value="F">F</option><option value="O">O</option></select></div>
+            <div class="form-col flex-2"><label>E-mail</label><input id="personEmail" class="form-control form-control-sm" type="email" placeholder="email@exemplo.com" /></div>
+            <div class="form-col"><label>Telefone *</label><input id="personPhone" class="form-control form-control-sm" required placeholder="(00) 00000-0000" maxlength="15" /></div>
+            <div class="form-col"><label>Celular 2</label><input id="personPhone2" class="form-control form-control-sm" placeholder="(00) 00000-0000" maxlength="15" /></div>
+          </div>
+
+          <!-- LINHA 3: Endereço Completo -->
+          <div class="form-row-full">
+            <div class="form-col"><label>CEP</label><input id="personCep" class="form-control form-control-sm" placeholder="00000-000" maxlength="9" /></div>
+            <div class="form-col flex-3"><label>Logradouro</label><input id="personStreet" class="form-control form-control-sm" placeholder="Rua, Avenida..." /></div>
+            <div class="form-col" style="max-width:70px"><label>Nº</label><input id="personNumber" class="form-control form-control-sm" placeholder="Nº" /></div>
+            <div class="form-col"><label>Complemento</label><input id="personComplement" class="form-control form-control-sm" placeholder="Apto" /></div>
+            <div class="form-col"><label>Bairro</label><input id="personNeighborhood" class="form-control form-control-sm" /></div>
+            <div class="form-col"><label>Cidade</label><input id="personCity" class="form-control form-control-sm" /></div>
+            <div class="form-col" style="max-width:70px"><label>UF</label><select id="personState" class="form-control form-control-sm"><option value="">--</option><option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP" selected>SP</option><option value="SE">SE</option><option value="TO">TO</option></select></div>
+          </div>
+
+          <!-- LINHA 4: Referência e Obs -->
+          <div class="form-row-full">
+            <div class="form-col flex-2"><label>Ponto de Referência</label><input id="personReference" class="form-control form-control-sm" placeholder="Próximo a..." /></div>
+            <div class="form-col flex-3"><label>Observações</label><input id="personNotes" class="form-control form-control-sm" placeholder="Anotações..." /></div>
+            <div class="form-col" style="max-width:120px"><label>Foto</label><input type="file" class="form-control-file form-control-sm" id="personPhoto" accept="image/*" style="font-size:11px"></div>
+          </div>
+
+        </div>
+        <div class="modal-footer py-2">
+          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
+          <button type="button" class="btn btn-primary btn-sm" id="savePerson"><i class="fa fa-save"></i> Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Detalhes -->
+  <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detailsModalTitle"><i class="fa fa-user-circle"></i> Detalhes</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body" id="detailsModalContent"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-primary" id="exportDetails"><i class="fa fa-file-pdf"></i> Exportar PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <!-- Módulo centralizado de data/hora (Brasília) -->
+  <script src="/js/datetime-utils.js"></script>
+  <!-- Sistema de Toasts Elegantes -->
+  <script src="js/toast.js"></script>
+  <script>
+    const API_BASE = 'http://localhost:3000/api';
+    
+    let peopleData = {
+      allPeople: [],
+      filteredPeople: [],
+      stats: { totalCustomers: 0, totalSuppliers: 0, totalEmployees: 0, newThisMonth: 0 },
+      currentFilter: 'all',
+      searchTerm: '',
+      isLoading: false
+    };
+    let currentPersonIdInModal = null;
+    
+    async function loadPeopleData() {
+      if (peopleData.isLoading) return;
+      try {
+        peopleData.isLoading = true;
+        showLoading(true);
+        const response = await axios.get(`${API_BASE}/people`);
+        const people = response.data.data || response.data || [];
+        peopleData.allPeople = people;
+        calculateStats(people);
+        applyFilters();
+        updateStats();
+        renderTable();
+        showLoading(false);
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        showLoading(false);
+      } finally {
+        peopleData.isLoading = false;
+      }
+    }
+    
+    function calculateStats(people) {
+      const now = new Date();
+      peopleData.stats = {
+        totalCustomers: people.filter(p => p.type === 'Cliente').length,
+        totalSuppliers: people.filter(p => p.type === 'Fornecedor').length,
+        totalEmployees: people.filter(p => p.type === 'Funcionário').length,
+        newThisMonth: people.filter(p => {
+          if (!p.createdAt) return false;
+          const d = new Date(p.createdAt);
+          return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        }).length
+      };
+    }
+    
+    function applyFilters() {
+      let filtered = [...peopleData.allPeople];
+      if (peopleData.currentFilter !== 'all') {
+        filtered = filtered.filter(p => p.type === peopleData.currentFilter);
+      }
+      if (peopleData.searchTerm) {
+        const term = peopleData.searchTerm.toLowerCase();
+        filtered = filtered.filter(p => 
+          (p.name && p.name.toLowerCase().includes(term)) ||
+          (p.email && p.email.toLowerCase().includes(term)) ||
+          (p.phone && p.phone.includes(term))
+        );
+      }
+      peopleData.filteredPeople = filtered;
+    }
+    
+    function updateStats() {
+      const s = peopleData.stats;
+      document.getElementById('total-customers').textContent = s.totalCustomers;
+      document.getElementById('total-suppliers').textContent = s.totalSuppliers;
+      document.getElementById('total-employees').textContent = s.totalEmployees;
+      document.getElementById('new-this-month').textContent = s.newThisMonth;
+    }
+    
+    function renderTable() {
+      const body = document.getElementById('peopleBody');
+      const people = peopleData.filteredPeople;
+      
+      if (people.length === 0) {
+        body.innerHTML = `<tr><td colspan="6" class="text-center py-5">
+          <i class="fa fa-users fa-3x text-muted mb-3 d-block"></i>
+          <p class="text-muted">Nenhuma pessoa encontrada</p>
+          <button class="btn btn-primary mt-2" onclick="openNewPersonModal()"><i class="fa fa-plus"></i> Adicionar</button>
+        </td></tr>`;
+      } else {
+        body.innerHTML = people.map(p => `
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="avatar-circle mr-3">${p.name ? p.name.charAt(0).toUpperCase() : '?'}</div>
+                <div><strong>${p.name || 'Sem nome'}</strong>${p.document ? `<div class="small text-muted">${p.document}</div>` : ''}</div>
+              </div>
+            </td>
+            <td>${p.email || '-'}</td>
+            <td>${p.phone || '-'}</td>
+            <td><span class="badge ${getBadgeClass(p.type)}">${p.type || 'Cliente'}</span></td>
+            <td>${p.createdAt ? DateTimeUtils.formatDate(p.createdAt) : '-'}</td>
+            <td class="text-right">
+              <button class="btn btn-sm btn-outline-primary mr-1" onclick="showPersonDetails('${p.id}')"><i class="fa fa-eye"></i></button>
+              <button class="btn btn-sm btn-outline-primary mr-1" onclick="editPerson('${p.id}')"><i class="fa fa-edit"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deletePerson('${p.id}')"><i class="fa fa-trash"></i></button>
+            </td>
+          </tr>
+        `).join('');
+      }
+      document.getElementById('count').textContent = `${people.length} pessoa${people.length !== 1 ? 's' : ''}`;
+    }
+    
+    function getBadgeClass(type) {
+      switch(type) {
+        case 'Cliente': return 'badge-success';
+        case 'Fornecedor': return 'badge-info';
+        case 'Funcionário': return 'badge-warning';
+        default: return 'badge-success';
+      }
+    }
+    
+    function showPersonDetails(id) {
+      const p = peopleData.allPeople.find(x => x.id === id);
+      if (!p) return;
+      currentPersonIdInModal = id;
+      document.getElementById('detailsModalTitle').innerHTML = `<i class="fa fa-user-circle"></i> ${p.name}`;
+      document.getElementById('detailsModalContent').innerHTML = `
+        <div class="text-center mb-4">
+          <div class="avatar-circle avatar-lg mx-auto mb-3">${p.name?.charAt(0) || '?'}</div>
+          <h4>${p.name}</h4>
+          <span class="badge ${getBadgeClass(p.type)}">${p.type || 'Cliente'}</span>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Código:</strong> ${p.code || '-'}</p>
+            <p><strong>CPF/CNPJ:</strong> ${p.document || '-'}</p>
+            <p><strong>Email:</strong> ${p.email || '-'}</p>
+            <p><strong>Telefone:</strong> ${p.phone || '-'}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Cidade:</strong> ${p.city || '-'} ${p.state ? '- ' + p.state : ''}</p>
+            <p><strong>Bairro:</strong> ${p.neighborhood || '-'}</p>
+            <p><strong>Endereço:</strong> ${p.street || '-'}${p.number ? ', ' + p.number : ''}</p>
+            <p><strong>Cadastrado em:</strong> ${p.createdAt ? DateTimeUtils.formatDate(p.createdAt) : '-'}</p>
+          </div>
+        </div>
+        ${p.notes ? `<p><strong>Obs:</strong> ${p.notes}</p>` : ''}
+      `;
+      $('#detailsModal').modal('show');
+    }
+    
+    function editPerson(id) {
+      const p = peopleData.allPeople.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('modalPersonTitle').innerHTML = '<i class="fa fa-user-edit"></i> Editar Pessoa';
+      document.getElementById('personId').value = p.id;
+      document.getElementById('personCode').value = p.code || '';
+      document.getElementById('personName').value = p.name || '';
+      document.getElementById('personFantasyName').value = p.fantasyName || '';
+      document.getElementById('personLegalType').value = p.legalType || 'PF';
+      document.getElementById('personType').value = p.type || 'Cliente';
+      document.getElementById('personDocument').value = p.document || '';
+      document.getElementById('personRgIe').value = p.rgIe || '';
+      document.getElementById('personBirthDate').value = p.birthDate || '';
+      document.getElementById('personGender').value = p.gender || '';
+      document.getElementById('personEmail').value = p.email || '';
+      document.getElementById('personPhone').value = p.phone || '';
+      document.getElementById('personPhone2').value = p.phone2 || '';
+      document.getElementById('personCep').value = p.cep || '';
+      document.getElementById('personStreet').value = p.street || '';
+      document.getElementById('personNumber').value = p.number || '';
+      document.getElementById('personComplement').value = p.complement || '';
+      document.getElementById('personNeighborhood').value = p.neighborhood || '';
+      document.getElementById('personCity').value = p.city || '';
+      document.getElementById('personState').value = p.state || '';
+      document.getElementById('personReference').value = p.reference || '';
+      document.getElementById('personNotes').value = p.notes || '';
+      // photo data if exists
+      if (p.photo) {
+        document.getElementById('personPhotoData').value = p.photo;
+      } else {
+        document.getElementById('personPhotoData').value = '';
+      }
+      $('#modalPerson').modal('show');
+    }
+    
+    // Photo input handler (simple - just store base64)
+    document.getElementById('personPhoto').addEventListener('change', function(e){
+      const file = this.files && this.files[0];
+      if (!file) {
+        document.getElementById('personPhotoData').value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(ev){
+        document.getElementById('personPhotoData').value = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // debounce helper
+    function debounce(fn, wait){ let t; return function(){ clearTimeout(t); t = setTimeout(() => fn.apply(this, arguments), wait); }; }
+
+    async function deletePerson(id) {
+      const confirmDelete = await Modal.delete('Tem certeza que deseja excluir este cadastro?', 'Excluir Cliente');
+      if (!confirmDelete) return;
+      try {
+        await axios.delete(`${API_BASE}/people/${id}`);
+        Toast.success('Cadastro excluído com sucesso!');
+        loadPeopleData();
+      } catch (error) {
+        Toast.error('Erro ao excluir pessoa.');
+      }
+    }
+    
+    function openNewPersonModal() {
+      document.getElementById('modalPersonTitle').innerHTML = '<i class="fa fa-user-plus"></i> Novo Cliente';
+      document.getElementById('personId').value = '';
+      document.getElementById('personPhotoData').value = '';
+      ['personCode','personName','personFantasyName','personDocument','personRgIe','personBirthDate','personEmail','personPhone','personPhone2','personCep','personStreet','personNumber','personComplement','personNeighborhood','personCity','personReference','personNotes'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      document.getElementById('personLegalType').value = 'PF';
+      document.getElementById('personType').value = 'Cliente';
+      document.getElementById('personGender').value = '';
+      document.getElementById('personState').value = 'SP';
+      $('#modalPerson').modal('show');
+    }
+    
+    async function savePerson() {
+      const id = document.getElementById('personId').value;
+      const person = {
+        code: document.getElementById('personCode').value.trim(),
+        name: document.getElementById('personName').value.trim(),
+        fantasyName: document.getElementById('personFantasyName').value.trim(),
+        legalType: document.getElementById('personLegalType').value,
+        type: document.getElementById('personType').value,
+        document: document.getElementById('personDocument').value.trim(),
+        rgIe: document.getElementById('personRgIe').value.trim(),
+        birthDate: document.getElementById('personBirthDate').value,
+        gender: document.getElementById('personGender').value,
+        email: document.getElementById('personEmail').value.trim(),
+        phone: document.getElementById('personPhone').value.trim(),
+        phone2: document.getElementById('personPhone2').value.trim(),
+        cep: document.getElementById('personCep').value.trim(),
+        street: document.getElementById('personStreet').value.trim(),
+        number: document.getElementById('personNumber').value.trim(),
+        complement: document.getElementById('personComplement').value.trim(),
+        neighborhood: document.getElementById('personNeighborhood').value.trim(),
+        city: document.getElementById('personCity').value.trim(),
+        state: document.getElementById('personState').value.trim(),
+        reference: document.getElementById('personReference').value.trim(),
+        notes: document.getElementById('personNotes').value.trim()
+      };
+      
+      if (!person.name || !person.document || !person.phone) {
+        Toast.warning('Preencha os campos obrigatórios!');
+        return;
+      }
+      
+      try {
+        if (id) {
+          await axios.put(`${API_BASE}/people/${id}`, person);
+        } else {
+          await axios.post(`${API_BASE}/people`, person);
+        }
+        $('#modalPerson').modal('hide');
+        Toast.success(id ? 'Cliente atualizado com sucesso!' : 'Cliente cadastrado com sucesso!');
+        loadPeopleData();
+      } catch (error) {
+        // Show a more detailed message if the server provided it (helpful in development)
+        console.error('Erro ao salvar pessoa:', error);
+        const detail = error?.response?.data?.detail || error?.message || 'Erro desconhecido';
+        Toast.error('Erro ao salvar pessoa: ' + detail);
+      }
+    }
+    
+    function exportData() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text('Relatório de Clientes', 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Data: ${DateTimeUtils.formatDate(new Date())}`, 14, 28);
+      
+      const tableData = peopleData.filteredPeople.map(p => [p.code || '-', p.name || '-', p.type || '-', p.phone || '-', p.city || '-']);
+      doc.autoTable({
+        startY: 35,
+        head: [['Código', 'Nome', 'Tipo', 'Telefone', 'Cidade']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [99, 102, 241] }
+      });
+      doc.save(`clientes-${DateTimeUtils.todayISO()}.pdf`);
+    }
+    
+    function showLoading(show) {
+      const btn = document.getElementById('refreshBtn');
+      btn.innerHTML = show ? '<i class="fa fa-spinner fa-spin"></i> Carregando...' : '<i class="fa fa-sync-alt"></i> Atualizar';
+      btn.disabled = show;
+    }
+    
+    // Keep track of the element that had focus before opening modals (for accessibility)
+    let lastFocusedElement = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      loadPeopleData();
+      
+      document.getElementById('refreshBtn').addEventListener('click', loadPeopleData);
+      document.getElementById('btnNew').addEventListener('click', openNewPersonModal);
+      document.getElementById('savePerson').addEventListener('click', savePerson);
+      document.getElementById('exportDetails').addEventListener('click', exportData);
+      
+      document.getElementById('personCep').addEventListener('blur', async function() {
+        const cep = this.value.replace(/\D/g, '');
+        if (cep.length === 8) {
+          try {
+            const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const d = await r.json();
+            if (!d.erro) {
+              document.getElementById('personStreet').value = d.logradouro || '';
+              document.getElementById('personNeighborhood').value = d.bairro || '';
+              document.getElementById('personCity').value = d.localidade || '';
+              document.getElementById('personState').value = d.uf || '';
+            }
+          } catch (e) {
+            // If the browser blocks the request (Tracking Prevention), handle silently but log for debugging
+            console.warn('ViaCEP request failed (possível blocking):', e);
+          }
+        }
+      });
+
+      // Restore focus to previously focused element when the person modal closes
+      $('#modalPerson').on('hidden.bs.modal', function() {
+        try {
+          if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+            lastFocusedElement.focus();
+          } else {
+            document.getElementById('btnNew')?.focus();
+          }
+        } catch (e) { /* ignore */ }
+      });
+
+      // Ensure focus is moved into modal when shown (and save last focused element)
+      $('#modalPerson').on('shown.bs.modal', function() {
+        lastFocusedElement = document.activeElement;
+        // Focus the first required input for convenience
+        const firstInput = document.getElementById('personName');
+        if (firstInput) firstInput.focus();
+      });
+      
+      document.querySelectorAll('.filter-type').forEach(item => {
+        item.addEventListener('click', function() {
+          peopleData.currentFilter = this.dataset.type;
+          applyFilters();
+          renderTable();
+        });
+      });
+      
+      document.getElementById('search').addEventListener('input', function() {
+        peopleData.searchTerm = this.value;
+        applyFilters();
+        renderTable();
+      });
+      
+      document.addEventListener('keydown', (e) => {
+        switch(e.key) {
+          case 'F1': e.preventDefault(); Modal.info('F1 - Ajuda\nF2 - Atualizar lista\nF3 - Novo cliente\nF4 - Pesquisar\nF5 - Exportar\nF9 - Dashboard', 'Atalhos de Teclado'); break;
+          case 'F2': e.preventDefault(); loadPeopleData(); break;
+          case 'F3': e.preventDefault(); openNewPersonModal(); break;
+          case 'F4': e.preventDefault(); document.getElementById('search').focus(); break;
+          case 'F5': e.preventDefault(); exportData(); break;
+          case 'F9': e.preventDefault(); window.location.href = 'dashboard.html'; break;
+          case 'Escape': $('#modalPerson').modal('hide'); $('#detailsModal').modal('hide'); break;
+        }
+      });
+      
+      setInterval(() => {
+        document.getElementById('currentTime').textContent = DateTimeUtils.formatTime(new Date());
+      }, 1000);
+    });
+  </script>
+  <style>
+    .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: var(--brand-gradient); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .avatar-lg { width: 80px; height: 80px; font-size: 32px; }
+  </style>
+</body>
+</html>

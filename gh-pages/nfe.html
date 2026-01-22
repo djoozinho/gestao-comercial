@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NF-e / NFC-e / SAT - Configurações</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Auth Guard - Proteção de acesso -->
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <script src="js/sidebar.js"></script>
+  <script src="js/toast.js"></script>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar"><h4>SISTEMA</h4></div>
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-cog"></i> Configurações NF-e / NFC-e / SAT</h3>
+        <div class="header-info">
+          <button class="btn btn-light mr-2" onclick="location.href='admin.html'"><i class="fa fa-arrow-left"></i> Voltar</button>
+          <button class="btn btn-success mr-2" onclick="location.href='nfe-emissao.html'"><i class="fa fa-file-invoice"></i> Emitir Notas</button>
+          <button class="btn btn-primary" onclick="openNfeModal()"><i class="fa fa-plus"></i> Nova Configuração</button>
+        </div>
+      </div>
+
+      <div class="container-fluid py-4">
+        <!-- Card de Acesso Rápido -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="card" style="border-left: 4px solid #667eea;">
+              <div class="card-body text-center">
+                <i class="fa fa-file-invoice fa-3x text-primary mb-3"></i>
+                <h5>Emitir Notas Fiscais</h5>
+                <p class="text-muted small">NF-e, NFC-e e SAT</p>
+                <a href="nfe-emissao.html" class="btn btn-primary btn-block">
+                  <i class="fa fa-arrow-right"></i> Acessar
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card" style="border-left: 4px solid #10b981;">
+              <div class="card-body text-center">
+                <i class="fa fa-calculator fa-3x text-success mb-3"></i>
+                <h5>Parâmetros Fiscais</h5>
+                <p class="text-muted small">ICMS, PIS, COFINS</p>
+                <a href="fiscal.html" class="btn btn-success btn-block">
+                  <i class="fa fa-arrow-right"></i> Configurar
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card" style="border-left: 4px solid #f59e0b;">
+              <div class="card-body text-center">
+                <i class="fa fa-certificate fa-3x text-warning mb-3"></i>
+                <h5>Certificado Digital</h5>
+                <p class="text-muted small">Configurar certificado A1</p>
+                <button class="btn btn-warning btn-block" onclick="openNfeModal()">
+                  <i class="fa fa-cog"></i> Configurar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-search"></i></span></div>
+                  <input id="searchNfe" class="form-control" placeholder="Buscar por certificado, série...">
+                </div>
+              </div>
+              <div class="col-md-3"><button class="btn btn-secondary btn-block" onclick="loadNfe()"><i class="fa fa-sync-alt"></i> Atualizar</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="nfeList">
+          <div class="text-center py-5 text-muted"><i class="fa fa-spinner fa-spin fa-2x"></i><p>Carregando...</p></div>
+        </div>
+      </div>
+
+      <footer class="footer-shortcuts"><div class="shortcut-item"><span><kbd>F2</kbd> Novo</span></div></footer>
+    </div>
+  </div>
+
+  <div class="modal fade" id="nfeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg"><div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="fa fa-file-alt mr-2"></i> <span id="nfeModalTitle">Nova Configuração NF-e</span></h5><button class="close" data-dismiss="modal"><span>&times;</span></button></div>
+      <div class="modal-body">
+        <form id="nfeForm">
+          <input type="hidden" id="nfeId">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Tipo de Documento</label>
+                <select id="nfeTipo" class="form-control">
+                  <option value="NFC-e">NFC-e (Consumidor Final)</option>
+                  <option value="NF-e">NF-e (Completa)</option>
+                  <option value="SAT">SAT (CF-e São Paulo)</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Ambiente</label>
+                <select id="nfeAmbiente" class="form-control">
+                  <option value="homologacao">Homologação (Testes)</option>
+                  <option value="producao">Produção</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Série</label>
+                <input id="nfeSerie" class="form-control" value="1">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Número Atual</label>
+                <input id="nfeNumeroAtual" type="number" class="form-control" value="1">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Status</label>
+                <select id="nfeAtivo" class="form-control">
+                  <option value="1">Ativo</option>
+                  <option value="0">Inativo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <h6><i class="fa fa-key"></i> Credenciais NFC-e (CSC)</h6>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>ID do Token (CSC)</label>
+                <input id="nfeCscId" class="form-control" placeholder="Ex: 000001">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Código CSC</label>
+                <input id="nfeCscToken" class="form-control" placeholder="Código alfanumérico">
+              </div>
+            </div>
+          </div>
+          <hr>
+          <h6><i class="fa fa-microchip"></i> Configurações SAT (Opcional)</h6>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Código de Ativação</label>
+                <input id="nfeSatCodAtivacao" class="form-control">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Assinatura AC</label>
+                <input id="nfeSatAssinatura" class="form-control">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Observações</label>
+            <textarea id="nfeObs" class="form-control" rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveNfe()"><i class="fa fa-save"></i> Salvar</button>
+      </div>
+    </div></div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    const API_BASE = '/api';
+
+    async function loadNfe() {
+      try {
+        const q = document.getElementById('searchNfe').value;
+        const res = await axios.get(`${API_BASE}/nfe?search=${encodeURIComponent(q)}`);
+        const items = res.data.data || res.data || [];
+        const container = document.getElementById('nfeList');
+        if (!items.length) {
+          container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+              <i class="fa fa-cog fa-4x"></i>
+              <p class="mt-3">Nenhuma configuração cadastrada</p>
+              <p class="small">Configure pelo menos uma série para começar a emitir notas fiscais.</p>
+              <button class="btn btn-primary" onclick="openNfeModal()">
+                <i class="fa fa-plus"></i> Criar Primeira Configuração
+              </button>
+            </div>
+          `;
+          return;
+        }
+        container.innerHTML = items.map(i => `
+          <div class="card mb-3">
+            <div class="card-body d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="mb-1">
+                  <span class="badge badge-${i.tipo === 'NF-e' ? 'primary' : i.tipo === 'SAT' ? 'warning' : 'success'}">${i.tipo}</span>
+                  Série ${i.serie || '1'}
+                </h5>
+                <div class="text-muted small">
+                  Ambiente: <strong>${i.ambiente === 'producao' ? 'Produção' : 'Homologação'}</strong> |
+                  Próximo nº: <strong>${i.numero_atual || 1}</strong> |
+                  Status: ${i.ativo ? '<span class="text-success">Ativo</span>' : '<span class="text-danger">Inativo</span>'}
+                </div>
+              </div>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-outline-primary" onclick="editNfe('${i.id}')"><i class="fa fa-edit"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteNfe('${i.id}')"><i class="fa fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+        document.getElementById('nfeList').innerHTML = '<div class="alert alert-warning">Erro ao carregar configurações.</div>';
+      }
+    }
+
+    function openNfeModal(item=null){
+      document.getElementById('nfeForm').reset();
+      document.getElementById('nfeId').value = '';
+      document.getElementById('nfeModalTitle').textContent = 'Nova Configuração NF-e';
+      document.getElementById('nfeNumeroAtual').value = '1';
+      document.getElementById('nfeAtivo').value = '1';
+      
+      if(item){
+        document.getElementById('nfeId').value = item.id;
+        document.getElementById('nfeTipo').value = item.tipo || 'NFC-e';
+        document.getElementById('nfeAmbiente').value = item.ambiente || 'homologacao';
+        document.getElementById('nfeSerie').value = item.serie || '1';
+        document.getElementById('nfeNumeroAtual').value = item.numero_atual || 1;
+        document.getElementById('nfeCscId').value = item.csc_id || '';
+        document.getElementById('nfeCscToken').value = item.csc_token || '';
+        document.getElementById('nfeSatCodAtivacao').value = item.sat_codigo_ativacao || '';
+        document.getElementById('nfeSatAssinatura').value = item.sat_assinatura || '';
+        document.getElementById('nfeObs').value = item.observacoes || '';
+        document.getElementById('nfeAtivo').value = item.ativo ? '1' : '0';
+        document.getElementById('nfeModalTitle').textContent = 'Editar Configuração NF-e';
+      }
+      $('#nfeModal').modal('show');
+    }
+
+    async function editNfe(id){
+      try {
+        const res = await axios.get(`${API_BASE}/nfe/${id}`);
+        openNfeModal(res.data);
+      } catch(e) {
+        Toast.error('Erro ao obter configuração');
+      }
+    }
+
+    async function saveNfe(){
+      const id = document.getElementById('nfeId').value;
+      const data = {
+        tipo: document.getElementById('nfeTipo').value,
+        ambiente: document.getElementById('nfeAmbiente').value,
+        serie: document.getElementById('nfeSerie').value,
+        numeroAtual: parseInt(document.getElementById('nfeNumeroAtual').value) || 1,
+        cscId: document.getElementById('nfeCscId').value,
+        cscToken: document.getElementById('nfeCscToken').value,
+        satCodigoAtivacao: document.getElementById('nfeSatCodAtivacao').value,
+        satAssinatura: document.getElementById('nfeSatAssinatura').value,
+        obs: document.getElementById('nfeObs').value,
+        ativo: document.getElementById('nfeAtivo').value === '1'
+      };
+
+      try {
+        if(id) {
+          await axios.put(`${API_BASE}/nfe/${id}`, data);
+        } else {
+          await axios.post(`${API_BASE}/nfe`, data);
+        }
+        Toast.success('Configuração salva com sucesso!');
+        $('#nfeModal').modal('hide');
+        loadNfe();
+      } catch(e) {
+        Toast.error('Erro ao salvar configuração');
+      }
+    }
+
+    async function deleteNfe(id){
+      Modal.delete(
+        'Excluir Configuração',
+        'Tem certeza que deseja excluir esta configuração? Esta ação não pode ser desfeita.',
+        async () => {
+          try {
+            await axios.delete(`${API_BASE}/nfe/${id}`);
+            Toast.success('Configuração excluída!');
+            loadNfe();
+          } catch(e) {
+            Toast.error('Erro ao excluir configuração');
+          }
+        }
+      );
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('searchNfe').addEventListener('input', debounce(loadNfe, 300));
+      loadNfe();
+      
+      // Atalhos
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') { e.preventDefault(); openNfeModal(); }
+      });
+    });
+
+    function debounce(fn, t){ let timer; return (...a)=>{ clearTimeout(timer); timer=setTimeout(()=>fn(...a), t); }; }
+  </script>
+</body>
+</html>

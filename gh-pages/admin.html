@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administração - Sistema</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Auth Guard - Proteção de acesso -->
+  <script src="js/auth-guard.js"></script>
+  <script src="js/branding.js"></script>
+  <script src="js/sidebar.js"></script>
+  <style>
+    /* Estilos específicos da página Admin */
+    .admin-container { padding: 24px; overflow-y: auto; flex: 1; }
+    .admin-section { margin-bottom: 32px; }
+    .section-title { font-size: 18px; font-weight: 700; color: var(--gray-800); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .section-title i { color: var(--brand); font-size: 20px; }
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .admin-card { background: #fff; border: 2px solid var(--gray-200); border-radius: 16px; padding: 20px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
+    .admin-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--brand); }
+    .admin-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--brand-gradient); opacity: 0; transition: opacity 0.3s; }
+    .admin-card:hover::before { opacity: 1; }
+    .admin-card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; margin-bottom: 14px; }
+    .admin-card-icon.purple { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .admin-card-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+    .admin-card-icon.blue { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+    .admin-card-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .admin-card-icon.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .admin-card-icon.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+    .admin-card-icon.teal { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+    .admin-card-icon.indigo { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+    .admin-card-title { font-size: 16px; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; }
+    .admin-card-desc { font-size: 13px; color: var(--gray-500); line-height: 1.5; }
+    .admin-card-badge { position: absolute; top: 12px; right: 12px; background: rgba(99, 102, 241, 0.1); color: var(--brand); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .admin-card-badge.new { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .admin-card-badge.important { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    .quick-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .quick-stat { background: #fff; border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); display: flex; align-items: center; gap: 16px; }
+    .quick-stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; }
+    .quick-stat-value { font-size: 24px; font-weight: 800; color: var(--gray-800); }
+    .quick-stat-label { font-size: 13px; color: var(--gray-500); }
+    .refresh-btn { background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--brand); }
+    .refresh-btn:hover { background: var(--brand); color: #fff; }
+    .divider { height: 1px; background: var(--gray-200); margin: 32px 0; }
+    @media (max-width: 768px) { .admin-grid { grid-template-columns: 1fr; } .quick-stats { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+    <div class="sidebar">
+      <h4>SISTEMA</h4>
+      <ul class="sidebar-menu">
+        <li><a href="index.html"><span class="menu-icon"><i class="fa fa-home"></i></span><span class="menu-label">Início</span></a></li>
+        <li><a href="pdv.html"><span class="menu-icon"><i class="fa fa-cash-register"></i></span><span class="menu-label">PDV</span></a></li>
+        <li><a href="dashboard.html"><span class="menu-icon"><i class="fa fa-chart-pie"></i></span><span class="menu-label">Painel</span></a></li>
+        <li><a href="nfe-emissao.html"><span class="menu-icon"><i class="fa fa-file-invoice"></i></span><span class="menu-label">Notas Fiscais</span></a></li>
+        <li><a href="movimentos.html"><span class="menu-icon"><i class="fa fa-exchange-alt"></i></span><span class="menu-label">Movimentos</span></a></li>
+        <li><a href="relatorios.html"><span class="menu-icon"><i class="fa fa-chart-bar"></i></span><span class="menu-label">Relatórios</span></a></li>
+        <li><a href="pessoas.html"><span class="menu-icon"><i class="fa fa-users"></i></span><span class="menu-label">Clientes</span></a></li>
+        <li><a href="produtos.html"><span class="menu-icon"><i class="fa fa-boxes"></i></span><span class="menu-label">Produtos</span></a></li>
+        <li><a href="agenda.html"><span class="menu-icon"><i class="fa fa-calendar"></i></span><span class="menu-label">Agenda</span></a></li>
+        <li><a href="admin.html" class="active"><span class="menu-icon"><i class="fa fa-cogs"></i></span><span class="menu-label">Admin</span></a></li>
+      </ul>
+    </div>
+
+    <div class="main-content">
+      <div class="main-header">
+        <h3><i class="fa fa-cog"></i> Administração do Sistema</h3>
+        <div class="header-info">
+          <span><i class="fa fa-user-circle mr-2"></i>Admin</span>
+          <span><i class="fa fa-clock mr-2"></i><span id="currentTime">--:--:--</span></span>
+          <button id="refreshBtn" class="refresh-btn"><i class="fa fa-sync-alt"></i> Atualizar</button>
+        </div>
+      </div>
+
+      <div class="admin-container">
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i class="fa fa-box"></i></div>
+            <div>
+              <div class="quick-stat-value" id="totalProducts">0</div>
+              <div class="quick-stat-label">Produtos Cadastrados</div>
+            </div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="fa fa-users"></i></div>
+            <div>
+              <div class="quick-stat-value" id="totalClients">0</div>
+              <div class="quick-stat-label">Clientes Ativos</div>
+            </div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i class="fa fa-user-tie"></i></div>
+            <div>
+              <div class="quick-stat-value" id="totalEmployees">0</div>
+              <div class="quick-stat-label">Funcionários</div>
+            </div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-icon" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);"><i class="fa fa-truck"></i></div>
+            <div>
+              <div class="quick-stat-value" id="totalSuppliers">0</div>
+              <div class="quick-stat-label">Fornecedores</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumo Geral -->
+        <div class="admin-section">
+          <h2 class="section-title"><i class="fa fa-chart-pie"></i> Resumo Geral</h2>
+          <div class="admin-grid">
+            <div class="admin-card" id="cardSales" onclick="openDashboard()">
+              <div class="admin-card-icon blue"><i class="fa fa-chart-line"></i></div>
+              <div class="admin-card-title">Vendas (mês)</div>
+              <div class="admin-card-desc">Total de vendas: <strong id="totalSales">R$ 0,00</strong><br/>Lucro: <strong id="profit">R$ 0,00</strong></div>
+            </div>
+            <div class="admin-card" id="cardTopProducts" onclick="showTopProducts()">
+              <div class="admin-card-icon purple"><i class="fa fa-box"></i></div>
+              <div class="admin-card-title">Top Produtos</div>
+              <div class="admin-card-desc"><ul id="topProductsList" style="margin:0; padding-left:18px;"></ul></div>
+            </div>
+            <div class="admin-card" id="cardLowStock" onclick="showLowStock()">
+              <div class="admin-card-icon orange"><i class="fa fa-exclamation-triangle"></i></div>
+              <div class="admin-card-title">Estoque Baixo</div>
+              <div class="admin-card-desc"><ul id="lowStockList" style="margin:0; padding-left:18px;"></ul></div>
+            </div>
+            <div class="admin-card" id="cardOverdue" onclick="showOverdue()">
+              <div class="admin-card-icon red"><i class="fa fa-clock"></i></div>
+              <div class="admin-card-title">Contas Vencidas</div>
+              <div class="admin-card-desc"><ul id="overdueList" style="margin:0; padding-left:18px;"></ul></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cadastros Principais -->
+        <div class="admin-section">
+          <h2 class="section-title"><i class="fa fa-database"></i> Cadastros Principais</h2>
+          <div class="admin-grid">
+            <div class="admin-card" onclick="location.href='produtos.html'">
+              <span class="admin-card-badge">Essencial</span>
+              <div class="admin-card-icon purple"><i class="fa fa-box-open"></i></div>
+              <div class="admin-card-title">Produtos</div>
+              <div class="admin-card-desc">Cadastro completo: código, descrição, preço, custo, margem, NCM, CST, CFOP, unidade, fotos, kit/combo, tabela de preços, controle de lote/vencimento.</div>
+            </div>
+            <div class="admin-card" onclick="location.href='fornecedores.html'">
+              <div class="admin-card-icon blue"><i class="fa fa-truck"></i></div>
+              <div class="admin-card-title">Fornecedores e Compras</div>
+              <div class="admin-card-desc">Cadastro de fornecedores, pedidos de compra, entrada de mercadorias via XML/NFe, histórico de compras.</div>
+            </div>
+            <div class="admin-card" onclick="location.href='pessoas.html'">
+              <div class="admin-card-icon green"><i class="fa fa-users"></i></div>
+              <div class="admin-card-title">Clientes</div>
+              <div class="admin-card-desc">Cadastro detalhado, limite de crédito, histórico de compras, convênios/PBMs, alertas de inadimplência.</div>
+            </div>
+            <div class="admin-card" onclick="location.href='funcionarios.html'">
+              <div class="admin-card-icon orange"><i class="fa fa-user-tie"></i></div>
+              <div class="admin-card-title">Funcionários / Vendedores</div>
+              <div class="admin-card-desc">Cadastro de funcionários, comissões, acesso ao sistema, perfis de usuário e permissões.</div>
+            </div>
+            <div class="admin-card" onclick="location.href='departamentos.html'">
+              <div class="admin-card-icon teal"><i class="fa fa-sitemap"></i></div>
+              <div class="admin-card-title">Departamentos / Grupos</div>
+              <div class="admin-card-desc">Organização da hierarquia de produtos: departamentos, grupos e subgrupos para relatórios e gráficos.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Configurações Fiscais -->
+        <div class="admin-section">
+          <h2 class="section-title"><i class="fa fa-file-invoice-dollar"></i> Configurações Fiscais</h2>
+          <div class="admin-grid">
+            <div class="admin-card" onclick="location.href='nfe-emissao.html'" style="border: 2px solid #667eea;">
+              <span class="admin-card-badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Principal</span>
+              <div class="admin-card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"><i class="fa fa-file-invoice"></i></div>
+              <div class="admin-card-title">Emitir Notas Fiscais</div>
+              <div class="admin-card-desc">Emita NF-e, NFC-e e SAT. Visualize notas emitidas, cancele e inutilize numeração.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('fiscal')">
+              <span class="admin-card-badge important">Obrigatório</span>
+              <div class="admin-card-icon red"><i class="fa fa-calculator"></i></div>
+              <div class="admin-card-title">Parâmetros Fiscais</div>
+              <div class="admin-card-desc">Tributação por produto/estado, regras de ICMS, PIS/COFINS, substituição tributária.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('nfe')">
+              <div class="admin-card-icon indigo"><i class="fa fa-file-alt"></i></div>
+              <div class="admin-card-title">Configurar NF-e / NFC-e</div>
+              <div class="admin-card-desc">Configuração de certificado digital, ambiente de homologação/produção, série e numeração.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('sngpc')">
+              <div class="admin-card-icon pink"><i class="fa fa-pills"></i></div>
+              <div class="admin-card-title">SNGPC (Farmácias)</div>
+              <div class="admin-card-desc">Integração com SNGPC para controle de medicamentos, integração com Imendes para classificação fiscal.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('pdv-config')">
+              <div class="admin-card-icon green"><i class="fa fa-cash-register"></i></div>
+              <div class="admin-card-title">Regras de PDV</div>
+              <div class="admin-card-desc">Formas de pagamento, descontos permitidos, obrigatoriedade de CPF/CNPJ, troco automático.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Personalização -->
+        <div class="admin-section">
+          <h2 class="section-title"><i class="fa fa-palette"></i> Personalização</h2>
+          <div class="admin-grid">
+            <div class="admin-card" onclick="location.href='minha-empresa.html'">
+              <span class="admin-card-badge new">Novo</span>
+              <div class="admin-card-icon purple"><i class="fa fa-store"></i></div>
+              <div class="admin-card-title">Minha Empresa</div>
+              <div class="admin-card-desc">Logo da empresa, cores do sistema, dados para cupom fiscal, relatórios e recibos.</div>
+            </div>
+            <div class="admin-card" onclick="location.href='meu-perfil.html'">
+              <span class="admin-card-badge new">Novo</span>
+              <div class="admin-card-icon green"><i class="fa fa-user-circle"></i></div>
+              <div class="admin-card-title">Meu Perfil</div>
+              <div class="admin-card-desc">Foto de perfil, dados pessoais, alteração de senha e preferências do usuário.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Parâmetros Gerais -->
+        <div class="admin-section">
+          <h2 class="section-title"><i class="fa fa-sliders-h"></i> Parâmetros do Sistema</h2>
+          <div class="admin-grid">
+            <div class="admin-card" onclick="openModule('empresa')">
+              <div class="admin-card-icon purple"><i class="fa fa-building"></i></div>
+              <div class="admin-card-title">Dados da Empresa</div>
+              <div class="admin-card-desc">Dados fiscais, logotipo, configuração de múltiplas filiais/lojas, endereços.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('usuarios')">
+              <span class="admin-card-badge">Segurança</span>
+              <div class="admin-card-icon red"><i class="fa fa-user-shield"></i></div>
+              <div class="admin-card-title">Perfis e Usuários</div>
+              <div class="admin-card-desc">Controle de acesso: quem pode cancelar venda, alterar preço, acessar relatórios, etc.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('integracoes')">
+              <span class="admin-card-badge new">Novo</span>
+              <div class="admin-card-icon blue"><i class="fa fa-plug"></i></div>
+              <div class="admin-card-title">Integrações</div>
+              <div class="admin-card-desc">PIX no PDV com QR Code, balanças, impressoras fiscais, apps mobile, e-commerce.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('estoque')">
+              <div class="admin-card-icon orange"><i class="fa fa-warehouse"></i></div>
+              <div class="admin-card-title">Regras de Estoque</div>
+              <div class="admin-card-desc">Controle de estoque mínimo/máximo, alertas de reposição, giro de estoque, inventário.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('financeiro-config')">
+              <div class="admin-card-icon green"><i class="fa fa-coins"></i></div>
+              <div class="admin-card-title">Configurações Financeiras</div>
+              <div class="admin-card-desc">Planos de contas, categorias de despesas/receitas, contas bancárias, centros de custo.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Outros Módulos -->
+        <div class="admin-section">
+          <h2 class="section-title"><i class="fa fa-th-large"></i> Gestão e Controle</h2>
+          <div class="admin-grid">
+            <div class="admin-card" onclick="location.href='movimentos.html'">
+              <div class="admin-card-icon green"><i class="fa fa-money-bill-wave"></i></div>
+              <div class="admin-card-title">Gestão Financeira</div>
+              <div class="admin-card-desc">Contas a pagar/receber, fluxo de caixa, conciliação bancária, DRE.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('comissoes')">
+              <div class="admin-card-icon orange"><i class="fa fa-percentage"></i></div>
+              <div class="admin-card-title">Comissões e Metas</div>
+              <div class="admin-card-desc">Controle de comissões por vendedor, metas de vendas, bonificações, ranking.</div>
+            </div>
+            <div class="admin-card" onclick="location.href='relatorios.html'">
+              <div class="admin-card-icon blue"><i class="fa fa-chart-bar"></i></div>
+              <div class="admin-card-title">Relatórios Avançados</div>
+              <div class="admin-card-desc">Exportação para Excel, PDF, relatórios personalizados, dashboards analíticos.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('orcamentos')">
+              <div class="admin-card-icon teal"><i class="fa fa-file-invoice"></i></div>
+              <div class="admin-card-title">Orçamentos / OS</div>
+              <div class="admin-card-desc">Administração de orçamentos, ordens de serviço, acompanhamento de propostas.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('backup')">
+              <span class="admin-card-badge">Segurança</span>
+              <div class="admin-card-icon red"><i class="fa fa-database"></i></div>
+              <div class="admin-card-title">Backup e Auditoria</div>
+              <div class="admin-card-desc">Backup automático, logs do sistema, rastreamento de alterações críticas, histórico.</div>
+            </div>
+            <div class="admin-card" onclick="openModule('suporte')">
+              <div class="admin-card-icon pink"><i class="fa fa-headset"></i></div>
+              <div class="admin-card-title">Suporte e Ajuda</div>
+              <div class="admin-card-desc">Central de ajuda, tutoriais, tickets de suporte, atualizações do sistema.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <footer class="footer-shortcuts">
+        <div class="shortcut-item"><span><kbd>F1</kbd> Ajuda</span></div>
+        <div class="shortcut-item"><span><kbd>F2</kbd> Atualizar</span></div>
+        <div class="shortcut-item"><span><kbd>F3</kbd> Produtos</span></div>
+        <div class="shortcut-item"><span><kbd>F4</kbd> Clientes</span></div>
+        <div class="shortcut-item"><span><kbd>F5</kbd> Fiscal</span></div>
+        <div class="shortcut-item"><span><kbd>F6</kbd> Usuários</span></div>
+        <div class="shortcut-item"><span><kbd>ESC</kbd> Voltar</span></div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Modal Genérico para Módulos -->
+  <div class="modal fade" id="moduleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="moduleModalTitle"><i class="fa fa-cog"></i> Módulo</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body" id="moduleModalBody">
+          <div class="text-center py-5">
+            <i class="fa fa-tools fa-4x text-muted mb-4"></i>
+            <h4>Módulo em Desenvolvimento</h4>
+            <p class="text-muted">Esta funcionalidade estará disponível em breve.</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- Módulo centralizado de data/hora (Brasília) -->
+  <script src="/js/datetime-utils.js"></script>
+  <script>
+    const API_BASE = 'http://localhost:3000/api';
+
+    // Relógio (usando módulo centralizado)
+    setInterval(() => {
+      const el = document.getElementById('currentTime');
+      if (el) el.textContent = DateTimeUtils.formatTime(new Date());
+    }, 1000);
+
+    // Carregar estatísticas (agregado)
+    function formatCurrency(v){
+      return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    }
+
+    function renderList(elemId, items){
+      const el = document.getElementById(elemId);
+      if (!el) return;
+      el.innerHTML = items.length ? items.slice(0,5).map(i => `<li>${i}</li>`).join('') : '<li class="text-muted">Nenhum item</li>';
+    }
+
+    async function loadStats() {
+      try {
+        // Produtos
+        const prodRes = await axios.get(`${API_BASE}/products`);
+        const products = prodRes.data.data || prodRes.data || [];
+        document.getElementById('totalProducts').textContent = products.length;
+
+        // Pessoas (rota correta)
+        const pesRes = await axios.get(`${API_BASE}/people`);
+        const pessoas = pesRes.data.data || pesRes.data || [];
+        const clients = pessoas.filter(p => ((p.type||'').toLowerCase().includes('cliente')));
+        const suppliers = pessoas.filter(p => ((p.type||'').toLowerCase().includes('fornecedor')));
+        const employees = pessoas.filter(p => ((p.type||'').toLowerCase().includes('funcion')));
+
+        document.getElementById('totalClients').textContent = clients.length;
+        document.getElementById('totalSuppliers').textContent = suppliers.length;
+        document.getElementById('totalEmployees').textContent = employees.length;
+
+        // Dashboard agregado (mês atual)
+        try {
+          const dashRes = await axios.get(`${API_BASE}/dashboard`);
+          const dash = dashRes.data || {};
+          document.getElementById('totalSales').textContent = formatCurrency(dash.totalSales || 0);
+          document.getElementById('profit').textContent = formatCurrency(dash.profit || 0);
+        } catch(e){ console.warn('dashboard unavailable',e); }
+
+        // Top produtos
+        try {
+          const topRes = await axios.get(`${API_BASE}/dashboard/top-products?limit=5`);
+          const top = (topRes.data && topRes.data.data) || topRes.data || [];
+          renderList('topProductsList', top.map(t => `${t.name} — ${t.qty}`));
+        } catch(e){ console.warn('top-products unavailable', e); }
+
+        // Estoque baixo (cliente-side: stock <= minStock)
+        const low = products.filter(p => (Number(p.stock) || 0) <= (Number(p.minStock) || 0));
+        renderList('lowStockList', low.map(p => `${p.name} — ${p.stock}`));
+
+        // Contas vencidas (últimas 5)
+        try {
+          const txRes = await axios.get(`${API_BASE}/transactions?status=vencido&pageSize=5`);
+          const overdue = txRes.data.data || txRes.data || [];
+          renderList('overdueList', overdue.map(t => `${t.description || t.person || 'Transação'} — ${formatCurrency(t.value)}`));
+        } catch(e){ console.warn('transactions unavailable', e); }
+
+      } catch (err) {
+        console.error('Erro ao carregar estatísticas:', err);
+      }
+    }
+
+    function openDashboard(){ location.href='dashboard.html'; }
+    function showTopProducts(){ openModule('relatorios'); }
+    function showLowStock(){ openModule('estoque'); }
+    function showOverdue(){ openModule('movimentos'); }
+
+    // Módulos em desenvolvimento
+    const moduleInfo = {
+      'fornecedores': { title: 'Fornecedores e Compras', icon: 'fa-truck', desc: 'Gerencie fornecedores, pedidos de compra e entrada de mercadorias.' },
+      'funcionarios': { title: 'Funcionários / Vendedores', icon: 'fa-user-tie', desc: 'Cadastre funcionários, configure comissões e perfis de acesso.' },
+      'departamentos': { title: 'Departamentos e Grupos', icon: 'fa-sitemap', desc: 'Organize a hierarquia de produtos para melhor controle.' },
+      'fiscal': { title: 'Parâmetros Fiscais', icon: 'fa-calculator', desc: 'Configure tributação, ICMS, PIS/COFINS e substituição tributária.' },
+      'nfe': { title: 'Emissão de NF-e / NFC-e', icon: 'fa-file-alt', desc: 'Configure certificado digital e parâmetros de emissão.' },
+      'sngpc': { title: 'SNGPC', icon: 'fa-pills', desc: 'Integração para controle de medicamentos em farmácias.' },
+      'pdv-config': { title: 'Regras de PDV', icon: 'fa-cash-register', desc: 'Configure formas de pagamento, descontos e regras de venda.' },
+      'empresa': { title: 'Dados da Empresa', icon: 'fa-building', desc: 'Configure dados fiscais, logo e filiais.' },
+      'usuarios': { title: 'Perfis e Usuários', icon: 'fa-user-shield', desc: 'Gerencie permissões e níveis de acesso.' },
+      'integracoes': { title: 'Integrações', icon: 'fa-plug', desc: 'Configure PIX, balanças, impressoras e apps.' },
+      'estoque': { title: 'Regras de Estoque', icon: 'fa-warehouse', desc: 'Configure alertas de estoque e regras de reposição.' },
+      'financeiro-config': { title: 'Configurações Financeiras', icon: 'fa-coins', desc: 'Configure planos de contas e categorias.' },
+      'comissoes': { title: 'Comissões e Metas', icon: 'fa-percentage', desc: 'Configure comissões por vendedor e metas.' },
+      'orcamentos': { title: 'Orçamentos / OS', icon: 'fa-file-invoice', desc: 'Gerencie orçamentos e ordens de serviço.' },
+      'backup': { title: 'Backup e Auditoria', icon: 'fa-database', desc: 'Configure backups automáticos e visualize logs.' },
+      'suporte': { title: 'Suporte e Ajuda', icon: 'fa-headset', desc: 'Acesse tutoriais e abra tickets de suporte.' }
+    };
+
+    function openModule(moduleId) {
+      // Redireciona para páginas que já possuem implementação estática
+      const pageMap = {
+        'fornecedores': 'fornecedores.html',
+        'funcionarios': 'funcionarios.html',
+        'departamentos': 'departamentos.html',
+        'fiscal': 'fiscal.html',
+        'nfe': 'nfe.html',
+        'sngpc': 'sngpc.html',
+        'pdv-config': 'pdv-config.html',
+        'empresa': 'empresa.html',
+        'usuarios': 'usuarios.html',
+        'integracoes': 'integracoes.html',
+        'estoque': 'estoque.html',
+        'financeiro-config': 'financeiro-config.html',
+        'comissoes': 'comissoes.html',
+        'orcamentos': 'orcamentos.html',
+        'backup': 'backup.html',
+        'suporte': 'suporte.html'
+      };
+
+      if (pageMap[moduleId]) {
+        location.href = pageMap[moduleId];
+        return;
+      }
+
+      const info = moduleInfo[moduleId] || { title: 'Módulo', icon: 'fa-cog', desc: 'Módulo em desenvolvimento.' };
+      document.getElementById('moduleModalTitle').innerHTML = `<i class="fa ${info.icon} mr-2"></i> ${info.title}`;
+      document.getElementById('moduleModalBody').innerHTML = `
+        <div class="text-center py-5">
+          <div style="width: 80px; height: 80px; border-radius: 20px; background: var(--brand-gradient); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+            <i class="fa ${info.icon} fa-2x text-white"></i>
+          </div>
+          <h4 class="mb-3">${info.title}</h4>
+          <p class="text-muted mb-4">${info.desc}</p>
+          <div class="alert alert-info">
+            <i class="fa fa-info-circle mr-2"></i>
+            Esta funcionalidade estará disponível em uma próxima atualização.
+          </div>
+        </div>
+      `;
+
+      $('#moduleModal').modal('show');
+    }
+
+    // Atalhos de teclado
+    document.addEventListener('keydown', (e) => {
+      switch(e.key) {
+        case 'F1':
+          e.preventDefault();
+          openModule('suporte');
+          break;
+        case 'F2':
+          e.preventDefault();
+          loadStats();
+          break;
+        case 'F3':
+          e.preventDefault();
+          location.href = 'produtos.html';
+          break;
+        case 'F4':
+          e.preventDefault();
+          location.href = 'pessoas.html';
+          break;
+        case 'F5':
+          e.preventDefault();
+          openModule('fiscal');
+          break;
+        case 'F6':
+          e.preventDefault();
+          openModule('usuarios');
+          break;
+        case 'Escape':
+          if ($('#moduleModal').hasClass('show')) {
+            $('#moduleModal').modal('hide');
+          } else {
+            location.href = 'index.html';
+          }
+          break;
+      }
+    });
+
+    // Refresh button
+    document.getElementById('refreshBtn').addEventListener('click', loadStats);
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', function() {
+      loadStats();
+    });
+  </script>
+</body>
+</html>

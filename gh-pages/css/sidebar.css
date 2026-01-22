@@ -1,0 +1,11 @@
+:root{--pdv:#16a085;--dashboard:#8e44ad;--relatorios:#2b88d9;--clientes:#27ae60;--produtos:#f39c12;--financeiro:#f1c40f}
+
+.sidebar .menu-icon{width:56px;height:56px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;margin-right:12px;background:rgba(255,255,255,0.06);font-size:22px;transition:transform .12s ease, font-size .12s ease}
+.sidebar .menu-icon i{color:inherit;font-size:18px}
+
+.menu-icon--pdv{background:var(--pdv);}
+.menu-icon--dashboard{background:var(--dashboard);}
+.menu-icon--relatorios{background:var(--relatorios);}
+.menu-icon--clientes{background:var(--clientes);}
+.menu-icon--produtos{background:var(--produtos);}
+.menu-icon--financeiro{background:var(--financeiro);}

@@ -1,0 +1,395 @@
+/* Footer com Atalhos de Teclado - Ibraim e Daniel */
+
+/* Container principal do footer */
+.footer-shortcuts {
+  /* Novo gradiente solicitado pelo usuário */
+  background: linear-gradient(135deg, #0f1724 0%, #1b2636 100%);
+  color: #fff;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.06);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+  position: relative;
+  z-index: 100;
+  min-height: 60px;
+}
+
+/* Versão compacta para telas menores */
+.footer-shortcuts.compact {
+  padding: 12px 20px;
+  min-height: 50px;
+}
+
+/* Container dos atalhos */
+.shortcuts-container {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Item individual de atalho */
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: help;
+  position: relative;
+}
+
+.shortcut-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Tecla do atalho */
+.shortcut-item kbd {
+  background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+  border: 1px solid #94a3b8;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  min-width: 28px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.shortcut-item:hover kbd {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Descrição do atalho */
+.shortcut-item .shortcut-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* Tooltip para atalhos */
+.shortcut-item::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.shortcut-item:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Status do sistema no footer */
+.footer-status {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981; /* Verde para online */
+}
+
+.status-indicator.offline {
+  background: #ef4444; /* Vermelho para offline */
+}
+
+.status-indicator.warning {
+  background: #f59e0b; /* Amarelo para alerta */
+}
+
+/* Contador de notificações no footer */
+.footer-notifications {
+  position: relative;
+  cursor: pointer;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+/* Indicador de tecla pressionada */
+.key-pressed {
+  animation: keyPress 0.3s ease;
+}
+
+@keyframes keyPress {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    transform: scale(0.95);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Modo escuro para o footer (alternativo) */
+.footer-shortcuts.dark-mode {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-top: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+/* Modo claro para o footer (alternativo) */
+.footer-shortcuts.light-mode {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #1e293b;
+  border-top: 1px solid rgba(203, 213, 225, 0.8);
+}
+
+.footer-shortcuts.light-mode .shortcut-item kbd {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border: 1px solid #94a3b8;
+  color: #1e293b;
+}
+
+.footer-shortcuts.light-mode .shortcut-item .shortcut-label {
+  color: #475569;
+}
+
+.footer-shortcuts.light-mode .shortcut-item:hover {
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.footer-shortcuts.light-mode .footer-status {
+  color: #64748b;
+}
+
+/* Responsividade */
+@media (max-width: 1200px) {
+  .shortcuts-container {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 992px) {
+  .footer-shortcuts {
+    padding: 14px 24px;
+  }
+  
+  .shortcuts-container {
+    gap: 20px;
+  }
+  
+  .shortcut-item {
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-shortcuts {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 16px;
+    text-align: center;
+  }
+  
+  .shortcuts-container {
+    justify-content: center;
+    gap: 16px;
+  }
+  
+  .footer-status {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .shortcut-item {
+    font-size: 12px;
+  }
+  
+  .shortcut-item kbd {
+    padding: 3px 6px;
+    font-size: 11px;
+    min-width: 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-shortcuts {
+    padding: 10px 12px;
+  }
+  
+  .shortcuts-container {
+    gap: 12px;
+  }
+  
+  .shortcut-item {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  
+  .shortcut-item kbd {
+    padding: 2px 4px;
+    font-size: 10px;
+    min-width: 20px;
+  }
+}
+
+/* Animações de entrada */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.footer-shortcuts {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Classes para diferentes tipos de atalhos */
+.shortcut-item.primary kbd {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #60a5fa;
+}
+
+.shortcut-item.success kbd {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-color: #34d399;
+}
+
+.shortcut-item.danger kbd {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-color: #f87171;
+}
+
+.shortcut-item.warning kbd {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-color: #fbbf24;
+}
+
+/* Indicador de tecla ativa (quando pressionada) */
+.shortcut-item.active kbd {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1e293b;
+  transform: scale(0.95);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Grupo de atalhos relacionados */
+.shortcut-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shortcut-group .shortcut-item {
+  padding: 4px 8px;
+}
+
+.shortcut-group .shortcut-item:not(:last-child)::after {
+  content: '+';
+  margin-left: 8px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Separador visual */
+.shortcut-separator {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 8px;
+}
+
+/* Versão minimalista */
+.footer-shortcuts.minimal {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Indicador de foco para acessibilidade */
+.shortcut-item:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Suporte para tema escuro do sistema */
+@media (prefers-color-scheme: dark) {
+  .footer-shortcuts.auto-theme {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+  
+  .footer-shortcuts.auto-theme.light-mode {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  }
+}
